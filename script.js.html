@@ -1,0 +1,40 @@
+const salesList = document.getElementById('sales-list');
+const itemForm = document.getElementById('item-form');
+const messageDiv = document.getElementById('message');
+
+let items = [];
+
+itemForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const itemName = document.getElementById('item-name').value;
+    const itemPrice = document.getElementById('item-price').value;
+
+    // تحقق إذا كان العنصر موجوداً لتحديثه أو إضافته
+    const existingItem = items.find(item => item.name === itemName);
+    
+    if (existingItem) {
+        existingItem.price = itemPrice;
+        messageDiv.textContent = `Updated price of ${itemName} to ${itemPrice}`;
+    } else {
+        const newItem = { name: itemName, price: itemPrice };
+        items.push(newItem);
+        messageDiv.textContent = `Added new item: ${itemName} at ${itemPrice}`;
+    }
+
+    // تحديث القائمة
+    updateSalesList();
+    
+    // إعادة تعيين الحقول
+    itemForm.reset();
+});
+
+function updateSalesList() {
+    salesList.innerHTML = ''; // إزالة القائمة القديمة
+
+    items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name} - $${item.price}`;
+        salesList.appendChild(li);
+    });
+}
