@@ -48,30 +48,37 @@
 <body>
   <h1>برنامج البحث بالباركود</h1>
 
+  <!-- إدخال الباركود -->
   <div class="input-container">
     <label for="barcode-input">أدخل الباركود:</label>
     <input type="text" id="barcode-input" placeholder="أدخل الباركود هنا">
     <button onclick="searchBarcode()">بحث</button>
   </div>
 
+  <!-- عرض النتيجة -->
   <div id="result"></div>
 
   <script>
     let excelData = [];
 
-    // قراءة ملف Excel
-    fetch('model1.xlsx')
-      .then(response => response.arrayBuffer())
+    // تحميل ملف Excel من المستودع
+    const githubFileUrl = "https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/model1.xlsx";
+
+    fetch(githubFileUrl)
+      .then(response => {
+        if (!response.ok) throw new Error("Failed to fetch the Excel file.");
+        return response.arrayBuffer();
+      })
       .then(data => {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         excelData = XLSX.utils.sheet_to_json(sheet);
-        console.log("Excel Data Loaded:", excelData);
+        alert("تم تحميل البيانات من ملف Excel بنجاح!");
       })
       .catch(error => {
         console.error("Error loading Excel file:", error);
-        document.getElementById('result').textContent = "حدث خطأ في تحميل ملف البيانات.";
+        document.getElementById('result').textContent = "حدث خطأ أثناء تحميل البيانات.";
       });
 
     // البحث عن الباركود
