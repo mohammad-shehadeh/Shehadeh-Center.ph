@@ -15,14 +15,6 @@
             text-align: center;
             color: #333;
         }
-        .header-image {
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border-radius: 10px;
-        }
         .container {
             max-width: 800px;
             margin: 20px auto;
@@ -38,19 +30,17 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        #product-image {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            display: block;
-            border-radius: 10px;
+        .error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+        #product-details {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-
-    <!-- صورة العنوان -->
-    <img src="https://ls6iibytsc.eu.scalesta-cdn.com/8mfEuqxAqn2kgf5APnH8fqBr_5w=/filters:format(webp):fill(fff):quality(90)/www.gstoreq8.com/images/detailed/265/800x800_680201070A-4.webp" alt="Header Image" class="header-image">
 
     <div class="container">
         <h1>بحث المنتجات باستخدام الباركود</h1>
@@ -66,30 +56,46 @@
             <h2>تفاصيل المنتج:</h2>
             <p id="product-name">الاسم: -</p>
             <p id="product-price">السعر: -</p>
-            <img id="product-image" src="" alt="Product Image" style="display:none;">
+            <p id="product-barcode">الباركود: -</p>
         </div>
+
+        <!-- رسائل الخطأ -->
+        <div id="error-message" class="error" style="display:none;"></div>
     </div>
 
     <script>
         document.getElementById('barcode-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const barcodeInput = document.getElementById('barcode-input').value.trim();
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
+
+            if (!barcodeInput) {
+                errorMessage.textContent = "الرجاء إدخال الباركود.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+
             // قراءة ملف البيانات
             fetch('test.txt')
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("فشل تحميل ملف البيانات.");
+                    }
+                    return response.text();
+                })
                 .then(data => {
-                    const barcodeInput = document.getElementById('barcode-input').value;
                     const lines = data.split('\n');
                     let found = false;
 
                     // البحث عن المنتج باستخدام الباركود
                     for (let line of lines) {
-                        const [productName, productPrice, barcode, imageUrl] = line.split('/');
-                        if (barcode === barcodeInput) {
+                        const [productName, productPrice, barcode] = line.split('/');
+                        if (barcode && barcode.trim() === barcodeInput) {
                             document.getElementById('product-name').textContent = `الاسم: ${productName}`;
                             document.getElementById('product-price').textContent = `السعر: ${productPrice}`;
-                            document.getElementById('product-image').src = imageUrl;
-                            document.getElementById('product-image').style.display = 'block';
+                            document.getElementById('product-barcode').textContent = `الباركود: ${barcode}`;
                             found = true;
                             break;
                         }
@@ -98,8 +104,12 @@
                     if (!found) {
                         document.getElementById('product-name').textContent = 'الاسم: المنتج غير موجود';
                         document.getElementById('product-price').textContent = 'السعر: -';
-                        document.getElementById('product-image').style.display = 'none';
+                        document.getElementById('product-barcode').textContent = 'الباركود: -';
                     }
+                })
+                .catch(error => {
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
                 });
         });
     </script>
