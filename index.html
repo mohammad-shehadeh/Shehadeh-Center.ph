@@ -187,30 +187,30 @@
             }
         });
 
-// تبديل الوضعية عند تغيير المفتاح
-modeSwitch.addEventListener('change', () => {
-    if (modeSwitch.checked) {
-        setBarcodeMode();
-        localStorage.setItem('inputMode', 'barcode');
-        showStatusMessage('تم التغيير إلى وضعية استخدام الباركود');
-    } else {
-        setKeyboardMode();
-        localStorage.setItem('inputMode', 'keyboard');
-        showStatusMessage('تم التغيير إلى وضعية استخدام لوحة المفاتيح');
-    }
-});
+        // تبديل الوضعية عند تغيير المفتاح
+        modeSwitch.addEventListener('change', () => {
+            if (modeSwitch.checked) {
+                setBarcodeMode();
+                localStorage.setItem('inputMode', 'barcode');
+                showStatusMessage('تم التغيير إلى وضعية استخدام الباركود');
+            } else {
+                setKeyboardMode();
+                localStorage.setItem('inputMode', 'keyboard');
+                showStatusMessage('تم التغيير إلى وضعية استخدام لوحة المفاتيح');
+            }
+        });
 
-// ضبط الوضعية على "استخدام باركود"
-function setBarcodeMode() {
-    barcodeInput.setAttribute('inputmode', 'none'); // منع ظهور لوحة المفاتيح الافتراضية
-    barcodeInput.placeholder = "استخدم جهاز قارئ الباركود";
-}
+        // ضبط الوضعية على "استخدام باركود"
+        function setBarcodeMode() {
+            barcodeInput.setAttribute('readonly', true);
+            barcodeInput.placeholder = "استخدم جهاز قارئ الباركود";
+        }
 
-// ضبط الوضعية على "استخدام لوحة المفاتيح"
-function setKeyboardMode() {
-    barcodeInput.setAttribute('inputmode', 'text'); // السماح بظهور لوحة المفاتيح الافتراضية
-    barcodeInput.placeholder = "أدخل الباركود";
-}
+        // ضبط الوضعية على "استخدام لوحة المفاتيح"
+        function setKeyboardMode() {
+            barcodeInput.removeAttribute('readonly');
+            barcodeInput.placeholder = "أدخل الباركود";
+        }
 
         // عرض رسالة تأكيد تغيير الوضعية
         function showStatusMessage(message) {
