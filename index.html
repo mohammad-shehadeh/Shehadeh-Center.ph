@@ -50,6 +50,62 @@
         input[type="submit"]:hover {
             background-color: #74b9ff;
         }
+        .switch-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .switch-container label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 25px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 25px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 19px;
+            width: 19px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #0984e3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(25px);
+        }
+        #status-message {
+            margin-top: 20px;
+            color: #0984e3;
+            font-size: 16px;
+            display: none;
+            font-weight: bold;
+        }
         #product-details {
             margin-top: 20px;
         }
@@ -72,19 +128,33 @@
             color: #333;
             font-size: 20px;
             font-weight: bold;
-            text-align: center;
+            text-align: left;
         }
-        .error {
-            color: red;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+        label {
+        font-size: 16px;
+        font-weight: bold;
+        color: #0984e3;
+        text-align: center;
+        display: block;
+    }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>بحث المنتجات باستخدام الباركود</h1>
+
+        <!-- مفتاح اختيار الوضعية -->
+        <div class="switch-container">
+            <label>mode</label>
+            <label class="switch">
+                <input type="checkbox" id="mode-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- رسالة الوضعية -->
+        <div id="status-message"></div>
 
         <!-- نموذج البحث عن المنتج -->
         <form id="barcode-form">
@@ -99,22 +169,66 @@
             <div class="price-box" id="product-price">السعر: -</div>
             <div class="detail-box" id="product-barcode">الباركود: -</div>
         </div>
-
-        <!-- رسائل الخطأ -->
-        <div id="error-message" class="error" style="display:none;"></div>
     </div>
 
     <script>
+        const modeSwitch = document.getElementById('mode-switch');
+        const barcodeInput = document.getElementById('barcode-input');
+        const statusMessage = document.getElementById('status-message');
+
+        // تحميل الوضعية من التخزين المحلي
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedMode = localStorage.getItem('inputMode');
+            if (savedMode === 'barcode') {
+                modeSwitch.checked = true;
+                setBarcodeMode();
+            } else {
+                setKeyboardMode();
+            }
+        });
+
+// تبديل الوضعية عند تغيير المفتاح
+modeSwitch.addEventListener('change', () => {
+    if (modeSwitch.checked) {
+        setBarcodeMode();
+        localStorage.setItem('inputMode', 'barcode');
+        showStatusMessage('تم التغيير إلى وضعية استخدام الباركود');
+    } else {
+        setKeyboardMode();
+        localStorage.setItem('inputMode', 'keyboard');
+        showStatusMessage('تم التغيير إلى وضعية استخدام لوحة المفاتيح');
+    }
+});
+
+// ضبط الوضعية على "استخدام باركود"
+function setBarcodeMode() {
+    barcodeInput.setAttribute('inputmode', 'none'); // منع ظهور لوحة المفاتيح الافتراضية
+    barcodeInput.placeholder = "استخدم جهاز قارئ الباركود";
+}
+
+// ضبط الوضعية على "استخدام لوحة المفاتيح"
+function setKeyboardMode() {
+    barcodeInput.setAttribute('inputmode', 'text'); // السماح بلوحة المفاتيح
+    barcodeInput.placeholder = "أدخل الباركود";
+}
+
+        // عرض رسالة تأكيد تغيير الوضعية
+        function showStatusMessage(message) {
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // البحث عن المنتج
         document.getElementById('barcode-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const barcodeInput = document.getElementById('barcode-input').value.trim();
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'none';
+            const barcodeInputValue = barcodeInput.value.trim();
 
-            if (!barcodeInput) {
-                errorMessage.textContent = "الرجاء إدخال الباركود.";
-                errorMessage.style.display = 'block';
+            if (!barcodeInputValue) {
+                alert("الرجاء إدخال الباركود.");
                 return;
             }
 
@@ -130,10 +244,9 @@
                     const lines = data.split('\n');
                     let found = false;
 
-                    // البحث عن المنتج باستخدام الباركود
                     for (let line of lines) {
                         const [productName, productPrice, barcode] = line.split('/');
-                        if (barcode && barcode.trim() === barcodeInput) {
+                        if (barcode && barcode.trim() === barcodeInputValue) {
                             document.getElementById('product-name').textContent = `الاسم: ${productName}`;
                             document.getElementById('product-price').textContent = `السعر: ${productPrice}`;
                             document.getElementById('product-barcode').textContent = `الباركود: ${barcode}`;
@@ -148,21 +261,11 @@
                         document.getElementById('product-barcode').textContent = 'الباركود: -';
                     }
 
-                    // إعادة ضبط حقل الإدخال
-                    document.getElementById('barcode-input').value = '';
+                    barcodeInput.value = '';
                 })
                 .catch(error => {
-                    errorMessage.textContent = error.message;
-                    errorMessage.style.display = 'block';
+                    alert(error.message);
                 });
-        });
-
-        // البحث عند الضغط على Enter
-        document.getElementById('barcode-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('barcode-form').dispatchEvent(new Event('submit'));
-            }
         });
     </script>
 
