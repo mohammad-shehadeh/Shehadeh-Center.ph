@@ -50,64 +50,24 @@
         input[type="submit"]:hover {
             background-color: #74b9ff;
         }
-        .switch-container {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .switch-container label {
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 25px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 25px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 19px;
-            width: 19px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #0984e3;
-        }
-        input:checked + .slider:before {
-            transform: translateX(25px);
-        }
-        #status-message {
-            margin-top: 20px;
-            color: #0984e3;
-            font-size: 16px;
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            text-align: left;
+            z-index: 1000;
             display: none;
-            font-weight: bold;
         }
-        #product-details {
-            margin-top: 20px;
+        .popup h2 {
+            margin: 0 0 10px;
+            color: #0984e3;
         }
         .detail-box {
             margin: 10px 0;
@@ -117,7 +77,6 @@
             background-color: #f4f4f4;
             color: #333;
             font-size: 16px;
-            text-align: left;
         }
         .price-box {
             margin: 10px 0;
@@ -128,15 +87,21 @@
             color: #333;
             font-size: 20px;
             font-weight: bold;
-            text-align: left;
+            text-align: center;
         }
-        label {
-        font-size: 16px;
-        font-weight: bold;
-        color: #0984e3;
-        text-align: center;
-        display: block;
-    }
+        .popup .close-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #0984e3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .popup .close-btn:hover {
+            background-color: #74b9ff;
+        }
     </style>
 </head>
 <body>
@@ -144,90 +109,40 @@
     <div class="container">
         <h1>بحث المنتجات باستخدام الباركود</h1>
 
-        <!-- مفتاح اختيار الوضعية -->
-        <div class="switch-container">
-            <label>mode</label>
-            <label class="switch">
-                <input type="checkbox" id="mode-switch">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <!-- رسالة الوضعية -->
-        <div id="status-message"></div>
-
         <!-- نموذج البحث عن المنتج -->
         <form id="barcode-form">
             <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
             <input type="submit" value="بحث">
         </form>
+    </div>
 
-        <!-- عرض تفاصيل المنتج -->
-        <div id="product-details">
-            <h2>تفاصيل المنتج:</h2>
-            <div class="detail-box" id="product-name">الاسم: -</div>
-            <div class="price-box" id="product-price">السعر: -</div>
-            <div class="detail-box" id="product-barcode">الباركود: -</div>
-        </div>
+    <!-- النافذة المنبثقة -->
+    <div class="popup" id="result-popup">
+        <h2>نتائج البحث:</h2>
+        <div class="detail-box" id="product-name">الاسم: -</div>
+        <div class="price-box" id="product-price">السعر: -</div>
+        <div class="detail-box" id="product-barcode">الباركود: -</div>
+        <button class="close-btn" onclick="closePopup()">إغلاق</button>
     </div>
 
     <script>
-        const modeSwitch = document.getElementById('mode-switch');
         const barcodeInput = document.getElementById('barcode-input');
-        const statusMessage = document.getElementById('status-message');
+        const popup = document.getElementById('result-popup');
 
-        // تحميل الوضعية من التخزين المحلي
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedMode = localStorage.getItem('inputMode');
-            if (savedMode === 'barcode') {
-                modeSwitch.checked = true;
-                setBarcodeMode();
-            } else {
-                setKeyboardMode();
-            }
-        });
-
-        // تبديل الوضعية عند تغيير المفتاح
-        modeSwitch.addEventListener('change', () => {
-            if (modeSwitch.checked) {
-                setBarcodeMode();
-                localStorage.setItem('inputMode', 'barcode');
-                showStatusMessage('تم التغيير إلى وضعية استخدام الباركود');
-            } else {
-                setKeyboardMode();
-                localStorage.setItem('inputMode', 'keyboard');
-                showStatusMessage('تم التغيير إلى وضعية استخدام لوحة المفاتيح');
-            }
-        });
-
-        // ضبط الوضعية على "استخدام باركود"
-        function setBarcodeMode() {
-            barcodeInput.setAttribute('readonly', true);
-            barcodeInput.placeholder = "استخدم جهاز قارئ الباركود";
+        // تركيز المؤشر على حقل الإدخال دائمًا
+        function focusBarcodeInput() {
+            barcodeInput.focus();
         }
-
-        // ضبط الوضعية على "استخدام لوحة المفاتيح"
-        function setKeyboardMode() {
-            barcodeInput.removeAttribute('readonly');
-            barcodeInput.placeholder = "أدخل الباركود";
-        }
-
-        // عرض رسالة تأكيد تغيير الوضعية
-        function showStatusMessage(message) {
-            statusMessage.textContent = message;
-            statusMessage.style.display = 'block';
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 5000);
-        }
+        document.addEventListener('DOMContentLoaded', focusBarcodeInput);
+        document.body.addEventListener('click', focusBarcodeInput);
 
         // البحث عن المنتج
         document.getElementById('barcode-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const barcodeInputValue = barcodeInput.value.trim();
+            const barcodeValue = barcodeInput.value.trim();
 
-            if (!barcodeInputValue) {
+            if (!barcodeValue) {
                 alert("الرجاء إدخال الباركود.");
                 return;
             }
@@ -246,7 +161,7 @@
 
                     for (let line of lines) {
                         const [productName, productPrice, barcode] = line.split('/');
-                        if (barcode && barcode.trim() === barcodeInputValue) {
+                        if (barcode && barcode.trim() === barcodeValue) {
                             document.getElementById('product-name').textContent = `الاسم: ${productName}`;
                             document.getElementById('product-price').textContent = `السعر: ${productPrice}`;
                             document.getElementById('product-barcode').textContent = `الباركود: ${barcode}`;
@@ -262,11 +177,23 @@
                     }
 
                     barcodeInput.value = '';
+                    openPopup();
                 })
                 .catch(error => {
                     alert(error.message);
                 });
         });
+
+        // فتح النافذة المنبثقة
+        function openPopup() {
+            popup.style.display = 'block';
+        }
+
+        // إغلاق النافذة المنبثقة
+        function closePopup() {
+            popup.style.display = 'none';
+            focusBarcodeInput();
+        }
     </script>
 
 </body>
