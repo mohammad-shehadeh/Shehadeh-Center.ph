@@ -1,105 +1,108 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>برنامج البحث بالباركود</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    .input-container {
-      margin: 20px 0;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 250px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #007BFF;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بحث المنتجات باستخدام الباركود</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .header-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #product-image {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>برنامج البحث بالباركود</h1>
 
-  <!-- إدخال الباركود -->
-  <div class="input-container">
-    <label for="barcode-input">أدخل الباركود:</label>
-    <input type="text" id="barcode-input" placeholder="أدخل الباركود هنا">
-    <button onclick="searchBarcode()">بحث</button>
-  </div>
+    <!-- صورة العنوان -->
+    <img src="https://ls6iibytsc.eu.scalesta-cdn.com/8mfEuqxAqn2kgf5APnH8fqBr_5w=/filters:format(webp):fill(fff):quality(90)/www.gstoreq8.com/images/detailed/265/800x800_680201070A-4.webp" alt="Header Image" class="header-image">
 
-  <!-- عرض النتيجة -->
-  <div id="result"></div>
+    <div class="container">
+        <h1>بحث المنتجات باستخدام الباركود</h1>
 
-  <script>
-    let excelData = [];
+        <!-- نموذج البحث عن المنتج -->
+        <form id="barcode-form">
+            <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
+            <input type="submit" value="بحث">
+        </form>
 
-    // تحميل ملف Excel من المستودع
-    const githubFileUrl = "https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/model1.xlsx";
+        <!-- عرض تفاصيل المنتج -->
+        <div id="product-details">
+            <h2>تفاصيل المنتج:</h2>
+            <p id="product-name">الاسم: -</p>
+            <p id="product-price">السعر: -</p>
+            <img id="product-image" src="" alt="Product Image" style="display:none;">
+        </div>
+    </div>
 
-    fetch(githubFileUrl)
-      .then(response => {
-        if (!response.ok) throw new Error("Failed to fetch the Excel file.");
-        return response.arrayBuffer();
-      })
-      .then(data => {
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        excelData = XLSX.utils.sheet_to_json(sheet);
-        alert("تم تحميل البيانات من ملف Excel بنجاح!");
-      })
-      .catch(error => {
-        console.error("Error loading Excel file:", error);
-        document.getElementById('result').textContent = "حدث خطأ أثناء تحميل البيانات.";
-      });
+    <script>
+        document.getElementById('barcode-form').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-    // البحث عن الباركود
-    function searchBarcode() {
-      const barcode = document.getElementById('barcode-input').value.trim();
-      if (!barcode) {
-        document.getElementById('result').textContent = "يرجى إدخال الباركود.";
-        return;
-      }
+            // قراءة ملف البيانات
+            fetch('test.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const barcodeInput = document.getElementById('barcode-input').value;
+                    const lines = data.split('\n');
+                    let found = false;
 
-      const item = excelData.find(row => row['C'] && row['C'].toString() === barcode);
+                    // البحث عن المنتج باستخدام الباركود
+                    for (let line of lines) {
+                        const [productName, productPrice, barcode, imageUrl] = line.split('/');
+                        if (barcode === barcodeInput) {
+                            document.getElementById('product-name').textContent = `الاسم: ${productName}`;
+                            document.getElementById('product-price').textContent = `السعر: ${productPrice}`;
+                            document.getElementById('product-image').src = imageUrl;
+                            document.getElementById('product-image').style.display = 'block';
+                            found = true;
+                            break;
+                        }
+                    }
 
-      if (item) {
-        document.getElementById('result').innerHTML = `
-          <p>الصنف: <strong>${item['A']}</strong></p>
-          <p>السعر: <strong>${item['B']} ريال</strong></p>
-        `;
-      } else {
-        document.getElementById('result').textContent = "لم يتم العثور على بيانات للباركود المدخل.";
-      }
-    }
-  </script>
+                    if (!found) {
+                        document.getElementById('product-name').textContent = 'الاسم: المنتج غير موجود';
+                        document.getElementById('product-price').textContent = 'السعر: -';
+                        document.getElementById('product-image').style.display = 'none';
+                    }
+                });
+        });
+    </script>
+
 </body>
 </html>
