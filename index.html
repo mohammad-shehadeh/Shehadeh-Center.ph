@@ -5,107 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بحث المنتجات باستخدام الباركود</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
             margin: 0;
             padding: 0;
             color: #fff;
             text-align: center;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe); /* تدرج لوني هادئ */
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden; /* منع التمرير الأفقي */
         }
+
         .container {
             max-width: 500px;
+            width: 100%; /* التأكد من أن العرض 100% داخل الحاوية */
             margin: 20px auto;
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.9);
             color: #333;
-            padding: 20px;
+            padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            animation: fadeIn 1s ease-out;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         h1 {
             margin-bottom: 20px;
             font-size: 24px;
             color: #0984e3;
+            animation: slideIn 1s ease-out;
         }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         input[type="text"] {
             width: calc(100% - 20px);
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
-            font-size: 16px;
+            font-size: 18px;
             border: 1px solid #ddd;
             border-radius: 6px;
             outline: none;
+            transition: box-shadow 0.3s, border-color 0.3s;
         }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 12px rgba(38, 198, 218, 0.8);
+            border-color: #0984e3;
+        }
+
         input[type="submit"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #0984e3;
             border: none;
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
+
         input[type="submit"]:hover {
             background-color: #74b9ff;
+            transform: scale(1.05);
         }
+
+        /* إضافة شلال الماء */
+        .waterfall {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: waterfall 3s infinite linear;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        @keyframes waterfall {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
         .popup {
             position: fixed;
-            top: 5%;
-            left: 50%;
-            transform: translate(-50%, 0);
-            background-color: #fff;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
             color: #333;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            text-align: left;
+            box-sizing: border-box;
+            box-shadow: none;
             z-index: 1000;
             display: none;
+            overflow-y: auto;
+            animation: popupIn 0.5s ease-out;
         }
-        .popup h2 {
-            margin: 0 0 10px;
-            color: #0984e3;
+
+        @keyframes popupIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
-        .detail-box {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background-color: #f4f4f4;
-            color: #333;
-            font-size: 18px;
-        }
-        .price-box {
-            margin: 10px 0;
-            padding: 15px;
-            border: 2px solid #0984e3;
-            border-radius: 6px;
-            background-color: #dfe6e9;
-            color: #333;
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .popup .close-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #0984e3;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .popup .close-btn:hover {
-            background-color: #74b9ff;
-        }
+
+.popup h2 {
+    margin: 0 0 20px;
+    color: #0984e3;
+    font-size: 24px;
+    text-align: center;
+}
+
+.detail-box, .price-box {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f4f4f4;
+    color: #333;
+    font-size: 20px;
+}
+
+.price-box {
+    background-color: #dfe6e9;
+    border: 2px solid #0984e3;
+    font-weight: bold;
+    text-align: center;
+}
+
+.popup .close-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 15px 30px;
+    background-color: #0984e3;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+}
+
+.popup .close-btn:hover {
+    background-color: #74b9ff;
+}
+
+#product-name-result {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0984e3;
+}
+
+#product-price-result {
+    font-size: 18px;
+    font-weight: normal;
+    color: #2d3436;
+}
+
+#product-barcode-result {
+    font-size: 18px;
+    font-weight: normal;
+    color: #2d3436;
+}
     </style>
 </head>
 <body>
-
+    <div class="waterfall"></div>
     <div class="container">
         <h1>بحث المنتجات باستخدام الباركود</h1>
 
@@ -117,12 +203,18 @@
 
     <div class="popup" id="result-popup">
         <h2>نتائج البحث:</h2>
-        <div class="detail-box" id="product-name">الاسم: -</div>
-        <div class="price-box" id="product-price">السعر: -</div>
-        <div class="detail-box" id="product-barcode">الباركود: -</div>
+        <div class="detail-box" id="product-name">
+            <strong>الاسم:</strong> <span id="product-name-result">-</span>
+        </div>
+        <div class="price-box" id="product-price">
+            <strong>السعر:</strong> <span id="product-price-result">-</span>
+        </div>
+        <div class="detail-box" id="product-barcode">
+            <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
+        </div>
         <button class="close-btn" onclick="closePopup()">إغلاق</button>
     </div>
-
+    
     <script>
         const barcodeInput = document.getElementById('barcode-input');
         const popup = document.getElementById('result-popup');
