@@ -15,7 +15,7 @@
         }
         .container {
             max-width: 500px;
-            margin: 50px auto;
+            margin: 20px auto;
             background-color: #ffffff;
             color: #333;
             padding: 20px;
@@ -52,15 +52,15 @@
         }
         .popup {
             position: fixed;
-            top: 50%;
+            top: 5%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, 0);
             background-color: #fff;
             color: #333;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            max-width: 90%;
             text-align: left;
             z-index: 1000;
             display: none;
@@ -76,7 +76,7 @@
             border-radius: 6px;
             background-color: #f4f4f4;
             color: #333;
-            font-size: 16px;
+            font-size: 18px;
         }
         .price-box {
             margin: 10px 0;
@@ -85,7 +85,7 @@
             border-radius: 6px;
             background-color: #dfe6e9;
             color: #333;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
         }
@@ -109,14 +109,12 @@
     <div class="container">
         <h1>بحث المنتجات باستخدام الباركود</h1>
 
-        <!-- نموذج البحث عن المنتج -->
         <form id="barcode-form">
             <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
             <input type="submit" value="بحث">
         </form>
     </div>
 
-    <!-- النافذة المنبثقة -->
     <div class="popup" id="result-popup">
         <h2>نتائج البحث:</h2>
         <div class="detail-box" id="product-name">الاسم: -</div>
@@ -129,25 +127,20 @@
         const barcodeInput = document.getElementById('barcode-input');
         const popup = document.getElementById('result-popup');
 
-        // تركيز المؤشر على حقل الإدخال دائمًا
         function focusBarcodeInput() {
             barcodeInput.focus();
         }
         document.addEventListener('DOMContentLoaded', focusBarcodeInput);
-        document.body.addEventListener('click', focusBarcodeInput);
 
-        // البحث عن المنتج
         document.getElementById('barcode-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const barcodeValue = barcodeInput.value.trim();
-
             if (!barcodeValue) {
                 alert("الرجاء إدخال الباركود.");
                 return;
             }
 
-            // قراءة ملف البيانات
             fetch('test.txt')
                 .then(response => {
                     if (!response.ok) {
@@ -177,6 +170,7 @@
                     }
 
                     barcodeInput.value = '';
+                    barcodeInput.blur(); // إخفاء لوحة المفاتيح الافتراضية
                     openPopup();
                 })
                 .catch(error => {
@@ -184,12 +178,10 @@
                 });
         });
 
-        // فتح النافذة المنبثقة
         function openPopup() {
             popup.style.display = 'block';
         }
 
-        // إغلاق النافذة المنبثقة
         function closePopup() {
             popup.style.display = 'none';
             focusBarcodeInput();
