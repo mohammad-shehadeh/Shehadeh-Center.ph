@@ -209,18 +209,18 @@
 
     <div class="popup" id="result-popup">
         <h2>نتائج البحث:</h2>
-        <div class="detail-box">
-            <strong class="label">الاسم:</strong> <span id="product-name-result">-</span>
+        <div class="detail-box" id="product-name">
+            <strong>الاسم:</strong> <span id="product-name-result">-</span>
         </div>
-        <div class="price-box">
-            <strong class="label">السعر:</strong> <span id="product-price-result">-</span>
+        <div class="price-box" id="product-price">
+            <strong>السعر:</strong> <span id="product-price-result">-</span>
         </div>
-        <div class="detail-box">
-            <strong class="label">الباركود:</strong> <span id="product-barcode-result">-</span>
+        <div class="detail-box" id="product-barcode">
+            <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
         </div>
         <button class="close-btn" onclick="closePopup()">إغلاق</button>
     </div>
-        
+    
     <script>
         const barcodeInput = document.getElementById('barcode-input');
         const popup = document.getElementById('result-popup');
