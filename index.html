@@ -148,20 +148,23 @@
     const startScannerButton = document.getElementById('start-scanner');
     const statusMessage = document.getElementById('status-message');
     const videoElement = document.querySelector('#interactive video');
+    const form = document.getElementById('barcode-form');
   
     let lastReadValues = [];
     let isProcessing = false;
     let scannerActive = false;
   
-    // التركيز على حقل الباركود عند تحميل الصفحة
+    // إخفاء عنصر الفيديو عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
       barcodeInput.focus();
+      videoElement.style.display = 'none'; // إخفاء الفيديو عند التحميل
     });
   
     // بدء الماسح
     function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
+      videoElement.style.display = 'block'; // إظهار الفيديو عند بدء الماسح
   
       Quagga.init(
         {
@@ -222,7 +225,7 @@
       setTimeout(() => {
         barcodeInput.value = code; // إدخال الباركود في الحقل
         stopScanner();
-        performSearch(code); // تنفيذ البحث تلقائيًا
+        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
         isProcessing = false;
       }, 500);
     }
@@ -234,12 +237,14 @@
         scannerActive = false;
         lastReadValues = [];
         startScannerButton.disabled = false;
-        videoElement.style.display = 'none'; // إخفاء واجهة الفيديو
+        videoElement.style.display = 'none'; // إخفاء الفيديو عند إيقاف الماسح
       }
     }
   
     // البحث عن المنتج
-    function performSearch(barcodeValue) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const barcodeValue = barcodeInput.value.trim();
       if (!barcodeValue) {
         alert('الرجاء إدخال الباركود.');
         return;
@@ -278,7 +283,7 @@
         .catch((error) => {
           alert(error.message);
         });
-    }
+    });
   
     // عرض النافذة المنبثقة
     function openPopup() {
@@ -293,13 +298,6 @@
   
     // إضافة مستمع لزر بدء الماسح
     startScannerButton.addEventListener('click', startScanner);
-  
-    // إضافة مستمع للنموذج
-    document.getElementById('barcode-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const barcodeValue = barcodeInput.value.trim();
-      performSearch(barcodeValue);
-    });
   </script>
   </body>
 </html>
