@@ -113,10 +113,10 @@ button:hover {
 }
 
 h1 {
-  color: #380000;  /* Gold color for the heading */
+  color: #020000;  /* Gold color for the heading */
   font-size: 2.8rem;
   text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.6);
-  margin-top: 40px;
+  margin-top: 30px;
   animation: fadeIn 2s ease-in-out;
 }
 
@@ -133,7 +133,7 @@ h1 {
 /* Container Styling */
 .container {
   max-width: 800px;
-  width: 100%;
+  width: 90%;
   margin: 30px auto;
   padding: 30px;
   background-color: rgba(255, 255, 255, 0.9); /* Transparent white background */
@@ -185,7 +185,8 @@ h1 {
 
 /* Input and Button Styles */
 input[type="text"] {
-  width: 85%;
+  width: 100%;
+  max-width: 100%; /* لضمان أن العرض لا يتجاوز العرض الكامل */
   padding: 12px;
   font-size: 18px;
   border: 2px solid #ddd;
@@ -193,6 +194,15 @@ input[type="text"] {
   margin-top: 20px;
   outline: none;
   transition: border 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box; /* لتضمين الحدود والمسافات الداخلية ضمن العرض الكلي */
+}
+
+/* تحسين التوافق مع الأجهزة المحمولة */
+@media (max-width: 768px) {
+  input[type="text"] {
+    font-size: 16px; /* تصغير الخط في الشاشات الصغيرة */
+    padding: 10px; /* تقليل المسافات الداخلية لتناسب الشاشة الصغيرة */
+  }
 }
 
 input[type="text"]:focus {
@@ -267,8 +277,13 @@ input[type="submit"]:disabled {
   }
 
   h1 {
-    font-size: 2rem;
-  }
+  font-size: 1.2rem;
+  text-align: center; /* لمحاذاة النص أفقيًا */
+  display: flex; /* استخدام flexbox */
+  align-items: center; /* محاذاة النص عموديًا */
+  justify-content: center; /* محاذاة النص في المنتصف أفقياً وعمودياً */
+  height: 100%; /* لضمان أن الحاوية تمتلك ارتفاعًا كافيًا لمحاذاة العنصر عموديًا */
+}
 
   input[type="text"], button, input[type="submit"] {
     width: 100%;
