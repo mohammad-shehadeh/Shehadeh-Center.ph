@@ -8,26 +8,71 @@
 /* General Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f7f7f7;
   margin: 0;
   padding: 0;
   text-align: center;
-  color: #333;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(0, 153, 255, 0.5), rgba(0, 255, 204, 0.5), rgba(0, 204, 255, 0.5));
+  background-size: 100% 300%;
+  animation: waterfallAnimation 15s linear infinite;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes waterfallAnimation {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 0 100%;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }
 
 h1 {
-  color: #333;
-  font-size: 2.2rem;
+  color: #330000;  /* Gold color for the heading */
+  font-size: 2.8rem;
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.6);
   margin-top: 40px;
+  animation: fadeIn 2s ease-in-out;
 }
 
+/* Fade-in animation for h1 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Container Styling */
 .container {
   max-width: 800px;
+  width: 100%;
   margin: 30px auto;
-  padding: 25px;
-  background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  background-color: rgba(255, 255, 255, 0.9); /* Transparent white background */
+  border-radius: 20px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideIn 1.5s ease-out;
+}
+
+/* Slide-in animation for container */
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Scanner Styles */
@@ -36,17 +81,30 @@ h1 {
   width: 100%;
   border-radius: 15px;
   overflow: hidden;
-  background-color: #000;
+  background: rgba(0, 0, 0, 0.5);
   box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+  animation: scaleUp 0.8s ease-in-out;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 #scanner-container video {
   width: 100%;
   height: auto;
   border-radius: 15px;
+  opacity: 0.9;
 }
 
-/* Barcode Input and Button Styles */
+/* Input and Button Styles */
 input[type="text"] {
   width: 85%;
   padding: 12px;
@@ -55,11 +113,12 @@ input[type="text"] {
   border-radius: 10px;
   margin-top: 20px;
   outline: none;
-  transition: border 0.3s ease;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
 input[type="text"]:focus {
   border-color: #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
 button {
@@ -71,11 +130,12 @@ button {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
   background-color: #0056b3;
+  transform: translateY(-3px);
 }
 
 button:disabled {
@@ -99,6 +159,7 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
   background-color: #047bca;
+  transform: translateY(-3px);
 }
 
 input[type="submit"]:disabled {
@@ -120,6 +181,22 @@ input[type="submit"]:disabled {
   color: #dc3545;
 }
 
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  input[type="text"], button, input[type="submit"] {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
 /* Popup Styles */
 .popup {
   display: none;
@@ -127,13 +204,14 @@ input[type="submit"]:disabled {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(145deg, #ffffff, #f0f0f0);
-  border: 1px solid #ddd;
+  background: #fff;
   border-radius: 16px;
   padding: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   z-index: 9999;
+  width: 400px;
   animation: popupAnimation 0.5s ease-out;
+  overflow: hidden;
 }
 
 @keyframes popupAnimation {
@@ -147,31 +225,73 @@ input[type="submit"]:disabled {
   }
 }
 
+/* Content Frame */
+.popup .content-frame {
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading Styles */
 .popup h2 {
-  margin: 0 0 20px;
   font-size: 1.8rem;
   color: #333;
   font-weight: bold;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* Detail Box */
 .detail-box {
-  margin-bottom: 20px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #666;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
-.price {
-  font-size: 1.5rem;
+/* Price Frame */
+.price-frame {
+  border: 3px solid #2196F3;
+  border-radius: 10px;
+  padding: 15px;
+  background: linear-gradient(145deg, #2196F3, #0d47a1);
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+  text-align: center;
+  margin-top: 15px;
+}
+
+.price-frame .price {
+  font-size: 1.6rem;
   font-weight: bold;
-  color: #ff5722;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-  margin-top: 10px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(33, 150, 243, 0.8);
 }
 
+/* Barcode Frame */
+.barcode-frame {
+  border: 2px solid #4CAF50;
+  border-radius: 10px;
+  padding: 15px;
+  background-color: #e8f5e9;
+  margin-top: 20px;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+}
+
+.barcode-frame img {
+  width: 100%;
+  max-width: 250px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Close Button */
 .close-btn {
-  background: #4CAF50;
+  background: #FF5722;
   color: white;
   border: none;
   border-radius: 12px;
@@ -181,10 +301,13 @@ input[type="submit"]:disabled {
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+  display: block;
+  width: 100%;
 }
 
 .close-btn:hover {
-  background: #45a049;
+  background: #e64a19;
   transform: scale(1.05);
 }
 
@@ -195,7 +318,7 @@ input[type="submit"]:disabled {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .popup {
-    width: 80%;
+    width: 90%;
     padding: 20px;
   }
 
@@ -207,13 +330,17 @@ input[type="submit"]:disabled {
     font-size: 1rem;
   }
 
+  .price-frame .price {
+    font-size: 1.4rem;
+  }
+
+  .barcode-frame img {
+    max-width: 200px;
+  }
+
   .close-btn {
     padding: 10px 20px;
     font-size: 0.9rem;
-  }
-
-  .price {
-    font-size: 1.3rem;
   }
 }
   </style>
