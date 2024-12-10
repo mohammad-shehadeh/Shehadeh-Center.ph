@@ -154,17 +154,16 @@
     let isProcessing = false;
     let scannerActive = false;
   
-    // إخفاء عنصر الفيديو عند تحميل الصفحة
+    // إظهار الفيديو عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
       barcodeInput.focus();
-      videoElement.style.display = 'none'; // إخفاء الفيديو عند التحميل
+      videoElement.style.display = 'block'; // إظهار الفيديو
     });
   
     // بدء الماسح
     function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
-      videoElement.style.display = 'block'; // إظهار الفيديو عند بدء الماسح
   
       Quagga.init(
         {
@@ -237,7 +236,6 @@
         scannerActive = false;
         lastReadValues = [];
         startScannerButton.disabled = false;
-        videoElement.style.display = 'none'; // إخفاء الفيديو عند إيقاف الماسح
       }
     }
   
@@ -279,6 +277,7 @@
           }
   
           openPopup();
+          videoElement.style.display = 'none'; // إخفاء الفيديو بعد البحث
         })
         .catch((error) => {
           alert(error.message);
@@ -299,5 +298,5 @@
     // إضافة مستمع لزر بدء الماسح
     startScannerButton.addEventListener('click', startScanner);
   </script>
-  </body>
+    </body>
 </html>
