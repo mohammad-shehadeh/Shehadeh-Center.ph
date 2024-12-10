@@ -157,7 +157,7 @@
     // إظهار الفيديو عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
       barcodeInput.focus();
-      videoElement.style.display = 'block'; // إظهار الفيديو
+      videoElement.style.visibility = 'visible'; // إظهار الفيديو
     });
   
     // بدء الماسح
@@ -277,7 +277,7 @@
           }
   
           openPopup();
-          videoElement.style.display = 'none'; // إخفاء الفيديو بعد البحث
+          videoElement.style.visibility = 'hidden'; // جعل الفيديو غير مرئي بعد البحث
         })
         .catch((error) => {
           alert(error.message);
