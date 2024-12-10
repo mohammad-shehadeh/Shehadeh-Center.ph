@@ -557,23 +557,12 @@ input[type="submit"]:disabled {
       return lastReadValues.every((val) => val === code);
     }
   
-// تشغيل الصوت
-function playSound(fileName) {
-  const audio = new Audio(`${fileName}.mp3`); // تحديد المسار واسم الملف
-  audio.play().then(() => {
-    console.log('تم تشغيل الصوت بنجاح');
-  }).catch((error) => {
-    console.error('فشل تشغيل الصوت:', error);
-  });
-}
-
-// معالجة الباركود
-function processBarcode(code) {
+    function processBarcode(code) {
   if (isProcessing) return;
   isProcessing = true;
 
   // تشغيل الصوت عند قراءة الباركود
-  playSound('mm1');
+  playSound('mm1'); 
 
   setTimeout(() => {
     barcodeInput.value = code; // إدخال الباركود في الحقل
