@@ -8,33 +8,112 @@
 /* General Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #00b4d8, #0077b6, #90e0ef);
   margin: 0;
   padding: 0;
   text-align: center;
-  color: #fff;
-  background: linear-gradient(180deg, rgba(0, 153, 255, 0.5), rgba(0, 255, 204, 0.5), rgba(0, 204, 255, 0.5));
-  background-size: 100% 300%;
-  animation: waterfallAnimation 15s linear infinite;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+  animation: backgroundMove 30s linear infinite; /* حركة للخلفية */
 }
 
-@keyframes waterfallAnimation {
-  0% {
-    background-position: 0 0;
+/* تأثير الشلال المائي */
+@keyframes waterfall {
+  0% { top: -100%; opacity: 0; }
+  50% { top: 50%; opacity: 0.5; }
+  100% { top: 100%; opacity: 1; }
+}
+
+.waterfall {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.5);
+  animation: waterfall 3s infinite;
+  opacity: 0.8;
+  z-index: -1;
+}
+
+/* تأثير الأمواج */
+@keyframes waves {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.6);
+  background-image: url('https://www.transparenttextures.com/patterns/waves.png'); /* يمكنك تغيير الرابط إلى صورة أمواج أخرى */
+  animation: waves 5s linear infinite;
+  z-index: -2;
+}
+
+/* حركة مستمرة للخلفية */
+@keyframes backgroundMove {
+  0% { background-position: 0 0; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0 0; }
+}
+
+/* تحسين مظهر النص */
+h1, p {
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* تحسين الأزرار */
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ff3e1d;
+}
+
+/* تحسين التباين */
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* تحسين التوافق مع الأجهزة المحمولة */
+@media (max-width: 768px) {
+  body {
+    text-align: left;
+    padding: 10px;
   }
-  50% {
-    background-position: 0 100%;
+
+  h1 {
+    font-size: 24px;
   }
-  100% {
-    background-position: 0 0;
+
+  p {
+    font-size: 16px;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 8px 16px;
   }
 }
 
 h1 {
-  color: #330000;  /* Gold color for the heading */
+  color: #380000;  /* Gold color for the heading */
   font-size: 2.8rem;
   text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.6);
   margin-top: 40px;
@@ -117,16 +196,16 @@ input[type="text"] {
 }
 
 input[type="text"]:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+  border-color: #ff9900;
+  box-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
 }
 
 button {
   margin-top: 20px;
   padding: 12px 30px;
   font-size: 18px;
-  color: white;
-  background-color: #007bff;
+  color: rgb(0, 0, 0);
+  background-color: #ffae00;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -392,7 +471,6 @@ input[type="submit"]:disabled {
   
     // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
-      barcodeInput.focus();
       scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
     });
   
