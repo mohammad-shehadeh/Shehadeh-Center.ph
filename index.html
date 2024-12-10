@@ -557,20 +557,18 @@ input[type="submit"]:disabled {
       return lastReadValues.every((val) => val === code);
     }
   
+    // معالجة الباركود
     function processBarcode(code) {
-  if (isProcessing) return;
-  isProcessing = true;
-
-  // تشغيل الصوت عند قراءة الباركود
-  playSound('mm1'); 
-
-  setTimeout(() => {
-    barcodeInput.value = code; // إدخال الباركود في الحقل
-    stopScanner();
-    form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
-    isProcessing = false;
-  }, 500);
-}
+      if (isProcessing) return;
+      isProcessing = true;
+  
+      setTimeout(() => {
+        barcodeInput.value = code; // إدخال الباركود في الحقل
+        stopScanner();
+        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
+        isProcessing = false;
+      }, 500);
+    }
   
     // إيقاف الماسح
     function stopScanner() {
