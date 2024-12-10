@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Barcode Scanner and Search</title>
   <style>
-    /* CSS for Barcode Scanner */
+    /* CSS */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -22,6 +22,7 @@
       border: 2px solid #ccc;
       border-radius: 10px;
       overflow: hidden;
+      display: none; /* إخفاء الفيديو بشكل افتراضي */
     }
 
     #scanner-container video {
@@ -30,10 +31,6 @@
     }
 
     .container {
-      margin-top: 20px;
-    }
-
-    #barcode-result {
       margin-top: 20px;
     }
 
@@ -66,14 +63,6 @@
       font-weight: bold;
     }
 
-    .success {
-      color: green;
-    }
-
-    .error {
-      color: red;
-    }
-
     .popup {
       display: none;
       position: fixed;
@@ -89,10 +78,6 @@
 
     .popup h2 {
       margin: 0 0 10px;
-    }
-
-    .detail-box {
-      margin-bottom: 10px;
     }
 
     .close-btn {
@@ -126,13 +111,13 @@
 
   <div class="popup" id="result-popup">
     <h2>نتائج البحث:</h2>
-    <div class="detail-box" id="product-name">
+    <div class="detail-box">
       <strong>الاسم:</strong> <span id="product-name-result">-</span>
     </div>
-    <div class="price-box" id="product-price">
+    <div class="price-box">
       <strong>السعر:</strong> <span id="product-price-result">-</span>
     </div>
-    <div class="detail-box" id="product-barcode">
+    <div class="detail-box">
       <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
     </div>
     <button class="close-btn" onclick="closePopup()">إغلاق</button>
@@ -143,157 +128,135 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script>
-    const barcodeInput = document.getElementById('barcode-input');
-    const popup = document.getElementById('result-popup');
-    const startScannerButton = document.getElementById('start-scanner');
-    const statusMessage = document.getElementById('status-message');
+const scannerContainer = document.getElementById('scanner-container');
+const statusMessage = document.getElementById('status-message');
+const barcodeInput = document.getElementById('barcode-input');
+const startScannerButton = document.getElementById('start-scanner');
 
-    let lastReadValues = [];
-    let isProcessing = false;
-    let scannerActive = false;
+let isProcessing = false;
+let scannerActive = false;
+let retryCounter = 0;
+const maxRetries = 3; // عدد المحاولات القصوى لإعادة قراءة الباركود
 
-    // Focus on barcode input field when the page loads
-    function focusBarcodeInput() {
-      barcodeInput.focus();
+// إعداد مكتبة Quagga.js
+function initializeScanner() {
+    if (scannerActive) {
+        stopScanner(); // إعادة التهيئة إذا كانت الكاميرا تعمل
     }
-    document.addEventListener('DOMContentLoaded', focusBarcodeInput);
 
-    // Start the scanner
-    function startScanner() {
-      startScannerButton.disabled = true;
-      statusMessage.textContent = "";
+    scannerContainer.style.display = 'block'; // إظهار الكاميرا
+    startScannerButton.disabled = true;
+    statusMessage.textContent = "جاري تشغيل الكاميرا...";
 
-      Quagga.init(
+    Quagga.init(
         {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector("#interactive"),
-            constraints: {
-              facingMode: "environment",
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [{ focusMode: "continuous" }],
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector("#interactive"),
+                constraints: {
+                    facingMode: "environment", // استخدام الكاميرا الخلفية
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    aspectRatio: { ideal: 16 / 9 },
+                    advanced: [{ focusMode: "continuous" }], // تحسين التركيز
+                },
             },
-          },
-          decoder: {
-            readers: [
-              "code_128_reader",
-              "ean_reader",
-              "ean_8_reader",
-            ],
-          },
-          locate: true,
-          numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 10,
+            decoder: {
+                readers: [
+                    "code_128_reader",
+                    "ean_reader",
+                    "ean_8_reader",
+                    "upc_reader",
+                ],
+            },
+            locate: true, // تمكين تحديد المواقع
+            numOfWorkers: navigator.hardwareConcurrency || 4, // تحسين الأداء
         },
         function (err) {
-          if (err) {
-            console.error("Error initializing Quagga:", err);
-            statusMessage.textContent = "Error starting the scanner.";
-            startScannerButton.disabled = false;
-            return;
-          }
-          Quagga.start();
-          scannerActive = true;
+            if (err) {
+                console.error("خطأ أثناء تشغيل الكاميرا:", err);
+                statusMessage.textContent = "فشل تشغيل الكاميرا.";
+                startScannerButton.disabled = false;
+                return;
+            }
+            Quagga.start();
+            scannerActive = true;
+            statusMessage.textContent = "جاري البحث عن الباركود...";
         }
-      );
+    );
 
-      Quagga.onDetected(function (data) {
-        const code = data.codeResult.code;
-        if (isValidBarcode(code)) {
-          processBarcode(code);
+    Quagga.onDetected(processBarcode);
+    Quagga.onProcessed(handleFrameProcessed);
+}
+
+// عند اكتشاف الإطار (لتحليل البيانات)
+function handleFrameProcessed(result) {
+    if (result && result.boxes) {
+        const ctx = Quagga.canvas.ctx.overlay;
+        const canvas = Quagga.canvas.dom.overlay;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // مسح الإطار السابق
+
+        result.boxes
+            .filter(box => box !== result.box) // تجنب رسم الإطار الأساسي
+            .forEach(box => Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, ctx, { color: "blue", lineWidth: 2 }));
+
+        if (result.box) {
+            Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, ctx, { color: "green", lineWidth: 2 });
         }
-      });
     }
+}
 
-    function isValidBarcode(code) {
-      if (!code) return false;
+// معالجة البيانات عند اكتشاف باركود
+function processBarcode(data) {
+    if (isProcessing) return;
 
-      lastReadValues.push(code);
-      if (lastReadValues.length > 3) lastReadValues.shift();
+    const code = data.codeResult.code;
 
-      return lastReadValues.every((val) => val === code);
+    if (isValidBarcode(code)) {
+        isProcessing = true;
+
+        setTimeout(() => {
+            barcodeInput.value = code; // تعبئة الحقل بالباركود
+            stopScanner(); // إيقاف الكاميرا بعد نجاح القراءة
+            document.getElementById('barcode-form').dispatchEvent(new Event('submit')); // بدء البحث تلقائيًا
+        }, 500);
+    } else {
+        retryCounter++;
+        if (retryCounter >= maxRetries) {
+            statusMessage.textContent = "فشل قراءة الباركود. الرجاء المحاولة مرة أخرى.";
+            retryCounter = 0; // إعادة تعيين العداد
+            stopScanner();
+        }
     }
+}
 
-    function processBarcode(code) {
-      if (isProcessing) return;
-      isProcessing = true;
+// التحقق من صحة الباركود
+function isValidBarcode(code) {
+    // شرط للتأكد من أن الكود ليس فارغًا وأن طوله مناسب
+    return !!code && code.length >= 6 && /^\d+$/.test(code); // باركود يجب أن يحتوي فقط على أرقام
+}
 
-      setTimeout(() => {
-        barcodeInput.value = code; // إدراج الباركود في الحقل
-        stopScanner();
-        statusMessage.textContent = "Barcode scanned successfully!";
-        barcodeInput.dispatchEvent(new Event('submit')); // تنفيذ البحث
-        isProcessing = false;
-      }, 500);
-    }
-
-    function stopScanner() {
-      if (scannerActive) {
+// إيقاف الكاميرا
+function stopScanner() {
+    if (scannerActive) {
         Quagga.stop();
         scannerActive = false;
-        lastReadValues = [];
+        scannerContainer.style.display = 'none'; // إخفاء الفيديو
         startScannerButton.disabled = false;
-      }
+        statusMessage.textContent = "تم إيقاف الكاميرا.";
     }
+}
 
-    // Search functionality
-    document.getElementById('barcode-form').addEventListener('submit', function (e) {
-      e.preventDefault();
+// تشغيل الكاميرا عند الضغط على الزر
+startScannerButton.addEventListener("click", initializeScanner);
 
-      const barcodeValue = barcodeInput.value.trim();
-      if (!barcodeValue) {
-        alert("الرجاء إدخال الباركود.");
-        return;
-      }
-
-      fetch('test.txt')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("فشل تحميل ملف البيانات.");
-          }
-          return response.text();
-        })
-        .then(data => {
-          const lines = data.split('\n');
-          let found = false;
-
-          for (let line of lines) {
-            const [productName, productPrice, barcode] = line.split('/');
-            if (barcode && barcode.trim() === barcodeValue) {
-              document.getElementById('product-name-result').textContent = productName;
-              document.getElementById('product-price-result').textContent = productPrice;
-              document.getElementById('product-barcode-result').textContent = barcode;
-              found = true;
-              break;
-            }
-          }
-
-          if (!found) {
-            document.getElementById('product-name-result').textContent = 'المنتج غير موجود';
-            document.getElementById('product-price-result').textContent = '-';
-            document.getElementById('product-barcode-result').textContent = '-';
-          }
-
-          openPopup();
-        })
-        .catch(error => {
-          alert(error.message);
-        });
-    });
-
-    function openPopup() {
-      popup.style.display = 'block';
-    }
-
-    function closePopup() {
-      popup.style.display = 'none';
-      focusBarcodeInput();
-    }
-
-    startScannerButton.addEventListener("click", startScanner);
+// تنظيف النصوص عند إعادة التشغيل
+startScannerButton.addEventListener("click", () => {
+    barcodeInput.value = "";
+    statusMessage.textContent = "جاري تشغيل الكاميرا...";
+});
   </script>
 </body>
 </html>
