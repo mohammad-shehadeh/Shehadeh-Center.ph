@@ -1,290 +1,299 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بحث المنتجات باستخدام الباركود</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner and Search</title>
+  <style>
+    /* CSS for Barcode Scanner */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background-color: #f5f5f5;
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #fff;
-            text-align: center;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe); /* تدرج لوني هادئ */
-            background-size: cover;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow-x: hidden; /* منع التمرير الأفقي */
-        }
+    #scanner-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+    }
 
-        .container {
-            max-width: 500px;
-            width: 100%; /* التأكد من أن العرض 100% داخل الحاوية */
-            margin: 20px auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            animation: fadeIn 1s ease-out;
-        }
+    #scanner-container video {
+      width: 100%;
+      height: auto;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+    .container {
+      margin-top: 20px;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #0984e3;
-            animation: slideIn 1s ease-out;
-        }
+    #barcode-result {
+      margin-top: 20px;
+    }
 
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 12px;
-            margin: 10px 0;
-            font-size: 18px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            outline: none;
-            transition: box-shadow 0.3s, border-color 0.3s;
-        }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        input[type="text"]:focus {
-            box-shadow: 0 0 12px rgba(38, 198, 218, 0.8);
-            border-color: #0984e3;
-        }
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
 
-        input[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #0984e3;
-            border: none;
-            color: #fff;
-            font-size: 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
+    #status-message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
 
-        input[type="submit"]:hover {
-            background-color: #74b9ff;
-            transform: scale(1.05);
-        }
+    .success {
+      color: green;
+    }
 
-        /* إضافة شلال الماء */
-        .waterfall {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-            animation: waterfall 3s infinite linear;
-            z-index: 1;
-            opacity: 0.5;
-        }
+    .error {
+      color: red;
+    }
 
-        @keyframes waterfall {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 20px;
-            box-sizing: border-box;
-            box-shadow: none;
-            z-index: 1000;
-            display: none;
-            overflow-y: auto;
-            animation: popupIn 0.5s ease-out;
-        }
+    .popup h2 {
+      margin: 0 0 10px;
+    }
 
-        @keyframes popupIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
+    .detail-box {
+      margin-bottom: 10px;
+    }
 
-.popup h2 {
-    margin: 0 0 20px;
-    color: #0984e3;
-    font-size: 24px;
-    text-align: center;
-}
+    .close-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      cursor: pointer;
+    }
 
-.detail-box, .price-box {
-    margin: 15px 0;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background-color: #f4f4f4;
-    color: #333;
-    font-size: 20px;
-}
-
-.price-box {
-    background-color: #dfe6e9;
-    border: 2px solid #0984e3;
-    font-weight: bold;
-    text-align: center;
-}
-
-.popup .close-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 15px 30px;
-    background-color: #0984e3;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 18px;
-    width: 100%;
-}
-
-.popup .close-btn:hover {
-    background-color: #74b9ff;
-}
-
-#product-name-result {
-    font-size: 20px;
-    font-weight: bold;
-    color: #0984e3;
-}
-
-#product-price-result {
-    font-size: 18px;
-    font-weight: normal;
-    color: #2d3436;
-}
-
-#product-barcode-result {
-    font-size: 18px;
-    font-weight: normal;
-    color: #2d3436;
-}
-/* تخصيص النصوص عند استخدام Arabic و English */
-#product-name-result, #product-price-result, #product-barcode-result {
-    display: inline-block;
-    direction: ltr; /* هذا يضمن أن النصوص لا تتداخل عند وجود الإنجليزية والعربية معًا */
-    padding: 2px;
-}
-    </style>
+    .close-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
 </head>
 <body>
-    <div class="waterfall"></div>
-    <div class="container">
-        <h1>بحث المنتجات باستخدام الباركود</h1>
 
-        <form id="barcode-form">
-            <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
-            <input type="submit" value="بحث">
-        </form>
+  <div id="scanner-container">
+    <div id="interactive" class="viewport"></div>
+  </div>
+
+  <div class="container">
+    <h1>بحث المنتجات باستخدام الباركود</h1>
+
+    <form id="barcode-form">
+      <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
+      <input type="submit" value="بحث">
+    </form>
+  </div>
+
+  <div class="popup" id="result-popup">
+    <h2>نتائج البحث:</h2>
+    <div class="detail-box" id="product-name">
+      <strong>الاسم:</strong> <span id="product-name-result">-</span>
     </div>
-
-    <div class="popup" id="result-popup">
-        <h2>نتائج البحث:</h2>
-        <div class="detail-box" id="product-name">
-            <strong>الاسم:</strong> <span id="product-name-result">-</span>
-        </div>
-        <div class="price-box" id="product-price">
-            <strong>السعر:</strong> <span id="product-price-result">-</span>
-        </div>
-        <div class="detail-box" id="product-barcode">
-            <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
-        </div>
-        <button class="close-btn" onclick="closePopup()">إغلاق</button>
+    <div class="price-box" id="product-price">
+      <strong>السعر:</strong> <span id="product-price-result">-</span>
     </div>
-    
-    <script>
-        const barcodeInput = document.getElementById('barcode-input');
-        const popup = document.getElementById('result-popup');
+    <div class="detail-box" id="product-barcode">
+      <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
+    </div>
+    <button class="close-btn" onclick="closePopup()">إغلاق</button>
+  </div>
 
-        function focusBarcodeInput() {
-            barcodeInput.focus();
+  <button id="start-scanner">Start Scanner</button>
+  <p id="status-message"></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script>
+    const barcodeInput = document.getElementById('barcode-input');
+    const popup = document.getElementById('result-popup');
+    const startScannerButton = document.getElementById('start-scanner');
+    const statusMessage = document.getElementById('status-message');
+
+    let lastReadValues = [];
+    let isProcessing = false;
+    let scannerActive = false;
+
+    // Focus on barcode input field when the page loads
+    function focusBarcodeInput() {
+      barcodeInput.focus();
+    }
+    document.addEventListener('DOMContentLoaded', focusBarcodeInput);
+
+    // Start the scanner
+    function startScanner() {
+      startScannerButton.disabled = true;
+      statusMessage.textContent = "";
+
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector("#interactive"),
+            constraints: {
+              facingMode: "environment",
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              aspectRatio: { ideal: 16 / 9 },
+              advanced: [{ focusMode: "continuous" }],
+            },
+          },
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "ean_reader",
+              "ean_8_reader",
+            ],
+          },
+          locate: true,
+          numOfWorkers: navigator.hardwareConcurrency || 4,
+          frequency: 10,
+        },
+        function (err) {
+          if (err) {
+            console.error("Error initializing Quagga:", err);
+            statusMessage.textContent = "Error starting the scanner.";
+            startScannerButton.disabled = false;
+            return;
+          }
+          Quagga.start();
+          scannerActive = true;
         }
-        document.addEventListener('DOMContentLoaded', focusBarcodeInput);
+      );
 
-        document.getElementById('barcode-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+      Quagga.onDetected(function (data) {
+        const code = data.codeResult.code;
+        if (isValidBarcode(code)) {
+          processBarcode(code);
+        }
+      });
+    }
 
-            const barcodeValue = barcodeInput.value.trim();
-            if (!barcodeValue) {
-                alert("الرجاء إدخال الباركود.");
-                return;
+    function isValidBarcode(code) {
+      if (!code) return false;
+
+      lastReadValues.push(code);
+      if (lastReadValues.length > 3) lastReadValues.shift();
+
+      return lastReadValues.every((val) => val === code);
+    }
+
+    function processBarcode(code) {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      setTimeout(() => {
+        barcodeInput.value = code; // إدراج الباركود في الحقل
+        stopScanner();
+        statusMessage.textContent = "Barcode scanned successfully!";
+        barcodeInput.dispatchEvent(new Event('submit')); // تنفيذ البحث
+        isProcessing = false;
+      }, 500);
+    }
+
+    function stopScanner() {
+      if (scannerActive) {
+        Quagga.stop();
+        scannerActive = false;
+        lastReadValues = [];
+        startScannerButton.disabled = false;
+      }
+    }
+
+    // Search functionality
+    document.getElementById('barcode-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const barcodeValue = barcodeInput.value.trim();
+      if (!barcodeValue) {
+        alert("الرجاء إدخال الباركود.");
+        return;
+      }
+
+      fetch('test.txt')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("فشل تحميل ملف البيانات.");
+          }
+          return response.text();
+        })
+        .then(data => {
+          const lines = data.split('\n');
+          let found = false;
+
+          for (let line of lines) {
+            const [productName, productPrice, barcode] = line.split('/');
+            if (barcode && barcode.trim() === barcodeValue) {
+              document.getElementById('product-name-result').textContent = productName;
+              document.getElementById('product-price-result').textContent = productPrice;
+              document.getElementById('product-barcode-result').textContent = barcode;
+              found = true;
+              break;
             }
+          }
 
-            fetch('test.txt')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("فشل تحميل ملف البيانات.");
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    const lines = data.split('\n');
-                    let found = false;
+          if (!found) {
+            document.getElementById('product-name-result').textContent = 'المنتج غير موجود';
+            document.getElementById('product-price-result').textContent = '-';
+            document.getElementById('product-barcode-result').textContent = '-';
+          }
 
-                    for (let line of lines) {
-                        const [productName, productPrice, barcode] = line.split('/');
-                        if (barcode && barcode.trim() === barcodeValue) {
-                            document.getElementById('product-name').textContent = `الاسم: ${productName}`;
-                            document.getElementById('product-price').textContent = `السعر: ${productPrice}`;
-                            document.getElementById('product-barcode').textContent = `الباركود: ${barcode}`;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        document.getElementById('product-name').textContent = 'الاسم: المنتج غير موجود';
-                        document.getElementById('product-price').textContent = 'السعر: -';
-                        document.getElementById('product-barcode').textContent = 'الباركود: -';
-                    }
-
-                    barcodeInput.value = '';
-                    barcodeInput.blur(); // إخفاء لوحة المفاتيح الافتراضية
-                    openPopup();
-                })
-                .catch(error => {
-                    alert(error.message);
-                });
+          openPopup();
+        })
+        .catch(error => {
+          alert(error.message);
         });
+    });
 
-        function openPopup() {
-            popup.style.display = 'block';
-        }
+    function openPopup() {
+      popup.style.display = 'block';
+    }
 
-        function closePopup() {
-            popup.style.display = 'none';
-            focusBarcodeInput();
-        }
-    </script>
+    function closePopup() {
+      popup.style.display = 'none';
+      focusBarcodeInput();
+    }
 
+    startScannerButton.addEventListener("click", startScanner);
+  </script>
 </body>
 </html>
