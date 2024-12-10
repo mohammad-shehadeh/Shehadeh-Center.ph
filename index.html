@@ -220,68 +220,77 @@ input[type="submit"]:disabled {
       // إظهار واجهة الماسح (scanner-container) عند بدء القراءة
       scannerContainer.style.display = 'block';
   
-      Quagga.init(
-  {
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.querySelector('#interactive'),
-      constraints: {
-        facingMode: 'environment', // لضمان استخدام الكاميرا الخلفية
-        width: { ideal: 1920 }, // الدقة المثالية
-        height: { ideal: 1080 }, // دقة الكاميرا
-        aspectRatio: { ideal: 16 / 9 },
-        advanced: [
-          { focusMode: 'continuous' }, // تركيز مستمر لتحسين الأداء عند الاقتراب
-          { torch: true } // تفعيل الفلاش لتحسين الإضاءة في البيئة المظلمة
-        ],
+// التأكد من تحميل مكتبة Quagga بشكل صحيح
+if (typeof Quagga !== 'undefined') {
+  Quagga.init(
+    {
+      inputStream: {
+        name: 'Live',
+        type: 'LiveStream',
+        target: document.querySelector('#interactive'), // العنصر الذي يتم عرض الفيديو عليه
+        constraints: {
+          facingMode: 'environment', // استخدام الكاميرا الخلفية
+          width: { ideal: 1920 }, // دقة الفيديو المطلوبة
+          height: { ideal: 1080 }, // دقة الفيديو المطلوبة
+          aspectRatio: { ideal: 16 / 9 }, // نسبة العرض إلى الارتفاع المثالية
+          advanced: [
+            { focusMode: 'continuous' }, // التركيز المستمر
+            { torch: true }, // تشغيل الفلاش في حالة الإضاءة الضعيفة
+          ],
+        },
       },
+      decoder: {
+        readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'], // أنواع الباركود المدعومة
+      },
+      locate: true,
+      numOfWorkers: navigator.hardwareConcurrency || 4, // استخدام عدد العاملين المتاح
+      frequency: 10, // فاصل التحديث
     },
-    decoder: {
-      readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'], // إضافة قارئ آخر مثل `ean_reader`
-    },
-    locate: true,
-    numOfWorkers: navigator.hardwareConcurrency || 4,
-    frequency: 10,
-  },
-  function (err) {
-    if (err) {
-      console.error('Error initializing Quagga:', err);
-      statusMessage.textContent = 'خطأ في تشغيل الماسح.';
-      startScannerButton.disabled = false;
-      return;
+    function (err) {
+      if (err) {
+        console.error('Error initializing Quagga:', err); // معالجة الأخطاء
+        statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+        startScannerButton.disabled = false;
+        return;
+      }
+      Quagga.start(); // بدء الماسح
+      scannerActive = true;
     }
-    Quagga.start();
-    scannerActive = true;
+  );
+
+  // الاستماع للأحداث عند اكتشاف الباركود
+  Quagga.onDetected(function (data) {
+    const code = data.codeResult.code;
+    if (isValidBarcode(code)) {
+      processBarcode(code);
+    }
+  });
+
+  // التحقق من صحة الباركود
+  let lastReadValues = []; // مصفوفة لتخزين القيم السابقة
+  function isValidBarcode(code) {
+    if (!code) return false;
+
+    lastReadValues.push(code);
+    if (lastReadValues.length > 3) lastReadValues.shift(); // الحفاظ على آخر ثلاث قراءات فقط
+
+    return lastReadValues.every((val) => val === code); // التأكد من تكرار نفس الكود في المرات الثلاث
   }
-);
 
-Quagga.onDetected(function (data) {
-  const code = data.codeResult.code;
-  if (isValidBarcode(code)) {
-    processBarcode(code);
+  // معالجة الباركود
+  let isProcessing = false; // حالة المعالجة لتجنب تكرار المعالجة
+  function processBarcode(code) {
+    if (isProcessing) return; // منع التكرار أثناء المعالجة
+    isProcessing = true;
+
+    // هنا يمكنك إضافة الكود لمعالجة الباركود مثل إرسال البيانات إلى الخادم أو غيره
+    console.log('Barcode processed:', code);
+
+    isProcessing = false; // إعادة تعيين حالة المعالجة
   }
-});
 
-// التحقق من صحة الباركود
-function isValidBarcode(code) {
-  if (!code) return false;
-
-  lastReadValues.push(code);
-  if (lastReadValues.length > 3) lastReadValues.shift();
-
-  return lastReadValues.every((val) => val === code);
-}
-
-// معالجة الباركود
-function processBarcode(code) {
-  if (isProcessing) return;
-  isProcessing = true;
-  
-  // هنا يمكنك معالجة البيانات أو إرسالها إلى الخادم
-  console.log('Barcode processed:', code);
-
-  isProcessing = false;
+} else {
+  console.error('Quagga library is not loaded.');
 }
   
       setTimeout(() => {
