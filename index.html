@@ -557,18 +557,29 @@ input[type="submit"]:disabled {
       return lastReadValues.every((val) => val === code);
     }
   
-    // معالجة الباركود
-    function processBarcode(code) {
-      if (isProcessing) return;
-      isProcessing = true;
-  
-      setTimeout(() => {
-        barcodeInput.value = code; // إدخال الباركود في الحقل
-        stopScanner();
-        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
-        isProcessing = false;
-      }, 500);
-    }
+// معالجة الباركود
+function processBarcode(code) {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  // تشغيل الصوت عند قراءة الباركود
+  playSound('mm1'); 
+
+  setTimeout(() => {
+    barcodeInput.value = code; // إدخال الباركود في الحقل
+    stopScanner();
+    form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
+    isProcessing = false;
+  }, 500);
+}
+
+// تشغيل الصوت
+function playSound(fileName) {
+  const audio = new Audio(`${fileName}.mp3`); // تأكد من أن الملف mm1.mp3 موجود في نفس مسار المشروع
+  audio.play().catch((error) => {
+    console.error('Error playing sound:', error); // معالجة أي أخطاء تحدث أثناء تشغيل الصوت
+  });
+}
   
     // إيقاف الماسح
     function stopScanner() {
