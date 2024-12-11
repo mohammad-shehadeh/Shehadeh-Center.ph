@@ -509,16 +509,25 @@ input[type="submit"]:disabled {
     let isProcessing = false;
     let scannerActive = false;
   
+    // Initialize Tesseract.js for OCR
+    const tesseractWorker = Tesseract.createWorker();
+  
+    // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
-      scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
+      scannerContainer.style.display = 'none';
     });
   
     // بدء الماسح
-    function startScanner() {
+    async function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
   
+      // إظهار واجهة الماسح
       scannerContainer.style.display = 'block';
+  
+      await tesseractWorker.load();
+      await tesseractWorker.loadLanguage('eng');
+      await tesseractWorker.initialize('eng');
   
       Quagga.init(
         {
@@ -530,8 +539,16 @@ input[type="submit"]:disabled {
               facingMode: 'environment',
               width: { ideal: 1920 },
               height: { ideal: 1080 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [{ focusMode: 'continuous' }],
+              advanced: [
+                { focusMode: 'continuous' },
+                { focusMode: 'manual' }
+              ],
+            },
+            area: {
+              top: "25%",
+              right: "25%",
+              left: "25%",
+              bottom: "25%",
             },
           },
           decoder: {
@@ -539,7 +556,7 @@ input[type="submit"]:disabled {
           },
           locate: true,
           numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 15,
+          frequency: 10,
         },
         function (err) {
           if (err) {
@@ -553,13 +570,13 @@ input[type="submit"]:disabled {
         }
       );
   
-      Quagga.onDetected(function (data) {
+      Quagga.onDetected(async function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
-          processBarcode(code);
-        } else {
-          // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
-          readBarcodeWithOCR();
+          const ocrText = await readBarcodeWithOCR();
+          if (validateBarcodeWithOCR(code, ocrText)) {
+            processBarcode(code);
+          }
         }
       });
     }
@@ -568,10 +585,31 @@ input[type="submit"]:disabled {
     function isValidBarcode(code) {
       if (!code) return false;
   
+      const validLengths = [8, 12, 13, 14];
+      if (!validLengths.includes(code.length)) {
+        return false;
+      }
+  
+      if (!/^\d+$/.test(code)) {
+        return false;
+      }
+  
       lastReadValues.push(code);
       if (lastReadValues.length > 3) lastReadValues.shift();
   
       return lastReadValues.every((val) => val === code);
+    }
+  
+    // قراءة النص باستخدام OCR
+    async function readBarcodeWithOCR() {
+      const canvas = document.querySelector('canvas');
+      const result = await tesseractWorker.recognize(canvas);
+      return result.data.text.replace(/\s/g, '');
+    }
+  
+    // التحقق من تطابق الباركود مع النص
+    function validateBarcodeWithOCR(barcode, ocrText) {
+      return barcode === ocrText || barcode.startsWith(ocrText) || ocrText.startsWith(barcode);
     }
   
     // معالجة الباركود
@@ -580,9 +618,9 @@ input[type="submit"]:disabled {
       isProcessing = true;
   
       setTimeout(() => {
-        barcodeInput.value = code; // إدخال الباركود في الحقل
+        barcodeInput.value = code;
         stopScanner();
-        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
+        form.querySelector('input[type="submit"]').click();
         isProcessing = false;
       }, 500);
     }
@@ -595,39 +633,6 @@ input[type="submit"]:disabled {
         lastReadValues = [];
         startScannerButton.disabled = false;
       }
-    }
-  
-    // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
-    function readBarcodeWithOCR() {
-      const videoElement = document.querySelector('#interactive video');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      const width = videoElement.videoWidth;
-      const height = videoElement.videoHeight;
-  
-      canvas.width = width;
-      canvas.height = height;
-  
-      // رسم الإطار الحالي للكاميرا على الـ canvas
-      context.drawImage(videoElement, 0, 0, width, height);
-  
-      // استخدام Tesseract.js لقراءة النصوص من الصورة
-      Tesseract.recognize(
-        canvas.toDataURL(),
-        'eng', // تحديد اللغة (يمكنك إضافة المزيد من اللغات هنا)
-        {
-          logger: (m) => console.log(m), // لعرض التقدم
-        }
-      ).then(({ data: { text } }) => {
-        const extractedText = text.replace(/\s+/g, '').trim();
-        if (extractedText) {
-          // إضافة الرقم المستخرج في حال وجوده
-          console.log('النص المستخرج باستخدام OCR:', extractedText);
-          if (isValidBarcode(extractedText)) {
-            processBarcode(extractedText); // إذا كان النص المستخرج هو باركود صحيح، يعالجونه
-          }
-        }
-      });
     }
   
     // البحث عن المنتج
@@ -668,7 +673,7 @@ input[type="submit"]:disabled {
           }
   
           openPopup();
-          scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح بعد البحث
+          scannerContainer.style.display = 'none';
         })
         .catch((error) => {
           alert(error.message);
@@ -689,5 +694,5 @@ input[type="submit"]:disabled {
     // إضافة مستمع لزر بدء الماسح
     startScannerButton.addEventListener('click', startScanner);
   </script>
-      </body>
+        </body>
 </html>
