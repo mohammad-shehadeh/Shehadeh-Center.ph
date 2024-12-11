@@ -458,26 +458,6 @@ input[type="submit"]:disabled {
     .footer .line {
       margin: 5px 0; /* مسافة صغيرة بين الأسطر */
     }
-
-  #scanner-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 250px; /* عرض الإطار */
-    height: 150px; /* ارتفاع الإطار */
-    border: 3px solid red; /* لون الإطار */
-    box-sizing: border-box;
-    z-index: 10;
-    pointer-events: none; /* منع التفاعل مع الإطار */
-  }
-
-  #interactive {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-
   </style>
 </head>
 <body>
@@ -512,10 +492,6 @@ input[type="submit"]:disabled {
   <button id="start-scanner">Start Scanner</button>
   <p id="status-message"></p>
 
-  <div id="interactive" class="viewport">
-    <div id="scanner-frame"></div>
-  </div>
-  
   <div class="footer">
     <div class="line">جميع الحقوق محفوظة © 2024 | All Rights Reserved</div>
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
@@ -545,82 +521,37 @@ input[type="submit"]:disabled {
       scannerContainer.style.display = 'block';
   
       Quagga.init(
-  {
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.querySelector('#interactive'),
-      constraints: {
-        facingMode: 'environment',
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        aspectRatio: { ideal: 16 / 9 },
-        advanced: [{ focusMode: 'continuous' }],
-      },
-      area: { // تحديد منطقة الاهتمام لقراءة الباركود داخل الإطار الأحمر
-        top: "30%", // تحديد نسبة المنطقة من أعلى الكاميرا
-        right: "30%", // تحديد نسبة المنطقة من يمين الكاميرا
-        left: "30%", // تحديد نسبة المنطقة من يسار الكاميرا
-        bottom: "30%", // تحديد نسبة المنطقة من أسفل الكاميرا
-      },
-    },
-    decoder: {
-      readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
-    },
-    locate: true,
-    numOfWorkers: navigator.hardwareConcurrency || 4,
-    frequency: 15,
-  },
-  function (err) {
-    if (err) {
-      console.error('Error initializing Quagga:', err);
-      statusMessage.textContent = 'خطأ في تشغيل الماسح.';
-      startScannerButton.disabled = false;
-      return;
-    }
-    Quagga.start();
-    scannerActive = true;
-
-    // إضافة الإطار الأحمر في وسط الكاميرا فقط عند بدء الكاميرا
-    const scannerFrame = document.createElement('div');
-    scannerFrame.id = 'scanner-frame';
-    scannerFrame.style.position = 'absolute';
-    scannerFrame.style.top = '35%'; // ضبط موضع الإطار في وسط الشاشة
-    scannerFrame.style.left = '35%';
-    scannerFrame.style.width = '30%'; // ضبط عرض الإطار
-    scannerFrame.style.height = '30%'; // ضبط ارتفاع الإطار
-    scannerFrame.style.border = '3px solid red'; // إطار أحمر
-    scannerFrame.style.pointerEvents = 'none'; // منع التفاعل مع الإطار
-    document.querySelector('#interactive').appendChild(scannerFrame);
-  }
-);
-
-// إضافة خاصية التحقق من أن الباركود داخل الإطار الأحمر بالكامل
-Quagga.onProcessed(function (result) {
-  const drawingCtx = Quagga.canvas.ctx.overlay;
-  const drawingCanvas = Quagga.canvas.dom.overlay;
-
-  if (result && result.boxes) {
-    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-
-    result.boxes.forEach(function (box) {
-      // التحقق إذا كان الباركود داخل الإطار الأحمر بالكامل
-      const [minX, minY] = box[0];
-      const [maxX, maxY] = box[2];
-
-      const isInsideFrame =
-        minX >= drawingCanvas.width * 0.35 && // التحقق من الجهة اليسرى
-        minY >= drawingCanvas.height * 0.35 && // التحقق من الجهة العليا
-        maxX <= drawingCanvas.width * 0.65 && // التحقق من الجهة اليمنى
-        maxY <= drawingCanvas.height * 0.65;  // التحقق من الجهة السفلى
-
-      if (isInsideFrame) {
-        console.log('Barcode is inside the frame!');
-        // يمكنك هنا إضافة معالجة إضافية
-      }
-    });
-  }
-});
+        {
+          inputStream: {
+            name: 'Live',
+            type: 'LiveStream',
+            target: document.querySelector('#interactive'),
+            constraints: {
+              facingMode: 'environment',
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              aspectRatio: { ideal: 16 / 9 },
+              advanced: [{ focusMode: 'continuous' }],
+            },
+          },
+          decoder: {
+            readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+          },
+          locate: true,
+          numOfWorkers: navigator.hardwareConcurrency || 4,
+          frequency: 15,
+        },
+        function (err) {
+          if (err) {
+            console.error('Error initializing Quagga:', err);
+            statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+            startScannerButton.disabled = false;
+            return;
+          }
+          Quagga.start();
+          scannerActive = true;
+        }
+      );
   
       Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
