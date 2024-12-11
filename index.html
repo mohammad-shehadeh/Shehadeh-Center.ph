@@ -517,65 +517,51 @@ input[type="submit"]:disabled {
 function startScanner() {
   startScannerButton.disabled = true;
   statusMessage.textContent = '';
+
   scannerContainer.style.display = 'block';
 
-  // إعداد الكاميرا
-  navigator.mediaDevices
-    .getUserMedia({
-      video: {
-        facingMode: 'environment',
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-      },
-    })
-    .then((stream) => {
-      const videoElement = document.querySelector('#interactive');
-      videoElement.srcObject = stream;
-      videoElement.play();
-
-      // إعداد زر التقاط الصورة
-      captureButton.addEventListener('click', () => {
-        captureAndDecode(videoElement, stream);
-      });
-    })
-    .catch((err) => {
-      console.error('Error accessing camera:', err);
-      statusMessage.textContent = 'خطأ في تشغيل الكاميرا.';
-      startScannerButton.disabled = false;
-    });
-}
-
-// التقاط الصورة وتحليلها
-function captureAndDecode(videoElement, stream) {
-  const canvas = document.createElement('canvas');
-  canvas.width = videoElement.videoWidth;
-  canvas.height = videoElement.videoHeight;
-
-  // رسم إطار الفيديو على الـCanvas
-  const context = canvas.getContext('2d');
-  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-  // تحويل الصورة إلى بيانات
-  const imageData = canvas.toDataURL('image/png');
-
-  // تمرير الصورة إلى Quagga لتحليلها
-  Quagga.decodeSingle(
+  Quagga.init(
     {
-      src: imageData, // الصورة التي تم التقاطها
+      inputStream: {
+        name: 'Live',
+        type: 'LiveStream',
+        target: document.querySelector('#interactive'),
+        constraints: {
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          aspectRatio: { ideal: 16 / 9 },
+          advanced: [{ focusMode: 'continuous' }],
+        },
+      },
       decoder: {
         readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
       },
+      locate: true,
+      numOfWorkers: navigator.hardwareConcurrency || 4,
+      frequency: 15,
     },
-    function (result) {
-      if (result && result.codeResult) {
-        console.log('Barcode detected:', result.codeResult.code);
-        processBarcode(result.codeResult.code);
-      } else {
-        console.log('No barcode detected. Try again.');
-        statusMessage.textContent = 'لم يتم اكتشاف أي باركود. حاول مرة أخرى.';
+    function (err) {
+      if (err) {
+        console.error('Error initializing Quagga:', err);
+        statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+        startScannerButton.disabled = false;
+        return;
       }
+      Quagga.start();
+      scannerActive = true;
     }
   );
+
+  Quagga.onDetected(function (data) {
+    const code = data.codeResult.code;
+    if (isValidBarcode(code)) {
+      captureBarcodeImage();
+    } else {
+      // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
+      readBarcodeWithOCR();
+    }
+  });
 }
 
 // التحقق من صحة الباركود
@@ -588,7 +574,38 @@ function isValidBarcode(code) {
   return lastReadValues.every((val) => val === code);
 }
 
-// معالجة الباركود
+// التقاط صورة للباركود
+function captureBarcodeImage() {
+  if (!scannerActive) return;
+
+  const videoElement = document.querySelector('video');
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  // ضبط حجم الصورة على دقة الفيديو
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL('image/png');
+
+  // عرض الصورة أو معالجتها
+  displayCapturedImage(imageData);
+  stopScanner();
+}
+
+// عرض الصورة الملتقطة
+function displayCapturedImage(imageData) {
+  const imageContainer = document.querySelector('#capturedImageContainer');
+  const img = document.createElement('img');
+  img.src = imageData;
+  img.alt = 'صورة الباركود';
+  img.style.maxWidth = '100%';
+  imageContainer.innerHTML = '';
+  imageContainer.appendChild(img);
+}
+
+// معالجة الباركود (يمكن إلغاء استخدامه الآن إذا كانت الصورة كافية)
 function processBarcode(code) {
   if (isProcessing) return;
   isProcessing = true;
@@ -601,52 +618,15 @@ function processBarcode(code) {
   }, 500);
 }
 
-// إيقاف الكاميرا
+// إيقاف الماسح
 function stopScanner() {
-  const videoElement = document.querySelector('#interactive');
-  const stream = videoElement.srcObject;
-
-  if (stream) {
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
+  if (scannerActive) {
+    Quagga.stop();
+    scannerActive = false;
+    lastReadValues = [];
+    startScannerButton.disabled = false;
   }
-
-  videoElement.srcObject = null;
-  scannerActive = false;
 }
-  
-    // التحقق من صحة الباركود
-    function isValidBarcode(code) {
-      if (!code) return false;
-  
-      lastReadValues.push(code);
-      if (lastReadValues.length > 3) lastReadValues.shift();
-  
-      return lastReadValues.every((val) => val === code);
-    }
-  
-    // معالجة الباركود
-    function processBarcode(code) {
-      if (isProcessing) return;
-      isProcessing = true;
-  
-      setTimeout(() => {
-        barcodeInput.value = code; // إدخال الباركود في الحقل
-        stopScanner();
-        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
-        isProcessing = false;
-      }, 500);
-    }
-  
-    // إيقاف الماسح
-    function stopScanner() {
-      if (scannerActive) {
-        Quagga.stop();
-        scannerActive = false;
-        lastReadValues = [];
-        startScannerButton.disabled = false;
-      }
-    }
   
     // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
     function readBarcodeWithOCR() {
