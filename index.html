@@ -510,6 +510,7 @@ input[type="submit"]:disabled {
     let lastReadValues = [];
     let isProcessing = false;
     let scannerActive = false;
+    let selectedDeviceId = null; // احتفاظ بجهاز الكاميرا المختار
     
     // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
@@ -538,12 +539,17 @@ input[type="submit"]:disabled {
               option.textContent = device.label || `Camera ${index + 1}`;
               cameraSelect.appendChild(option);
             });
-            startQuagga(videoDevices[0].deviceId);
+    
+            // استخدام الجهاز المختار أو الافتراضي
+            selectedDeviceId = selectedDeviceId || videoDevices[0].deviceId;
+            cameraSelect.value = selectedDeviceId;
+            startQuagga(selectedDeviceId);
           } else {
             alert('لم يتم العثور على كاميرا خلفية. سيتم استخدام أي كاميرا متوفرة.');
             const fallbackDevice = devices.find(device => device.kind === 'videoinput');
             if (fallbackDevice) {
-              startQuagga(fallbackDevice.deviceId);
+              selectedDeviceId = fallbackDevice.deviceId;
+              startQuagga(selectedDeviceId);
             } else {
               alert('لا توجد كاميرات متوفرة على هذا الجهاز.');
             }
@@ -552,7 +558,8 @@ input[type="submit"]:disabled {
     
       cameraSelect.addEventListener('change', () => {
         if (scannerActive) stopScanner();
-        startQuagga(cameraSelect.value);
+        selectedDeviceId = cameraSelect.value; // تحديث الجهاز المختار
+        startQuagga(selectedDeviceId);
       });
     }
     
