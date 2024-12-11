@@ -498,8 +498,7 @@ input[type="submit"]:disabled {
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js/dist/tesseract.min.js"></script>
-  
+
   <script>
     const barcodeInput = document.getElementById('barcode-input');
     const popup = document.getElementById('result-popup');
@@ -512,40 +511,17 @@ input[type="submit"]:disabled {
     let isProcessing = false;
     let scannerActive = false;
   
-    // Initialize Tesseract.js for OCR
-    const tesseractWorker = Tesseract.createWorker();
-  
-    document.addEventListener('DOMContentLoaded', async () => {
+    // إخفاء واجهة الماسح عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', () => {
       scannerContainer.style.display = 'none';
-      await tesseractWorker.load();
-      await tesseractWorker.loadLanguage('eng');
-      await tesseractWorker.initialize('eng');
     });
   
-    // طلب الإذن للكاميرا
-    async function requestCameraPermission() {
-      try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-      } catch (err) {
-        alert('يرجى السماح بالوصول إلى الكاميرا عبر إعدادات المتصفح.');
-        throw err;
-      }
-    }
-  
     // بدء الماسح
-    async function startScanner() {
+    function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
   
-      // طلب إذن الكاميرا
-      try {
-        await requestCameraPermission();
-      } catch {
-        statusMessage.textContent = 'لا يمكن الوصول إلى الكاميرا.';
-        startScannerButton.disabled = false;
-        return;
-      }
-  
+      // إظهار واجهة الماسح (scanner-container) عند بدء القراءة
       scannerContainer.style.display = 'block';
   
       Quagga.init(
@@ -555,20 +531,11 @@ input[type="submit"]:disabled {
             type: 'LiveStream',
             target: document.querySelector('#interactive'),
             constraints: {
-              facingMode: { exact: 'environment' }, // الكاميرا الخلفية فقط
+              facingMode: 'environment',
               width: { ideal: 1920 },
               height: { ideal: 1080 },
-              advanced: [
-                { focusMode: 'continuous' },
-                { focusMode: 'manual' },
-                { zoom: true }, // دعم التقريب إذا كان مدعومًا
-              ],
-            },
-            area: {
-              top: "20%", // منطقة المسح العلوية
-              right: "20%", // منطقة المسح اليمنى
-              left: "20%", // منطقة المسح اليسرى
-              bottom: "20%", // منطقة المسح السفلية
+              aspectRatio: { ideal: 16 / 9 },
+              advanced: [{ focusMode: 'continuous' }],
             },
           },
           decoder: {
@@ -577,6 +544,10 @@ input[type="submit"]:disabled {
           locate: true,
           numOfWorkers: navigator.hardwareConcurrency || 4,
           frequency: 10,
+          locator: {
+            patchSize: 'medium',
+            halfSample: false,
+          },
         },
         function (err) {
           if (err) {
@@ -590,13 +561,33 @@ input[type="submit"]:disabled {
         }
       );
   
-      Quagga.onDetected(async function (data) {
+      Quagga.onProcessed(function (result) {
+        const drawingCtx = Quagga.canvas.ctx.overlay;
+        const drawingCanvas = Quagga.canvas.dom.overlay;
+  
+        drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        if (result && result.boxes) {
+          result.boxes
+            .filter((box) => box !== result.box)
+            .forEach((box) => {
+              Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
+                color: 'blue',
+                lineWidth: 2,
+              });
+            });
+        }
+        if (result && result.box) {
+          Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, {
+            color: 'green',
+            lineWidth: 2,
+          });
+        }
+      });
+  
+      Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
-          const ocrText = await readBarcodeWithOCR();
-          if (validateBarcodeWithOCR(code, ocrText)) {
-            processBarcode(code);
-          }
+          processBarcode(code);
         }
       });
     }
@@ -605,27 +596,10 @@ input[type="submit"]:disabled {
     function isValidBarcode(code) {
       if (!code) return false;
   
-      const validLengths = [8, 12, 13, 14];
-      if (!validLengths.includes(code.length)) return false;
-  
-      if (!/^\d+$/.test(code)) return false;
-  
       lastReadValues.push(code);
       if (lastReadValues.length > 3) lastReadValues.shift();
   
       return lastReadValues.every((val) => val === code);
-    }
-  
-    // قراءة النص باستخدام OCR
-    async function readBarcodeWithOCR() {
-      const canvas = document.querySelector('canvas');
-      const result = await tesseractWorker.recognize(canvas);
-      return result.data.text.replace(/\s/g, '');
-    }
-  
-    // التحقق من تطابق النص مع الباركود
-    function validateBarcodeWithOCR(barcode, ocrText) {
-      return barcode === ocrText || barcode.startsWith(ocrText) || ocrText.startsWith(barcode);
     }
   
     // معالجة الباركود
@@ -634,9 +608,9 @@ input[type="submit"]:disabled {
       isProcessing = true;
   
       setTimeout(() => {
-        barcodeInput.value = code;
+        barcodeInput.value = code; // إدخال الباركود في الحقل
         stopScanner();
-        form.querySelector('input[type="submit"]').click();
+        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
         isProcessing = false;
       }, 500);
     }
@@ -689,7 +663,7 @@ input[type="submit"]:disabled {
           }
   
           openPopup();
-          scannerContainer.style.display = 'none';
+          scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح بعد البحث
         })
         .catch((error) => {
           alert(error.message);
