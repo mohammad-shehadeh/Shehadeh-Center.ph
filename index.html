@@ -530,12 +530,13 @@ input[type="submit"]:disabled {
             target: document.querySelector('#interactive'),
             constraints: {
               facingMode: 'environment', // استخدام الكاميرا الرئيسية فقط
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
+              width: { ideal: 1920 }, // أقصى دقة عرض
+              height: { ideal: 1080 }, // أقصى دقة ارتفاع
               aspectRatio: { ideal: 16 / 9 },
               advanced: [
-                { focusMode: 'continuous' }, 
-                { torch: true } // تفعيل الفلاش لتحسين الإضاءة
+                { focusMode: 'continuous' }, // تفعيل التركيز التلقائي المستمر
+                { torch: true }, // تفعيل الفلاش لتحسين الإضاءة
+                { brightness: 1 }, // تحسين السطوع
               ],
             },
           },
@@ -558,6 +559,7 @@ input[type="submit"]:disabled {
         }
       );
   
+      // استخدام تقنية لتقوية التركيز عند اقتراب الباركود
       Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
