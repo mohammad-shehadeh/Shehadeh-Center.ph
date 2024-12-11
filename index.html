@@ -528,18 +528,25 @@ input[type="submit"]:disabled {
     
       navigator.mediaDevices.enumerateDevices()
         .then((devices) => {
-          const videoDevices = devices.filter(device => device.kind === 'videoinput' && device.label.toLowerCase().includes('back'));
+          const videoDevices = devices.filter(device => device.kind === 'videoinput' && !device.label.toLowerCase().includes('front'));
           cameraSelect.innerHTML = '';
-          videoDevices.forEach((device, index) => {
-            const option = document.createElement('option');
-            option.value = device.deviceId;
-            option.textContent = device.label || `Camera ${index + 1}`;
-            cameraSelect.appendChild(option);
-          });
+    
           if (videoDevices.length > 0) {
+            videoDevices.forEach((device, index) => {
+              const option = document.createElement('option');
+              option.value = device.deviceId;
+              option.textContent = device.label || `Camera ${index + 1}`;
+              cameraSelect.appendChild(option);
+            });
             startQuagga(videoDevices[0].deviceId);
           } else {
-            alert('لم يتم العثور على كاميرا خلفية.');
+            alert('لم يتم العثور على كاميرا خلفية. سيتم استخدام أي كاميرا متوفرة.');
+            const fallbackDevice = devices.find(device => device.kind === 'videoinput');
+            if (fallbackDevice) {
+              startQuagga(fallbackDevice.deviceId);
+            } else {
+              alert('لا توجد كاميرات متوفرة على هذا الجهاز.');
+            }
           }
         });
     
@@ -558,7 +565,7 @@ input[type="submit"]:disabled {
             target: document.querySelector('#interactive'),
             constraints: {
               deviceId: deviceId ? { exact: deviceId } : undefined,
-              facingMode: 'environment',
+              facingMode: { ideal: 'environment' },
               width: { ideal: 1920 },
               height: { ideal: 1080 },
               aspectRatio: { ideal: 16 / 9 },
