@@ -581,11 +581,11 @@ input[type="submit"]:disabled {
     Quagga.start();
     scannerActive = true;
 
-    // إضافة الإطار الأحمر في وسط الكاميرا
+    // إضافة الإطار الأحمر في وسط الكاميرا فقط عند بدء الكاميرا
     const scannerFrame = document.createElement('div');
     scannerFrame.id = 'scanner-frame';
     scannerFrame.style.position = 'absolute';
-    scannerFrame.style.top = '35%'; // ضبط موضع الإطار (يتوسط الشاشة)
+    scannerFrame.style.top = '35%'; // ضبط موضع الإطار في وسط الشاشة
     scannerFrame.style.left = '35%';
     scannerFrame.style.width = '30%'; // ضبط عرض الإطار
     scannerFrame.style.height = '30%'; // ضبط ارتفاع الإطار
@@ -595,7 +595,7 @@ input[type="submit"]:disabled {
   }
 );
 
-// إضافة خاصية التحقق من أن الباركود داخل الإطار الأحمر
+// إضافة خاصية التحقق من أن الباركود داخل الإطار الأحمر بالكامل
 Quagga.onProcessed(function (result) {
   const drawingCtx = Quagga.canvas.ctx.overlay;
   const drawingCanvas = Quagga.canvas.dom.overlay;
@@ -604,26 +604,19 @@ Quagga.onProcessed(function (result) {
     drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
 
     result.boxes.forEach(function (box) {
-      Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
-        color: 'green',
-        lineWidth: 2,
-      });
+      // التحقق إذا كان الباركود داخل الإطار الأحمر بالكامل
+      const [minX, minY] = box[0];
+      const [maxX, maxY] = box[2];
 
-      // التحقق إذا كان الباركود داخل الإطار الأحمر
-      if (box) {
-        const [minX, minY] = box[0];
-        const [maxX, maxY] = box[2];
+      const isInsideFrame =
+        minX >= drawingCanvas.width * 0.35 && // التحقق من الجهة اليسرى
+        minY >= drawingCanvas.height * 0.35 && // التحقق من الجهة العليا
+        maxX <= drawingCanvas.width * 0.65 && // التحقق من الجهة اليمنى
+        maxY <= drawingCanvas.height * 0.65;  // التحقق من الجهة السفلى
 
-        const isInsideFrame =
-          minX >= drawingCanvas.width * 0.35 &&
-          minY >= drawingCanvas.height * 0.35 &&
-          maxX <= drawingCanvas.width * 0.65 &&
-          maxY <= drawingCanvas.height * 0.65;
-
-        if (isInsideFrame) {
-          console.log('Barcode is inside the frame!');
-          // يمكنك هنا إضافة معالجة إضافية
-        }
+      if (isInsideFrame) {
+        console.log('Barcode is inside the frame!');
+        // يمكنك هنا إضافة معالجة إضافية
       }
     });
   }
