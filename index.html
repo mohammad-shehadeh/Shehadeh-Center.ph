@@ -502,26 +502,52 @@ input[type="submit"]:disabled {
     const popup = document.getElementById('result-popup');
     const startScannerButton = document.getElementById('start-scanner');
     const statusMessage = document.getElementById('status-message');
-    const scannerContainer = document.getElementById('scanner-container'); // العنصر الذي يحتوي على الفيديو
+    const scannerContainer = document.getElementById('scanner-container');
     const form = document.getElementById('barcode-form');
-  
+    const cameraSelect = document.createElement('select');
+    scannerContainer.appendChild(cameraSelect);
+    
     let lastReadValues = [];
     let isProcessing = false;
     let scannerActive = false;
-  
+    
     // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
-      scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
+      scannerContainer.style.display = 'none';
+      cameraSelect.style.display = 'none';
     });
-  
+    
     // بدء الماسح
     function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
-  
-      // إظهار واجهة الماسح (scanner-container) عند بدء القراءة
+    
+      // إظهار واجهة الماسح والكاميرا
       scannerContainer.style.display = 'block';
-  
+      cameraSelect.style.display = 'block';
+    
+      navigator.mediaDevices.enumerateDevices()
+        .then((devices) => {
+          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+          cameraSelect.innerHTML = '';
+          videoDevices.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.textContent = device.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+          });
+          if (videoDevices.length > 0) {
+            startQuagga(videoDevices[0].deviceId);
+          }
+        });
+    
+      cameraSelect.addEventListener('change', () => {
+        if (scannerActive) stopScanner();
+        startQuagga(cameraSelect.value);
+      });
+    }
+    
+    function startQuagga(deviceId) {
       Quagga.init(
         {
           inputStream: {
@@ -529,11 +555,12 @@ input[type="submit"]:disabled {
             type: 'LiveStream',
             target: document.querySelector('#interactive'),
             constraints: {
+              deviceId: deviceId ? { exact: deviceId } : undefined,
               facingMode: 'environment',
               width: { ideal: 1920 },
               height: { ideal: 1080 },
               aspectRatio: { ideal: 16 / 9 },
-              advanced: [{ focusMode: 'continuous' }],
+              advanced: [{ focusMode: 'continuous' }, { zoom: true }],
             },
           },
           decoder: {
@@ -554,7 +581,23 @@ input[type="submit"]:disabled {
           scannerActive = true;
         }
       );
-  
+    
+      Quagga.onProcessed(function (result) {
+        const drawingCtx = Quagga.canvas.ctx.overlay;
+        const drawingCanvas = Quagga.canvas.dom.overlay;
+        if (result) {
+          drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+          if (result.boxes) {
+            result.boxes.filter(box => box !== result.box).forEach(box => {
+              Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
+                color: 'green',
+                lineWidth: 2,
+              });
+            });
+          }
+        }
+      });
+    
       Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
@@ -562,30 +605,30 @@ input[type="submit"]:disabled {
         }
       });
     }
-  
+    
     // التحقق من صحة الباركود
     function isValidBarcode(code) {
       if (!code) return false;
-  
+    
       lastReadValues.push(code);
       if (lastReadValues.length > 3) lastReadValues.shift();
-  
+    
       return lastReadValues.every((val) => val === code);
     }
-  
+    
     // معالجة الباركود
     function processBarcode(code) {
       if (isProcessing) return;
       isProcessing = true;
-  
+    
       setTimeout(() => {
-        barcodeInput.value = code; // إدخال الباركود في الحقل
+        barcodeInput.value = code;
         stopScanner();
-        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
+        form.querySelector('input[type="submit"]').click();
         isProcessing = false;
       }, 500);
     }
-  
+    
     // إيقاف الماسح
     function stopScanner() {
       if (scannerActive) {
@@ -595,7 +638,7 @@ input[type="submit"]:disabled {
         startScannerButton.disabled = false;
       }
     }
-  
+    
     // البحث عن المنتج
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -604,7 +647,7 @@ input[type="submit"]:disabled {
         alert('الرجاء إدخال الباركود.');
         return;
       }
-  
+    
       fetch('test.txt')
         .then((response) => {
           if (!response.ok) {
@@ -615,7 +658,7 @@ input[type="submit"]:disabled {
         .then((data) => {
           const lines = data.split('\n');
           let found = false;
-  
+    
           for (let line of lines) {
             const [productName, productPrice, barcode] = line.split('/');
             if (barcode && barcode.trim() === barcodeValue) {
@@ -626,34 +669,34 @@ input[type="submit"]:disabled {
               break;
             }
           }
-  
+    
           if (!found) {
             document.getElementById('product-name-result').textContent = 'المنتج غير موجود';
             document.getElementById('product-price-result').textContent = '-';
             document.getElementById('product-barcode-result').textContent = '-';
           }
-  
+    
           openPopup();
-          scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح بعد البحث
+          scannerContainer.style.display = 'none';
         })
         .catch((error) => {
           alert(error.message);
         });
     });
-  
+    
     // عرض النافذة المنبثقة
     function openPopup() {
       popup.style.display = 'block';
     }
-  
+    
     // إغلاق النافذة المنبثقة
     function closePopup() {
       popup.style.display = 'none';
       barcodeInput.focus();
     }
-  
+    
     // إضافة مستمع لزر بدء الماسح
     startScannerButton.addEventListener('click', startScanner);
-  </script>
-    </body>
+    </script>
+        </body>
 </html>
