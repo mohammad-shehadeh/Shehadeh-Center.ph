@@ -531,7 +531,7 @@ input[type="submit"]:disabled {
               width: { ideal: 1920 },
               height: { ideal: 1080 },
               aspectRatio: { ideal: 16 / 9 },
-              advanced: [{ focusMode: 'continuous' }],
+              advanced: [{ focusMode: 'continuous' }, { torch: true }], // تشغيل الفلاش لتحسين الإضاءة
             },
           },
           decoder: {
@@ -558,8 +558,7 @@ input[type="submit"]:disabled {
         if (isValidBarcode(code)) {
           processBarcode(code);
         } else {
-          // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
-          readBarcodeWithOCR();
+          console.warn('قراءة باركود غير صحيحة، إعادة المحاولة...');
         }
       });
     }
@@ -567,6 +566,10 @@ input[type="submit"]:disabled {
     // التحقق من صحة الباركود
     function isValidBarcode(code) {
       if (!code) return false;
+  
+      // التحقق من مطابقة الباركود لنمط متوقع
+      const barcodePattern = /^[0-9A-Za-z]{8,13}$/;
+      if (!barcodePattern.test(code)) return false;
   
       lastReadValues.push(code);
       if (lastReadValues.length > 3) lastReadValues.shift();
@@ -579,11 +582,15 @@ input[type="submit"]:disabled {
       if (isProcessing) return;
       isProcessing = true;
   
+      statusMessage.textContent = `جاري معالجة الباركود: ${code}`;
+  
       setTimeout(() => {
         barcodeInput.value = code; // إدخال الباركود في الحقل
         stopScanner();
         form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
         isProcessing = false;
+        lastReadValues = [];
+        statusMessage.textContent = ''; // مسح الرسالة
       }, 1000);
     }
   
@@ -594,9 +601,11 @@ input[type="submit"]:disabled {
         scannerActive = false;
         lastReadValues = [];
         startScannerButton.disabled = false;
+        statusMessage.textContent = 'تم إيقاف الماسح.';
       }
     }
-  
+  </script>
+    
     // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
     function readBarcodeWithOCR() {
       const videoElement = document.querySelector('#interactive video');
