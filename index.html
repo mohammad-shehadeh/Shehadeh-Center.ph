@@ -502,14 +502,13 @@ input[type="submit"]:disabled {
     const popup = document.getElementById('result-popup');
     const startScannerButton = document.getElementById('start-scanner');
     const statusMessage = document.getElementById('status-message');
-    const scannerContainer = document.getElementById('scanner-container'); // العنصر الذي يحتوي على الفيديو
+    const scannerContainer = document.getElementById('scanner-container');
     const form = document.getElementById('barcode-form');
   
     let lastReadValues = [];
     let isProcessing = false;
     let scannerActive = false;
   
-    // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
       scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
     });
@@ -519,7 +518,6 @@ input[type="submit"]:disabled {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
   
-      // إظهار واجهة الماسح (scanner-container) عند بدء القراءة
       scannerContainer.style.display = 'block';
   
       Quagga.init(
@@ -529,16 +527,11 @@ input[type="submit"]:disabled {
             type: 'LiveStream',
             target: document.querySelector('#interactive'),
             constraints: {
-              facingMode: 'environment', // استخدام الكاميرا الرئيسية فقط
-              width: { ideal: 1920 }, // أقصى دقة عرض
-              height: { ideal: 1080 }, // أقصى دقة ارتفاع
+              facingMode: 'environment',
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
               aspectRatio: { ideal: 16 / 9 },
-              advanced: [
-                { focusMode: 'continuous' }, // تفعيل التركيز التلقائي المستمر
-                { torch: true }, // تفعيل الفلاش لتحسين الإضاءة
-                { brightness: 1 }, // تحسين السطوع
-                { exposureMode: 'auto' }, // تحسين الإضاءة تلقائيًا
-              ],
+              advanced: [{ focusMode: 'continuous' }],
             },
           },
           decoder: {
@@ -546,7 +539,7 @@ input[type="submit"]:disabled {
           },
           locate: true,
           numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 15, // زيادة معدل التحديث
+          frequency: 15,
         },
         function (err) {
           if (err) {
@@ -560,21 +553,14 @@ input[type="submit"]:disabled {
         }
       );
   
-      // استخدام تقنية لتقوية التركيز عند اقتراب الباركود
       Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
           processBarcode(code);
+        } else {
+          // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
+          readBarcodeWithOCR();
         }
-      });
-  
-      // إضافة ميزة التركيز اليدوي عند لمس الشاشة
-      const videoElement = document.querySelector('#interactive video');
-      videoElement.addEventListener('touchstart', function (e) {
-        e.preventDefault();
-        // تنفيذ عملية التركيز التلقائي عند لمس الشاشة
-        Quagga.getState().inputStream.stop();
-        Quagga.getState().inputStream.start();
       });
     }
   
@@ -609,6 +595,39 @@ input[type="submit"]:disabled {
         lastReadValues = [];
         startScannerButton.disabled = false;
       }
+    }
+  
+    // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
+    function readBarcodeWithOCR() {
+      const videoElement = document.querySelector('#interactive video');
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      const width = videoElement.videoWidth;
+      const height = videoElement.videoHeight;
+  
+      canvas.width = width;
+      canvas.height = height;
+  
+      // رسم الإطار الحالي للكاميرا على الـ canvas
+      context.drawImage(videoElement, 0, 0, width, height);
+  
+      // استخدام Tesseract.js لقراءة النصوص من الصورة
+      Tesseract.recognize(
+        canvas.toDataURL(),
+        'eng', // تحديد اللغة (يمكنك إضافة المزيد من اللغات هنا)
+        {
+          logger: (m) => console.log(m), // لعرض التقدم
+        }
+      ).then(({ data: { text } }) => {
+        const extractedText = text.replace(/\s+/g, '').trim();
+        if (extractedText) {
+          // إضافة الرقم المستخرج في حال وجوده
+          console.log('النص المستخرج باستخدام OCR:', extractedText);
+          if (isValidBarcode(extractedText)) {
+            processBarcode(extractedText); // إذا كان النص المستخرج هو باركود صحيح، يعالجونه
+          }
+        }
+      });
     }
   
     // البحث عن المنتج
