@@ -537,6 +537,7 @@ input[type="submit"]:disabled {
                 { focusMode: 'continuous' }, // تفعيل التركيز التلقائي المستمر
                 { torch: true }, // تفعيل الفلاش لتحسين الإضاءة
                 { brightness: 1 }, // تحسين السطوع
+                { exposureMode: 'auto' }, // تحسين الإضاءة تلقائيًا
               ],
             },
           },
@@ -565,6 +566,15 @@ input[type="submit"]:disabled {
         if (isValidBarcode(code)) {
           processBarcode(code);
         }
+      });
+  
+      // إضافة ميزة التركيز اليدوي عند لمس الشاشة
+      const videoElement = document.querySelector('#interactive video');
+      videoElement.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        // تنفيذ عملية التركيز التلقائي عند لمس الشاشة
+        Quagga.getState().inputStream.stop();
+        Quagga.getState().inputStream.start();
       });
     }
   
