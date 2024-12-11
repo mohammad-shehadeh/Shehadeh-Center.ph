@@ -552,30 +552,10 @@ function startScanner() {
       scannerActive = true;
     }
   );
-
-  Quagga.onDetected(function (data) {
-    const code = data.codeResult.code;
-    if (isValidBarcode(code)) {
-      captureBarcodeImage();
-    } else {
-      // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
-      readBarcodeWithOCR();
-    }
-  });
 }
 
-// التحقق من صحة الباركود
-function isValidBarcode(code) {
-  if (!code) return false;
-
-  lastReadValues.push(code);
-  if (lastReadValues.length > 3) lastReadValues.shift();
-
-  return lastReadValues.every((val) => val === code);
-}
-
-// التقاط صورة للباركود
-function captureBarcodeImage() {
+// وظيفة التقاط الصورة وتحليل الباركود
+function captureAndProcessImage() {
   if (!scannerActive) return;
 
   const videoElement = document.querySelector('video');
@@ -589,33 +569,29 @@ function captureBarcodeImage() {
 
   const imageData = canvas.toDataURL('image/png');
 
-  // عرض الصورة أو معالجتها
-  displayCapturedImage(imageData);
-  stopScanner();
+  // تمرير الصورة لتحليل الباركود
+  Quagga.decodeSingle(
+    {
+      src: imageData,
+      numOfWorkers: 0, // يعمل في المتصفح الرئيسي بدون عمال خلفية
+      decoder: {
+        readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+      },
+    },
+    function (result) {
+      if (result && result.codeResult) {
+        displayBarcodeResult(result.codeResult.code);
+      } else {
+        statusMessage.textContent = 'تعذر قراءة الباركود من الصورة.';
+      }
+    }
+  );
 }
 
-// عرض الصورة الملتقطة
-function displayCapturedImage(imageData) {
-  const imageContainer = document.querySelector('#capturedImageContainer');
-  const img = document.createElement('img');
-  img.src = imageData;
-  img.alt = 'صورة الباركود';
-  img.style.maxWidth = '100%';
-  imageContainer.innerHTML = '';
-  imageContainer.appendChild(img);
-}
-
-// معالجة الباركود (يمكن إلغاء استخدامه الآن إذا كانت الصورة كافية)
-function processBarcode(code) {
-  if (isProcessing) return;
-  isProcessing = true;
-
-  setTimeout(() => {
-    barcodeInput.value = code; // إدخال الباركود في الحقل
-    stopScanner();
-    form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
-    isProcessing = false;
-  }, 500);
+// عرض نتيجة الباركود
+function displayBarcodeResult(code) {
+  statusMessage.textContent = `تم قراءة الباركود: ${code}`;
+  barcodeInput.value = code;
 }
 
 // إيقاف الماسح
@@ -627,6 +603,12 @@ function stopScanner() {
     startScannerButton.disabled = false;
   }
 }
+
+// إضافة زر التقاط الصورة
+const captureButton = document.createElement('button');
+captureButton.textContent = 'التقاط صورة وتحليل الباركود';
+captureButton.onclick = captureAndProcessImage;
+document.querySelector('#scannerControls').appendChild(captureButton);
   
     // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
     function readBarcodeWithOCR() {
