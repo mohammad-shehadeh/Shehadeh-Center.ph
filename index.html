@@ -497,6 +497,9 @@ input[type="submit"]:disabled {
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js/dist/tesseract.min.js"></script>
+  
   <script>
     const barcodeInput = document.getElementById('barcode-input');
     const popup = document.getElementById('result-popup');
@@ -512,22 +515,38 @@ input[type="submit"]:disabled {
     // Initialize Tesseract.js for OCR
     const tesseractWorker = Tesseract.createWorker();
   
-    // إخفاء واجهة الماسح عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       scannerContainer.style.display = 'none';
+      await tesseractWorker.load();
+      await tesseractWorker.loadLanguage('eng');
+      await tesseractWorker.initialize('eng');
     });
+  
+    // طلب الإذن للكاميرا
+    async function requestCameraPermission() {
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+      } catch (err) {
+        alert('يرجى السماح بالوصول إلى الكاميرا عبر إعدادات المتصفح.');
+        throw err;
+      }
+    }
   
     // بدء الماسح
     async function startScanner() {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
   
-      // إظهار واجهة الماسح
-      scannerContainer.style.display = 'block';
+      // طلب إذن الكاميرا
+      try {
+        await requestCameraPermission();
+      } catch {
+        statusMessage.textContent = 'لا يمكن الوصول إلى الكاميرا.';
+        startScannerButton.disabled = false;
+        return;
+      }
   
-      await tesseractWorker.load();
-      await tesseractWorker.loadLanguage('eng');
-      await tesseractWorker.initialize('eng');
+      scannerContainer.style.display = 'block';
   
       Quagga.init(
         {
@@ -536,19 +555,20 @@ input[type="submit"]:disabled {
             type: 'LiveStream',
             target: document.querySelector('#interactive'),
             constraints: {
-              facingMode: 'environment',
+              facingMode: { exact: 'environment' }, // الكاميرا الخلفية فقط
               width: { ideal: 1920 },
               height: { ideal: 1080 },
               advanced: [
                 { focusMode: 'continuous' },
-                { focusMode: 'manual' }
+                { focusMode: 'manual' },
+                { zoom: true }, // دعم التقريب إذا كان مدعومًا
               ],
             },
             area: {
-              top: "25%",
-              right: "25%",
-              left: "25%",
-              bottom: "25%",
+              top: "20%", // منطقة المسح العلوية
+              right: "20%", // منطقة المسح اليمنى
+              left: "20%", // منطقة المسح اليسرى
+              bottom: "20%", // منطقة المسح السفلية
             },
           },
           decoder: {
@@ -586,13 +606,9 @@ input[type="submit"]:disabled {
       if (!code) return false;
   
       const validLengths = [8, 12, 13, 14];
-      if (!validLengths.includes(code.length)) {
-        return false;
-      }
+      if (!validLengths.includes(code.length)) return false;
   
-      if (!/^\d+$/.test(code)) {
-        return false;
-      }
+      if (!/^\d+$/.test(code)) return false;
   
       lastReadValues.push(code);
       if (lastReadValues.length > 3) lastReadValues.shift();
@@ -607,7 +623,7 @@ input[type="submit"]:disabled {
       return result.data.text.replace(/\s/g, '');
     }
   
-    // التحقق من تطابق الباركود مع النص
+    // التحقق من تطابق النص مع الباركود
     function validateBarcodeWithOCR(barcode, ocrText) {
       return barcode === ocrText || barcode.startsWith(ocrText) || ocrText.startsWith(barcode);
     }
