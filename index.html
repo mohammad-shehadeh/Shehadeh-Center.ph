@@ -446,6 +446,18 @@ input[type="submit"]:disabled {
     text-align: center; /* توسيط النص داخل الزر */
   }
 }
+.footer {
+      background-color: #00f7ea15; /* خلفية سوداء */
+      color: #fff; /* النص باللون الأبيض */
+      text-align: center; /* توسيط النص */
+      padding: 20px; /* مسافة داخلية من الأعلى والأسفل */
+      font-family: Arial, sans-serif; /* خط النص */
+      font-size: 14px; /* حجم النص */
+      line-height: 1.5; /* تباعد بين الأسطر */
+    }
+    .footer .line {
+      margin: 5px 0; /* مسافة صغيرة بين الأسطر */
+    }
   </style>
 </head>
 <body>
@@ -458,7 +470,7 @@ input[type="submit"]:disabled {
     <h1>بحث المنتجات باستخدام الباركود</h1>
 
     <form id="barcode-form">
-      <input type="text" id="barcode-input" placeholder="أدخل الباركود" required>
+      <input type="text" id="barcode-input" placeholder=" Start Scanner أدخل الباركود يدويا أو استخدم " required>
       <input type="submit" value="بحث">
     </form>
   </div>
@@ -480,6 +492,10 @@ input[type="submit"]:disabled {
   <button id="start-scanner">Start Scanner</button>
   <p id="status-message"></p>
 
+  <div class="footer">
+    <div class="line">جميع الحقوق محفوظة © 2024 | All Rights Reserved</div>
+    <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script>
     const barcodeInput = document.getElementById('barcode-input');
