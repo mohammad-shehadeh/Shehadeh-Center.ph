@@ -497,8 +497,6 @@ input[type="submit"]:disabled {
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-
   <script>
     const barcodeInput = document.getElementById('barcode-input');
     const popup = document.getElementById('result-popup');
@@ -511,9 +509,8 @@ input[type="submit"]:disabled {
     let isProcessing = false;
     let scannerActive = false;
   
-    // إخفاء واجهة الماسح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', () => {
-      scannerContainer.style.display = 'none';
+      scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
     });
   
     // بدء الماسح
@@ -521,7 +518,6 @@ input[type="submit"]:disabled {
       startScannerButton.disabled = true;
       statusMessage.textContent = '';
   
-      // إظهار واجهة الماسح (scanner-container) عند بدء القراءة
       scannerContainer.style.display = 'block';
   
       Quagga.init(
@@ -543,11 +539,7 @@ input[type="submit"]:disabled {
           },
           locate: true,
           numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 10,
-          locator: {
-            patchSize: 'medium',
-            halfSample: false,
-          },
+          frequency: 15,
         },
         function (err) {
           if (err) {
@@ -561,33 +553,13 @@ input[type="submit"]:disabled {
         }
       );
   
-      Quagga.onProcessed(function (result) {
-        const drawingCtx = Quagga.canvas.ctx.overlay;
-        const drawingCanvas = Quagga.canvas.dom.overlay;
-  
-        drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-        if (result && result.boxes) {
-          result.boxes
-            .filter((box) => box !== result.box)
-            .forEach((box) => {
-              Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
-                color: 'blue',
-                lineWidth: 2,
-              });
-            });
-        }
-        if (result && result.box) {
-          Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, {
-            color: 'green',
-            lineWidth: 2,
-          });
-        }
-      });
-  
       Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
           processBarcode(code);
+        } else {
+          // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
+          readBarcodeWithOCR();
         }
       });
     }
@@ -623,6 +595,39 @@ input[type="submit"]:disabled {
         lastReadValues = [];
         startScannerButton.disabled = false;
       }
+    }
+  
+    // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
+    function readBarcodeWithOCR() {
+      const videoElement = document.querySelector('#interactive video');
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      const width = videoElement.videoWidth;
+      const height = videoElement.videoHeight;
+  
+      canvas.width = width;
+      canvas.height = height;
+  
+      // رسم الإطار الحالي للكاميرا على الـ canvas
+      context.drawImage(videoElement, 0, 0, width, height);
+  
+      // استخدام Tesseract.js لقراءة النصوص من الصورة
+      Tesseract.recognize(
+        canvas.toDataURL(),
+        'eng', // تحديد اللغة (يمكنك إضافة المزيد من اللغات هنا)
+        {
+          logger: (m) => console.log(m), // لعرض التقدم
+        }
+      ).then(({ data: { text } }) => {
+        const extractedText = text.replace(/\s+/g, '').trim();
+        if (extractedText) {
+          // إضافة الرقم المستخرج في حال وجوده
+          console.log('النص المستخرج باستخدام OCR:', extractedText);
+          if (isValidBarcode(extractedText)) {
+            processBarcode(extractedText); // إذا كان النص المستخرج هو باركود صحيح، يعالجونه
+          }
+        }
+      });
     }
   
     // البحث عن المنتج
@@ -684,5 +689,5 @@ input[type="submit"]:disabled {
     // إضافة مستمع لزر بدء الماسح
     startScannerButton.addEventListener('click', startScanner);
   </script>
-        </body>
+      </body>
 </html>
