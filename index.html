@@ -528,7 +528,7 @@ input[type="submit"]:disabled {
     
       navigator.mediaDevices.enumerateDevices()
         .then((devices) => {
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+          const videoDevices = devices.filter(device => device.kind === 'videoinput' && device.label.toLowerCase().includes('back'));
           cameraSelect.innerHTML = '';
           videoDevices.forEach((device, index) => {
             const option = document.createElement('option');
@@ -538,6 +538,8 @@ input[type="submit"]:disabled {
           });
           if (videoDevices.length > 0) {
             startQuagga(videoDevices[0].deviceId);
+          } else {
+            alert('لم يتم العثور على كاميرا خلفية.');
           }
         });
     
