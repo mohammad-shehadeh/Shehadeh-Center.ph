@@ -513,181 +513,213 @@ input[type="submit"]:disabled {
       scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح عند تحميل الصفحة
     });
   
-    // بدء الماسح
-    function startScanner() {
-      startScannerButton.disabled = true;
-      statusMessage.textContent = '';
-  
-      scannerContainer.style.display = 'block';
-  
-      Quagga.init(
+// بدء الماسح
+function startScanner() {
+    startScannerButton.disabled = true;
+    statusMessage.textContent = '';
+
+    scannerContainer.style.display = 'block';
+
+    Quagga.init(
         {
-          inputStream: {
-            name: 'Live',
-            type: 'LiveStream',
-            target: document.querySelector('#interactive'),
-            constraints: {
-              facingMode: 'environment',
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [{ focusMode: 'continuous' }],
+            inputStream: {
+                name: 'Live',
+                type: 'LiveStream',
+                target: document.querySelector('#interactive'),
+                constraints: {
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    aspectRatio: { ideal: 16 / 9 },
+                    advanced: [
+                        { focusMode: 'continuous' },
+                        { torch: true }, // تمكين الفلاش إذا كان مدعومًا
+                    ],
+                },
             },
-          },
-          decoder: {
-            readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
-          },
-          locate: true,
-          numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 15,
+            locator: {
+                patchSize: 'medium', // تقليل حجم الرقع لتحسين الأداء
+                halfSample: true, // تحسين الأداء باستخدام نصف الدقة
+            },
+            decoder: {
+                readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+                multiple: false, // تعطيل قراءة متعددة لتقليل الالتباس
+            },
+            locate: true,
+            numOfWorkers: navigator.hardwareConcurrency || 4, // ضبط عدد العمال بناءً على الجهاز
+            frequency: 10, // تقليل التردد لتحسين الأداء
         },
         function (err) {
-          if (err) {
-            console.error('Error initializing Quagga:', err);
-            statusMessage.textContent = 'خطأ في تشغيل الماسح.';
-            startScannerButton.disabled = false;
-            return;
-          }
-          Quagga.start();
-          scannerActive = true;
+            if (err) {
+                console.error('Error initializing Quagga:', err);
+                statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+                startScannerButton.disabled = false;
+                return;
+            }
+            Quagga.start();
+            scannerActive = true;
         }
-      );
-  
-      Quagga.onDetected(function (data) {
+    );
+
+    Quagga.onDetected(function (data) {
         const code = data.codeResult.code;
         if (isValidBarcode(code)) {
-          processBarcode(code);
+            processBarcode(code);
         } else {
-          // إذا لم يتم التحقق من الباركود، فحاول استخدام تقنية OCR لقراءة الرقم أسفل الباركود
-          readBarcodeWithOCR();
+            console.warn('Invalid barcode detected, attempting OCR.');
+            readBarcodeWithOCR();
         }
-      });
+    });
+}
+
+// التحقق من صحة الباركود
+function isValidBarcode(code) {
+    if (!code) return false;
+
+    // استخدام خوارزمية checksum إذا كان الباركود يحتوي على معيار يدعم ذلك
+    if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
+
+    lastReadValues.push(code);
+    if (lastReadValues.length > 3) lastReadValues.shift();
+
+    return lastReadValues.every((val) => val === code);
+}
+
+function isValidEAN13Checksum(code) {
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+        sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
     }
-  
-    // التحقق من صحة الباركود
-    function isValidBarcode(code) {
-      if (!code) return false;
-  
-      lastReadValues.push(code);
-      if (lastReadValues.length > 3) lastReadValues.shift();
-  
-      return lastReadValues.every((val) => val === code);
-    }
-  
-    // معالجة الباركود
-    function processBarcode(code) {
-      if (isProcessing) return;
-      isProcessing = true;
-  
-      setTimeout(() => {
+    const checksum = (10 - (sum % 10)) % 10;
+    return checksum === parseInt(code[12]);
+}
+
+// معالجة الباركود
+function processBarcode(code) {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    // تأكيد أن الحقل فارغ أو يحتوي على قيمة مختلفة قبل التحديث
+    if (barcodeInput.value !== code) {
         barcodeInput.value = code; // إدخال الباركود في الحقل
-        stopScanner();
-        form.querySelector('input[type="submit"]').click(); // تنفيذ الضغط على زر البحث تلقائيًا
-        isProcessing = false;
-      }, 500);
     }
-  
-    // إيقاف الماسح
-    function stopScanner() {
-      if (scannerActive) {
+
+    // عرض رسالة حالة للمستخدم
+    statusMessage.textContent = `باركود مكتشف: ${code}`;
+
+    // تنفيذ الضغط على زر البحث تلقائيًا بعد تأخير قصير لتجنب التكرار
+    setTimeout(() => {
+        stopScanner(); // إيقاف الماسح
+        if (form.querySelector('input[type="submit"]')) {
+            form.querySelector('input[type="submit"]').click();
+        } else {
+            console.error('زر الإرسال غير موجود في النموذج.');
+        }
+        statusMessage.textContent = ''; // إعادة تعيين رسالة الحالة
+        isProcessing = false;
+    }, 300);
+}
+
+// إيقاف الماسح
+function stopScanner() {
+    if (scannerActive) {
         Quagga.stop();
         scannerActive = false;
         lastReadValues = [];
         startScannerButton.disabled = false;
-      }
     }
-  
-    // قراءة النصوص أسفل الباركود باستخدام Tesseract.js
-    function readBarcodeWithOCR() {
-      const videoElement = document.querySelector('#interactive video');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      const width = videoElement.videoWidth;
-      const height = videoElement.videoHeight;
-  
-      canvas.width = width;
-      canvas.height = height;
-  
-      // رسم الإطار الحالي للكاميرا على الـ canvas
-      context.drawImage(videoElement, 0, 0, width, height);
-  
-      // استخدام Tesseract.js لقراءة النصوص من الصورة
-      Tesseract.recognize(
+}
+
+// قراءة النصوص أسفل الباركود باستخدام Tesseract.js
+function readBarcodeWithOCR() {
+    const videoElement = document.querySelector('#interactive video');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const width = videoElement.videoWidth;
+    const height = videoElement.videoHeight;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // رسم الإطار الحالي للكاميرا على الـ canvas
+    context.drawImage(videoElement, 0, 0, width, height);
+
+    // استخدام Tesseract.js لقراءة النصوص من الصورة
+    Tesseract.recognize(
         canvas.toDataURL(),
         'eng', // تحديد اللغة (يمكنك إضافة المزيد من اللغات هنا)
         {
-          logger: (m) => console.log(m), // لعرض التقدم
+            logger: (m) => console.log(m), // لعرض التقدم
         }
-      ).then(({ data: { text } }) => {
+    ).then(({ data: { text } }) => {
         const extractedText = text.replace(/\s+/g, '').trim();
         if (extractedText) {
-          // إضافة الرقم المستخرج في حال وجوده
-          console.log('النص المستخرج باستخدام OCR:', extractedText);
-          if (isValidBarcode(extractedText)) {
-            processBarcode(extractedText); // إذا كان النص المستخرج هو باركود صحيح، يعالجونه
-          }
+            // إضافة الرقم المستخرج في حال وجوده
+            console.log('النص المستخرج باستخدام OCR:', extractedText);
+            if (isValidBarcode(extractedText)) {
+                processBarcode(extractedText); // إذا كان النص المستخرج هو باركود صحيح، يعالجونه
+            }
         }
-      });
-    }
-  
-    // البحث عن المنتج
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const barcodeValue = barcodeInput.value.trim();
-      if (!barcodeValue) {
+    });
+}
+
+// البحث عن المنتج
+form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const barcodeValue = barcodeInput.value.trim();
+    if (!barcodeValue) {
         alert('الرجاء إدخال الباركود.');
         return;
-      }
-  
-      fetch('test.txt')
+    }
+
+    fetch('test.txt')
         .then((response) => {
-          if (!response.ok) {
-            throw new Error('فشل تحميل ملف البيانات.');
-          }
-          return response.text();
+            if (!response.ok) {
+                throw new Error('فشل تحميل ملف البيانات.');
+            }
+            return response.text();
         })
         .then((data) => {
-          const lines = data.split('\n');
-          let found = false;
-  
-          for (let line of lines) {
-            const [productName, productPrice, barcode] = line.split('/');
-            if (barcode && barcode.trim() === barcodeValue) {
-              document.getElementById('product-name-result').textContent = productName;
-              document.getElementById('product-price-result').textContent = productPrice;
-              document.getElementById('product-barcode-result').textContent = barcode;
-              found = true;
-              break;
+            const lines = data.split('\n');
+            let found = false;
+
+            for (let line of lines) {
+                const [productName, productPrice, barcode] = line.split('/');
+                if (barcode && barcode.trim() === barcodeValue) {
+                    document.getElementById('product-name-result').textContent = productName;
+                    document.getElementById('product-price-result').textContent = productPrice;
+                    document.getElementById('product-barcode-result').textContent = barcode;
+                    found = true;
+                    break;
+                }
             }
-          }
-  
-          if (!found) {
-            document.getElementById('product-name-result').textContent = 'المنتج غير موجود';
-            document.getElementById('product-price-result').textContent = '-';
-            document.getElementById('product-barcode-result').textContent = '-';
-          }
-  
-          openPopup();
-          scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح بعد البحث
+
+            if (!found) {
+                document.getElementById('product-name-result').textContent = 'المنتج غير موجود';
+                document.getElementById('product-price-result').textContent = '-';
+                document.getElementById('product-barcode-result').textContent = '-';
+            }
+
+            openPopup();
+            scannerContainer.style.display = 'none'; // إخفاء واجهة الماسح بعد البحث
         })
         .catch((error) => {
-          alert(error.message);
+            alert(error.message);
         });
-    });
-  
-    // عرض النافذة المنبثقة
-    function openPopup() {
-      popup.style.display = 'block';
-    }
-  
-    // إغلاق النافذة المنبثقة
-    function closePopup() {
-      popup.style.display = 'none';
-      barcodeInput.focus();
-    }
-  
-    // إضافة مستمع لزر بدء الماسح
-    startScannerButton.addEventListener('click', startScanner);
-  </script>
+});
+
+// عرض النافذة المنبثقة
+function openPopup() {
+    popup.style.display = 'block';
+}
+
+// إغلاق النافذة المنبثقة
+function closePopup() {
+    popup.style.display = 'none';
+    barcodeInput.focus();
+}
+
+// إضافة مستمع لزر بدء الماسح
+startScannerButton.addEventListener('click', startScanner);  </script>
       </body>
 </html>
