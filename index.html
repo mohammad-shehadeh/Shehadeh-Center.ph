@@ -212,19 +212,82 @@ input[type="text"]:focus {
 
 button {
   margin-top: 20px;
-  padding: 12px 30px;
+  padding: 14px 40px;
   font-size: 18px;
-  color: rgb(0, 0, 0);
-  background-color: #ffae00;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    0 0 5px #fff, 
+    0 0 10px #ffae00, 
+    0 0 20px #ff5700, 
+    0 0 30px #0056b3, 
+    0 0 40px #0056b3, 
+    0 0 50px #ff5700, 
+    0 0 60px #ffae00;
+  background: linear-gradient(90deg, #ffae00, #ff5700, #ffae00, #ffae00);
+  background-size: 300% 300%;
   border: none;
-  border-radius: 10px;
+  border-radius: 15px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 5px 15px rgba(255, 87, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: rotateColors 3s linear infinite, glowing 2s infinite ease-in-out;
+}
+
+@keyframes rotateColors {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.4), 0 0 30px rgba(255, 87, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 87, 0, 0.7), 0 0 40px rgba(255, 87, 0, 0.6), 0 0 60px rgba(255, 87, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.4), 0 0 30px rgba(255, 87, 0, 0.3);
+  }
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+button:hover::before {
+  transform: translate(-50%, -50%) scale(1);
 }
 
 button:hover {
-  background-color: #0056b3;
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 87, 0, 0.5), 0 0 40px rgba(255, 87, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+button:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 3px 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.6), inset 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
 button:disabled {
@@ -325,8 +388,8 @@ input[type="submit"]:disabled {
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, #ffffff, #f3f3f3);
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1), -5px -5px 15px rgba(255, 255, 255, 0.9);
 }
 
 /* Heading Styles */
@@ -338,42 +401,45 @@ input[type="submit"]:disabled {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Detail Box */
 .detail-box {
   font-size: 1.1rem;
-  color: #666;
+  color: #444;
   margin-bottom: 15px;
   text-align: center;
+  line-height: 1.6;
 }
 
 /* Price Frame */
 .price-frame {
   border: 3px solid #2196F3;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 15px;
-  background: linear-gradient(145deg, #2196F3, #0d47a1);
-  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+  background: linear-gradient(145deg, #2196F3, #1e88e5);
+  box-shadow: 0 8px 15px rgba(33, 150, 243, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.3);
   text-align: center;
   margin-top: 15px;
 }
 
 .price-frame .price {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: bold;
   color: #fff;
-  text-shadow: 0 0 10px rgba(33, 150, 243, 0.8);
+  text-shadow: 0 0 15px rgba(33, 150, 243, 0.8), 0 0 20px rgba(0, 100, 255, 0.5);
 }
 
 /* Barcode Frame */
 .barcode-frame {
   border: 2px solid #4CAF50;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 15px;
-  background-color: #e8f5e9;
+  background: linear-gradient(145deg, #e8f5e9, #c8e6c9);
+  box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.5);
   margin-top: 20px;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+  text-align: center;
 }
 
 .barcode-frame img {
@@ -381,11 +447,12 @@ input[type="submit"]:disabled {
   max-width: 250px;
   display: block;
   margin: 0 auto;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
 }
 
 /* Close Button */
 .close-btn {
-  background: #FF5722;
+  background: linear-gradient(145deg, #FF5722, #E64A19);
   color: white;
   border: none;
   border-radius: 12px;
@@ -393,16 +460,18 @@ input[type="submit"]:disabled {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 5px rgba(255, 255, 255, 0.3);
   margin-top: 20px;
   display: block;
   width: 100%;
+  text-transform: uppercase;
 }
 
 .close-btn:hover {
-  background: #e64a19;
+  background: linear-gradient(145deg, #E64A19, #FF5722);
   transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(255, 87, 34, 0.4);
 }
 
 .close-btn:active {
@@ -489,7 +558,7 @@ input[type="submit"]:disabled {
     <button class="close-btn" onclick="closePopup()">إغلاق</button>
   </div>
 
-  <button id="start-scanner">Start Scanner</button>
+  <button id="start-scanner">✨AI Scanner</button>
   <p id="status-message"></p>
 
   <div class="footer">
