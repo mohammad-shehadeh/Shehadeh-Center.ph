@@ -11,14 +11,14 @@
   <title>Shehadeh AI</title>
 
   <!-- إضافة أيقونة للموقع تظهر عند إضافته للشاشة الرئيسية -->
-  <link rel="icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg" type="image/gif">
-  <link rel="apple-touch-icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg">
+  <link rel="icon" href="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" type="image/gif">
+  <link rel="apple-touch-icon" href="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif">
 
   <!-- إضافة ملف manifest -->
   <link rel="manifest" href="/manifest.json">
 </head>
 <body>
-  <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" style="display:block; margin-left:auto; margin-right:auto; max-width:60%; height:auto;"> <style>@media (max-width: 768px) {.logo {max-width: 100%;}}</style>
+  <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" style="display:block; margin-left:auto; margin-right:auto; max-width:10%; height:auto;"> <style>@media (max-width: 768px) {.logo {max-width: 100%;}}</style>
 </body>
 </html>
   <style>
@@ -551,6 +551,7 @@ input[type="submit"]:disabled {
   <div id="scanner-container">
     <div id="interactive" class="viewport"></div>
   </div>
+  <button id="install-button" style="display: none;">Add to Home Screen</button>
 
   <div class="container">
     <h1>بحث المنتجات باستخدام الباركود</h1>
@@ -815,6 +816,34 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker registration failed:', error);
       });
     }
+
+    let deferredPrompt;
+
+// الاستماع لحدث 'beforeinstallprompt' عندما يتوفر إمكانية إضافة الموقع
+window.addEventListener('beforeinstallprompt', (event) => {
+  // منع ظهور نافذة التثبيت التلقائي
+  event.preventDefault();
+  deferredPrompt = event;
+
+  // عرض الزر للمستخدم ليقوم بإضافة الموقع إلى الشاشة الرئيسية
+  const installButton = document.getElementById('install-button');
+  installButton.style.display = 'block'; // عرض الزر
+});
+
+// عند النقر على الزر، يتم عرض نافذة إضافة الموقع إلى الشاشة الرئيسية
+document.getElementById('install-button').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt(); // عرض نافذة التثبيت
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('تم إضافة التطبيق إلى الشاشة الرئيسية');
+      } else {
+        console.log('رفض المستخدم إضافة التطبيق');
+      }
+      deferredPrompt = null;
+    });
+  }
+});
 </script>
       </body>
 </html>
