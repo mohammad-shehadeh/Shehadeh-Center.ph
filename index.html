@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000"> <!-- تغيير لون شريط الحالة -->
+  <meta name="description" content="وصف الموقع هنا"> <!-- وصف الموقع -->
+  <meta name="mobile-web-app-capable" content="yes"> <!-- لتمكين المظهر كـ تطبيق -->
+  <meta name="apple-mobile-web-app-capable" content="yes"> <!-- لتمكين المظهر على أجهزة iOS -->
+  
   <title>Shehadeh AI</title>
 
   <!-- إضافة أيقونة للموقع تظهر عند إضافته للشاشة الرئيسية -->
-  <link rel="icon" href="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" type="image/gif">
-  <link rel="apple-touch-icon" href="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif">
+  <link rel="icon" href="https://swisscognitive.ch/wp-content/uploads/2020/09/the-4-top-artificial-intelligence-trends-for-2021.jpeg" type="image/gif">
+  <link rel="apple-touch-icon" href="https://swisscognitive.ch/wp-content/uploads/2020/09/the-4-top-artificial-intelligence-trends-for-2021.jpeg">
 
-  <!-- Manifest file for PWA setup -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Splash Screen Image for PWA -->
-  <meta name="theme-color" content="#ffffff">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-  <!-- Specify splash screen image for different screen sizes -->
-  <link rel="apple-touch-startup-image" href="https://news.cgtn.com/news/2024-09-11/Saudi-Arabia-hosts-Global-AI-Summit-to-boost-innovation-growth-1wNIZstUedi/img/3c3208b79ef54577889139c4c2fe1e1a/3c3208b79ef54577889139c4c2fe1e1a.gif" media="(device-width: 375px) and (device-height: 667px)">
-
+  <!-- إضافة ملف manifest -->
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
   <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" style="display:block; margin-left:auto; margin-right:auto; max-width:50%; height:auto;"> <style>@media (max-width: 768px) {.logo {max-width: 50%;}}</style>
@@ -811,27 +808,13 @@ function closePopup() {
 // إضافة مستمع لزر بدء الماسح
 startScannerButton.addEventListener('click', startScanner); 
 
-window.addEventListener('load', function () {
-      // Show splash screen for 3 seconds when the app is launched
-      const splashScreen = document.createElement('div');
-      splashScreen.style.position = 'fixed';
-      splashScreen.style.top = '0';
-      splashScreen.style.left = '0';
-      splashScreen.style.width = '100%';
-      splashScreen.style.height = '100%';
-      splashScreen.style.background = 'url(https://news.cgtn.com/news/2024-09-11/Saudi-Arabia-hosts-Global-AI-Summit-to-boost-innovation-growth-1wNIZstUedi/img/3c3208b79ef54577889139c4c2fe1e1a/3c3208b79ef54577889139c4c2fe1e1a.gif) center center no-repeat';
-      splashScreen.style.backgroundSize = 'contain';
-      splashScreen.style.zIndex = '9999';
-      splashScreen.style.display = 'flex';
-      splashScreen.style.justifyContent = 'center';
-      splashScreen.style.alignItems = 'center';
-
-      document.body.appendChild(splashScreen);
-
-      setTimeout(function () {
-        splashScreen.remove();
-      }, 3000); // Remove splash screen after 3 seconds
-    });
- </script>
+if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch(function(error) {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
+</script>
       </body>
 </html>
