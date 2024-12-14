@@ -103,9 +103,23 @@ button:hover {
 
 /* تحسين التباين */
 .container {
-  padding: 20px;
+  padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
+  background: url('https://cdn.dribbble.com/users/1585453/screenshots/7254661/media/34d38558c8177f52debd9d1f83295001.gif') center/cover no-repeat; /* الصورة كخلفية */
+  border-radius: 20px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2); /* ظل الحاوية */
+  animation: float 3s infinite ease-in-out;
+}
+
+/* تأثير طفو خفيف */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* تحسين التوافق مع الأجهزة المحمولة */
@@ -116,23 +130,23 @@ button:hover {
   }
 
   h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   p {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   button {
-    font-size: 16px;
-    padding: 8px 16px;
+    font-size: 14px;
+    padding: 8px 12px;
   }
 }
 
 h1 {
-  color: #020000;  /* Gold color for the heading */
+  color: #fff; /* نص أبيض لتباين أفضل مع الخلفية */
   font-size: 2.8rem;
-  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.6);
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8); /* ظلال لتحسين وضوح النص */
   margin-top: 30px;
   animation: fadeIn 2s ease-in-out;
 }
@@ -147,16 +161,10 @@ h1 {
   }
 }
 
-/* Container Styling */
-.container {
-  max-width: 800px;
-  width: 90%;
-  margin: 30px auto;
-  padding: 30px;
-  background-color: rgba(255, 255, 255, 0.9); /* Transparent white background */
-  border-radius: 20px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
-  animation: slideIn 1.5s ease-out;
+/* تحسين النصوص الأخرى */
+p, button {
+  color: #fff;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.6); /* ظلال خفيفة لتحسين الوضوح */
 }
 
 /* Slide-in animation for container */
@@ -171,26 +179,62 @@ h1 {
   }
 }
 
-/* Scanner Styles */
+/* تصميم حديث للماسح */
 #scanner-container {
   position: relative;
   width: 100%;
+  height: 250px;
   border-radius: 15px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.5);
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #000000, #1a1a1a);
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4), inset 0px -2px 8px rgba(255, 255, 255, 0.1);
   animation: scaleUp 0.8s ease-in-out;
 }
 
-@keyframes scaleUp {
-  from {
-    transform: scale(0.95);
+/* تأثير الذكاء الصناعي على الماسح */
+#scanner-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 255, 255, 0.1);
+  border-radius: 15px;
+  box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.6), inset 0px 0px 10px rgba(0, 255, 255, 0.3);
+  animation: scannerLight 1.5s infinite ease-in-out;
+}
+
+/* تأثير مسح بالضوء */
+@keyframes scannerLight {
+  0% {
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
     opacity: 0;
   }
-  to {
-    transform: scale(1);
+  50% {
     opacity: 1;
   }
+  100% {
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    opacity: 0;
+  }
+}
+
+/* تحسين شكل الأزرار */
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  color: #ffffff;
+  background: linear-gradient(145deg, #2196f3, #42a5f5);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0px 5px 15px rgba(33, 150, 243, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0px 8px 20px rgba(33, 150, 243, 0.5);
 }
 
 #scanner-container video {
@@ -206,7 +250,7 @@ input[type="text"] {
   max-width: 100%; /* لضمان أن العرض لا يتجاوز العرض الكامل */
   padding: 12px;
   font-size: 18px;
-  border: 2px solid #ff5500cd;
+  border: 2px solid #ff0000cd;
   border-radius: 10px;
   margin-top: 20px;
   outline: none;
@@ -318,7 +362,7 @@ input[type="submit"] {
   padding: 12px 0;
   font-size: 18px;
   color: white;
-  background-color: #0058bde7;
+  background-color: #fa0202b8;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -551,9 +595,6 @@ input[type="submit"]:disabled {
   <div id="scanner-container">
     <div id="interactive" class="viewport"></div>
   </div>
-  
-  <button id="start-scanner">✨AI Scanner</button>
-  <p id="status-message"></p>
 
   <div class="container">
     <h1>بحث المنتجات باستخدام الباركود</h1>
@@ -577,6 +618,9 @@ input[type="submit"]:disabled {
     </div>
     <button class="close-btn" onclick="closePopup()">إغلاق</button>
   </div>
+
+  <button id="start-scanner">✨AI Scanner</button>
+  <p id="status-message"></p>
 
   <div class="footer">
     <div class="line">جميع الحقوق محفوظة © 2024 | All Rights Reserved</div>
