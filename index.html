@@ -13,6 +13,8 @@
   <!-- إضافة أيقونة للموقع تظهر عند إضافته للشاشة الرئيسية -->
   <link rel="icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg" type="image/gif">
   <link rel="apple-touch-icon" href="https://img.freepik.com/premium-vector/artificial-intelligence-colorful-tool-symbol-icon-ai-stars-modern-image-generator-app-logo-vector_34480-1595.jpg">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#ffffff">
 
   <!-- إضافة ملف manifest -->
   <link rel="manifest" href="/manifest.json">
@@ -853,12 +855,43 @@ function closePopup() {
 startScannerButton.addEventListener('click', startScanner); 
 
 if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch(function(error) {
-        console.log('Service Worker registration failed:', error);
-      });
-    }
+  navigator.serviceWorker
+    .register('/service-worker.js')
+    .then(function (registration) {
+      console.log('Service Worker registered with scope:', registration.scope);
+    })
+    .catch(function (error) {
+      console.log('Service Worker registration failed:', error);
+    });
+}
+
+// تحقق من دعم الإضافة إلى الشاشة الرئيسية
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  // منع العرض الافتراضي
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('PWA installation prompt is available.');
+  
+  // يمكنك عرض زر التثبيت يدويًا هنا
+  document.getElementById('installButton').style.display = 'block';
+});
+
+// عند النقر على زر التثبيت
+document.getElementById('installButton').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+    });
+  }
+});
+
 </script>
       </body>
 </html>
