@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,13 +12,10 @@
 
   <!-- إضافة أيقونة للموقع تظهر عند إضافته للشاشة الرئيسية -->
   <link rel="icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg" type="image/gif">
-  <link rel="apple-touch-icon" href="https://img.freepik.com/premium-vector/artificial-intelligence-colorful-tool-symbol-icon-ai-stars-modern-image-generator-app-logo-vector_34480-1595.jpg">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" href="https://img.freepik.com/premium-vector/artificial-intelligence-colorful-tool-symbol-icon-ai-stars-modern-image-generator-app-logo-vector_34480-1595.jpg?w=360.jpg">
 
   <!-- إضافة ملف manifest -->
   <link rel="manifest" href="/manifest.json">
-</head>
 </head>
 <body>
   <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" style="display:block; margin-left:auto; margin-right:auto; max-width:60%; height:auto;"> <style>@media (max-width: 768px) {.logo {max-width: 100%;}}</style>
@@ -105,7 +103,7 @@ button:hover {
 
 /* تحسين التباين */
 .container {
-  padding: 25px;
+  padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
   background: url('https://cdn.dribbble.com/users/1585453/screenshots/7254661/media/34d38558c8177f52debd9d1f83295001.gif') center/cover no-repeat; /* الصورة كخلفية */
@@ -594,21 +592,17 @@ input[type="submit"]:disabled {
 </head>
 <body>
 
-  <div id="scanner-container">
-    <div id="interactive" class="viewport"></div>
-  </div>
-
   <div class="container">
     <h1>بحث المنتجات باستخدام الباركود</h1>
 
     <form id="barcode-form">
-      <input type="text" id="barcode-input" placeholder=" ✨AI Scanner أدخل الباركود يدويا أو استخدم " required>
+      <input type="text" id="barcode-input" placeholder=" Start Scanner أدخل الباركود يدويا أو استخدم " required>
       <input type="submit" value="بحث">
     </form>
   </div>
 
   <div class="popup" id="result-popup">
-    <h2>نتائج البحث</h2>
+    <h2>نتائج البحث:</h2>
     <div class="detail-box" id="product-name">
       <strong>الاسم:</strong> <span id="product-name-result">-</span>
     </div>
@@ -621,11 +615,14 @@ input[type="submit"]:disabled {
     <button class="close-btn" onclick="closePopup()">إغلاق</button>
   </div>
 
+  <div id="scanner-container">
+    <div id="interactive" class="viewport"></div>
+  </div>
+
   <button id="start-scanner">✨AI Scanner</button>
   <p id="status-message"></p>
 
   <div class="footer">
-    <div class="line">جميع الحقوق محفوظة © 2024 | All Rights Reserved</div>
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
@@ -854,7 +851,7 @@ function closePopup() {
 // إضافة مستمع لزر بدء الماسح
 startScannerButton.addEventListener('click', startScanner); 
 
-    if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
       }).catch(function(error) {
