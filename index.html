@@ -754,7 +754,73 @@ function processBarcode(code) {
     }, 300);
 }
 
-// إيقاف الماسح
+// التحقق من صحة الباركود
+function isValidBarcode(code) {
+    if (!code) return false;
+
+    // تحقق من أن الباركود كامل وغير مغطى
+    if (!isCompleteBarcode(code)) {
+        console.warn('الباركود غير مكتمل أو مغطى');
+        return false;
+    }
+
+    // استخدام خوارزمية checksum إذا كان الباركود يحتوي على معيار يدعم ذلك
+    if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
+
+    lastReadValues.push(code);
+    if (lastReadValues.length > 3) lastReadValues.shift();
+
+    return lastReadValues.every((val) => val === code);
+}
+
+// التحقق من أن الباركود كامل وغير مغطى
+function isCompleteBarcode(code) {
+    // تحقق من أن الباركود يحتوي على الحد الأدنى من الطول
+    const minLength = 8; // الطول الأدنى المسموح به للباركود
+    const maxLength = 13; // الطول الأقصى للباركود (مثال ل EAN-13)
+    
+    if (code.length < minLength || code.length > maxLength) {
+        return false; // الباركود غير مكتمل أو غير صحيح
+    }
+
+    // هنا يمكنك إضافة فحص آخر مثل التحقق من جودة الصورة أو فحص الرموز المشوهة إذا كان لديك معالجة أكثر تقدمًا
+    return true;
+}
+
+function isValidEAN13Checksum(code) {
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+        sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
+    }
+    const checksum = (10 - (sum % 10)) % 10;
+    return checksum === parseInt(code[12]);
+}
+
+// معالجة الباركود
+function processBarcode(code) {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    // تأكيد أن الحقل فارغ أو يحتوي على قيمة مختلفة قبل التحديث
+    if (barcodeInput.value !== code) {
+        barcodeInput.value = code; // إدخال الباركود في الحقل
+    }
+
+    // عرض رسالة حالة للمستخدم
+    statusMessage.textContent = `باركود مكتشف: ${code}`;
+
+    // تنفيذ الضغط على زر البحث تلقائيًا بعد تأخير قصير لتجنب التكرار
+    setTimeout(() => {
+        stopScanner(); // إيقاف الماسح
+        if (form.querySelector('input[type="submit"]')) {
+            form.querySelector('input[type="submit"]').click();
+        } else {
+            console.error('زر الإرسال غير موجود في النموذج.');
+        }
+        statusMessage.textContent = ''; // إعادة تعيين رسالة الحالة
+        isProcessing = false;
+    }, 300);
+}
 function stopScanner() {
     if (scannerActive) {
         Quagga.stop();
