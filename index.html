@@ -710,9 +710,6 @@ function startScanner() {
 function isValidBarcode(code) {
     if (!code) return false;
 
-    // التحقق من أن الباركود يبدأ وينتهي بالشحطة الطويلة
-    if (!isValidBarcodeEdge(code)) return false;
-
     // استخدام خوارزمية checksum إذا كان الباركود يحتوي على معيار يدعم ذلك
     if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
 
@@ -720,13 +717,6 @@ function isValidBarcode(code) {
     if (lastReadValues.length > 3) lastReadValues.shift();
 
     return lastReadValues.every((val) => val === code);
-}
-
-// التحقق من أن الباركود يبدأ وينتهي بالشحطة الطويلة
-function isValidBarcodeEdge(code) {
-    // يجب أن يبدأ الباركود بحرف أو رقم معين و/أو ينتهي بالشحطة الطويلة (تعتمد على نوع الباركود)
-    // على سبيل المثال إذا كان الباركود يبدأ بـ "000" أو ينتهي بـ "999"
-    return code.startsWith("000") && code.endsWith("999");
 }
 
 function isValidEAN13Checksum(code) {
