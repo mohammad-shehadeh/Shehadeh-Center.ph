@@ -592,7 +592,47 @@ input[type="submit"]:disabled {
     #barcode-input {
     transform: translateY(-13.5px);
 }
+    .image-container img {
+            width: 100px; /* حجم الصورة */
+            filter: drop-shadow(0 0 5px #FFA07A); /* بداية بتوهج خفيف بلون برتقالي فاتح */
+            animation: glow 5s infinite; /* حركة التوهج */
+        }
 
+        @keyframes glow {
+            0% {
+                filter: drop-shadow(0 0 5px #FFA07A); /* توهج خفيف بلون برتقالي فاتح */
+            }
+            10% {
+                filter: drop-shadow(0 0 7px #FF8C00); /* درجة توهج 2 بلون برتقالي داكن */
+            }
+            20% {
+                filter: drop-shadow(0 0 12px #FF7F50); /* درجة توهج 3 بلون شعاب مرجانية */
+            }
+            30% {
+                filter: drop-shadow(0 0 16px #FF6347); /* درجة توهج 4 بلون طماطم */
+            }
+            40% {
+                filter: drop-shadow(0 0 20px #FF4500); /* درجة توهج 5 بلون أحمر برتقالي */
+            }
+            50% {
+                filter: drop-shadow(0 0 24px #FF0000); /* درجة توهج 6 بلون أحمر */
+            }
+            60% {
+                filter: drop-shadow(0 0 28px #D70000); /* درجة توهج 7 بلون أحمر داكن */
+            }
+            70% {
+                filter: drop-shadow(0 0 40px #B22222); /* درجة توهج 8 بلون حجر نار */
+            }
+            80% {
+                filter: drop-shadow(0 0 30px #8B0000); /* درجة توهج 9 بلون أحمر غامق */
+            }
+            90% {
+                filter: drop-shadow(0 0 20px #80000); /* درجة توهج 10 بلون بني محمر */
+            }
+            100% {
+                filter: drop-shadow(0 0 5px #FFA07A); /* العودة إلى التوهج الخفيف بلون برتقالي فاتح */
+            }
+        }
   </style>
 </head>
 <body>
@@ -630,6 +670,10 @@ input[type="submit"]:disabled {
   <div class="footer">
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
   </div>
+  
+    <div class="image-container">
+        <img src="https://i.imgur.com/UxQBHtU.png" alt="Wolf Logo">
+    </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script>
     const barcodeInput = document.getElementById('barcode-input');
