@@ -592,11 +592,16 @@ input[type="submit"]:disabled {
     #barcode-input {
     transform: translateY(-13.5px);
 }
-    .image-container img {
-            width: 100px; /* حجم الصورة */
-            filter: drop-shadow(0 0 5px #FFA07A); /* بداية بتوهج خفيف بلون برتقالي فاتح */
-            animation: glow 5s infinite; /* حركة التوهج */
-        }
+    .image-container {
+    display: flex; /* استخدام Flexbox */
+    justify-content: center; /* توسيط أفقي فقط */
+}
+
+.image-container img {
+    width: 120px; /* حجم الصورة */
+    filter: drop-shadow(0 0 5px #FFA07A); /* بداية بتوهج خفيف بلون برتقالي فاتح */
+    animation: glow 5s infinite; /* حركة التوهج */
+}
 
         @keyframes glow {
             0% {
