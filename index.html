@@ -749,14 +749,14 @@ function startScanner() {
         }
     }
 
-    // دالة لمراقبة جودة الصورة (تم الاحتفاظ بها دون تعديل التكبير تلقائيًا)
+    // دالة لمراقبة جودة الصورة دون تعديل التكبير تلقائيًا
     function monitorVideoQuality(videoTrack) {
         const videoElement = document.querySelector('#interactive video');
         if (!videoElement) return;
         function analyzeFrame() {
             if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-                // يمكن تطوير هذه الدالة لتحليل وضوح الصورة
-                // في هذا المثال لا يتم تغيير الزوم تلقائيًا
+                // هنا يمكنك إضافة منطق لتحليل وضوح الصورة دون تعديل الزوم تلقائيًا
+                // مثال: تسجيل ملاحظات أو عرض رسالة للمستخدم
             }
             setTimeout(analyzeFrame, 1000);
         }
@@ -809,7 +809,6 @@ function startScanner() {
                     // إضافة مستمع لتغيير التكبير يدويًا من شريط التمرير
                     const zoomSlider = document.getElementById('zoom-slider');
                     if (zoomSlider) {
-                        // ضبط قيمة الشريط بناءً على الحد الأدنى للتكبير
                         const capabilities = videoTrack.getCapabilities();
                         zoomSlider.min = capabilities.zoom ? capabilities.zoom.min : 0;
                         zoomSlider.max = capabilities.zoom ? capabilities.zoom.max : 1;
