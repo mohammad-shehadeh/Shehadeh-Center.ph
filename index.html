@@ -651,6 +651,11 @@ input[type="submit"]:disabled {
     </form>
   </div>
 
+  <div id="zoom-control">
+    <label for="zoom-slider">ضبط التكبير:</label>
+    <input type="range" id="zoom-slider" min="0" max="1" step="0.01" value="0">
+  </div>
+  
   <div class="popup" id="result-popup">
     <h2>نتائج البحث:</h2>
     <div class="detail-box" id="product-name">
@@ -727,63 +732,32 @@ function startScanner() {
         });
     }
 
-    // دالة لتعديل التكبير (Zoom) تلقائياً إذا كانت خاصية التكبير مدعومة
-   // متغير لتخزين آخر وقت تم فيه تعديل التكبير (بالملي ثانية)
-let lastZoomAdjustmentTime = 0;
-// فترة التبريد (مثلاً 5000 مللي ثانية = 5 ثوانٍ)
-const ZOOM_ADJUSTMENT_COOLDOWN = 5000;
-
-async function adjustZoom(videoTrack, desiredZoomIncrease = 0.5) {
-    const capabilities = videoTrack.getCapabilities();
-    if (capabilities.zoom) {
-        const settings = videoTrack.getSettings();
-        let currentZoom = settings.zoom || capabilities.zoom.min;
-        const now = Date.now();
-        // تحقق من فترة التبريد قبل تطبيق تعديل جديد
-        if (now - lastZoomAdjustmentTime < ZOOM_ADJUSTMENT_COOLDOWN) {
-            return; // تخطي التعديل إذا تم التعديل مؤخرًا
+    // دالة لضبط التكبير بناءً على القيمة المحددة يدويًا من المستخدم
+    async function setZoom(videoTrack, zoomValue) {
+        const capabilities = videoTrack.getCapabilities();
+        if (capabilities.zoom) {
+            // التأكد من أن القيمة المطلوبة ضمن حدود التكبير
+            const clampedZoom = Math.min(Math.max(zoomValue, capabilities.zoom.min), capabilities.zoom.max);
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ zoom: clampedZoom }] });
+                console.log(`تم ضبط التكبير على: ${clampedZoom}`);
+            } catch (err) {
+                console.error("فشل ضبط التكبير:", err);
+            }
+        } else {
+            console.warn("خاصية التكبير غير مدعومة من هذه الكاميرا.");
         }
-        // حساب قيمة التكبير الجديدة مع التأكد من عدم تجاوز الحد الأقصى
-        let newZoom = Math.min(currentZoom + desiredZoomIncrease, capabilities.zoom.max);
-        if (newZoom === currentZoom) return; // إذا كان التكبير الحالي هو الحد الأقصى، لا حاجة للتعديل
-        try {
-            await videoTrack.applyConstraints({ advanced: [{ zoom: newZoom }] });
-            console.log(`تم تعديل التكبير إلى: ${newZoom}`);
-            lastZoomAdjustmentTime = now; // تحديث وقت آخر تعديل
-        } catch (err) {
-            console.error('فشل تعديل التكبير:', err);
-        }
-    } else {
-        console.warn("خاصية التكبير غير مدعومة من هذه الكاميرا.");
-    }
-}
-
-
-    // دالة بسيطة لمحاكاة تقييم وضوح الصورة (يمكن استبدالها بخوارزمية أكثر تقدمًا مثل Laplacian)
-    function isImageBlurred(videoElement) {
-        // للحصول على تقييم بسيط: استخدم Canvas لتحليل إطار الفيديو
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        // هنا يتم حساب متوسط الفرق بين البيكسلات (مؤشر بسيط للضبابية)
-        // في هذا المثال نستخدم قيمة عشوائية للمحاكاة
-        return Math.random() < 0.3; // افتراض 30% من الوقت تكون الصورة ضبابية
     }
 
-    // دالة لمراقبة جودة الصورة بشكل دوري وضبط الزوم عند الحاجة
+    // دالة لمراقبة جودة الصورة (تم الاحتفاظ بها دون تعديل التكبير تلقائيًا)
     function monitorVideoQuality(videoTrack) {
         const videoElement = document.querySelector('#interactive video');
         if (!videoElement) return;
         function analyzeFrame() {
             if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-                if (isImageBlurred(videoElement)) {
-                    console.log("الصورة ضبابية، محاولة تحسين الوضوح...");
-                    adjustZoom(videoTrack); // زيادة التكبير لتحسين الوضوح
-                }
+                // يمكن تطوير هذه الدالة لتحليل وضوح الصورة
+                // في هذا المثال لا يتم تغيير الزوم تلقائيًا
             }
-            // إعادة التحليل كل ثانية
             setTimeout(analyzeFrame, 1000);
         }
         analyzeFrame();
@@ -831,6 +805,22 @@ async function adjustZoom(videoTrack, desiredZoomIncrease = 0.5) {
                 if (videoElement && videoElement.srcObject) {
                     const videoTrack = videoElement.srcObject.getVideoTracks()[0];
                     monitorVideoQuality(videoTrack);
+
+                    // إضافة مستمع لتغيير التكبير يدويًا من شريط التمرير
+                    const zoomSlider = document.getElementById('zoom-slider');
+                    if (zoomSlider) {
+                        // ضبط قيمة الشريط بناءً على الحد الأدنى للتكبير
+                        const capabilities = videoTrack.getCapabilities();
+                        zoomSlider.min = capabilities.zoom ? capabilities.zoom.min : 0;
+                        zoomSlider.max = capabilities.zoom ? capabilities.zoom.max : 1;
+                        zoomSlider.step = capabilities.zoom ? 0.01 : 0.01;
+                        zoomSlider.value = videoTrack.getSettings().zoom || capabilities.zoom.min;
+
+                        zoomSlider.addEventListener('input', () => {
+                            const zoomValue = parseFloat(zoomSlider.value);
+                            setZoom(videoTrack, zoomValue);
+                        });
+                    }
                 }
             }
         );
