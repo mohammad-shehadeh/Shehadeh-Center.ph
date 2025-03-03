@@ -106,7 +106,6 @@ button:hover {
   padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
-  background: url('https://cdn.dribbble.com/users/1585453/screenshots/7254661/media/34d38558c8177f52debd9d1f83295001.gif') center/cover no-repeat; /* الصورة كخلفية */
   border-radius: 20px;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2); /* ظل الحاوية */
   animation: float 3s infinite ease-in-out;
@@ -671,12 +670,13 @@ h8 {
   <div class="container">
     <h1>بحث المنتجات باستخدام الباركود</h1>
 
-    <form id="barcode-form">
-      <input type="text" id="barcode-input" placeholder=" Start Scanner أدخل الباركود يدويا أو استخدم " required>
-      <input type="submit" value="بحث">
-    </form>
-  </div>
-  <h8>استخدم التكبير الى ان يوضح الباركود </h8>
+    <div id="scanner-container">
+        <div id="interactive" class="viewport"></div>
+      </div>
+    
+      <button id="start-scanner">✨AI Scanner</button>
+      <p id="status-message"></p>
+    
   <div id="zoom-controls-barcode">
     <button id="reset-zoom-barcode" onclick="resetZoom()">🔄 الضبط</button>
     <button id="zoom-out-barcode" onclick="zoomOut()">🔎 تصغير</button>
@@ -697,12 +697,12 @@ h8 {
     <button class="close-btn" onclick="closePopup()">إغلاق</button>
   </div>
 
-  <div id="scanner-container">
-    <div id="interactive" class="viewport"></div>
-  </div>
-
-  <button id="start-scanner">✨AI Scanner</button>
-  <p id="status-message"></p>
+  <br>
+  <form id="barcode-form">
+    <input type="text" id="barcode-input" placeholder=" Start Scanner أدخل الباركود يدويا أو استخدم " required>
+    <input type="submit" value="بحث">
+  </form>
+</div>
 
   <div class="footer">
     <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
