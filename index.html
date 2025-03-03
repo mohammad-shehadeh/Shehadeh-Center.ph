@@ -697,124 +697,148 @@ input[type="submit"]:disabled {
     });
   
 // بدء الماسح
-// دالة للحصول على جميع كاميرات الهاتف
-async function getVideoDevices() {
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  return devices.filter(device => device.kind === 'videoinput');
-}
+function startScanner() {
+    startScannerButton.disabled = true;
+    statusMessage.textContent = '';
 
-// دالة لبدء تشغيل الكاميرا مع الجهاز المحدد
-async function initCamera(deviceId = null) {
-  const constraints = {
-    video: {
-      deviceId: deviceId ? { exact: deviceId } : undefined,
-      facingMode: { ideal: 'environment' },
-      width: { min: 1280, ideal: 1920, max: 3840 },
-      height: { min: 720, ideal: 1080, max: 2160 },
-      aspectRatio: { ideal: 16 / 9 },
-      // تمكين الفلاش إذا كان مدعومًا
-      advanced: [{ torch: true }]
+    scannerContainer.style.display = 'block';
+
+    // دالة لاختيار أفضل كاميرا متاحة باستخدام enumerateDevices
+    function configureCamera() {
+        return navigator.mediaDevices.enumerateDevices().then(devices => {
+            let videoDevices = devices.filter(device => device.kind === 'videoinput');
+            // إعدادات القيود الافتراضية
+            let constraints = {
+                facingMode: 'environment',
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                aspectRatio: { ideal: 16 / 9 },
+                advanced: [
+                    { focusMode: 'continuous' },
+                    { torch: true }
+                ]
+            };
+
+            // إذا كان هناك أكثر من كاميرا، نجرب اختيار الكاميرا الأخيرة (قد تكون عدسة الزوم)
+            if (videoDevices.length > 1) {
+                constraints.deviceId = { exact: videoDevices[videoDevices.length - 1].deviceId };
+            }
+            return constraints;
+        });
     }
-  };
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    const videoElement = document.querySelector('#interactive video') || document.createElement('video');
-    videoElement.srcObject = stream;
-    videoElement.play();
-    // قم بتخزين التيار لاستخدامه لاحقاً في التعديلات
-    currentStream = stream;
-    monitorVideoQuality(stream.getVideoTracks()[0]);
-  } catch (err) {
-    console.error('خطأ في الحصول على تيار الكاميرا:', err);
-    statusMessage.textContent = 'تعذر تشغيل الكاميرا.';
-    startScannerButton.disabled = false;
-  }
-}
-
-// دالة لتعديل إعدادات التكبير (Zoom) تلقائياً
-async function adjustZoom(videoTrack, desiredZoomIncrease = 0.5) {
-  const capabilities = videoTrack.getCapabilities();
-  if (capabilities.zoom) {
-    const settings = videoTrack.getSettings();
-    let currentZoom = settings.zoom || capabilities.zoom.min;
-    let newZoom = Math.min(currentZoom + desiredZoomIncrease, capabilities.zoom.max);
-    try {
-      await videoTrack.applyConstraints({ advanced: [{ zoom: newZoom }] });
-      console.log(`تم تعديل التكبير إلى: ${newZoom}`);
-    } catch (err) {
-      console.error('فشل تعديل التكبير:', err);
+    // دالة لتعديل التكبير (Zoom) تلقائياً إذا كانت خاصية التكبير مدعومة
+    async function adjustZoom(videoTrack, desiredZoomIncrease = 0.5) {
+        const capabilities = videoTrack.getCapabilities();
+        if (capabilities.zoom) {
+            const settings = videoTrack.getSettings();
+            let currentZoom = settings.zoom || capabilities.zoom.min;
+            let newZoom = Math.min(currentZoom + desiredZoomIncrease, capabilities.zoom.max);
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ zoom: newZoom }] });
+                console.log(`تم تعديل التكبير إلى: ${newZoom}`);
+            } catch (err) {
+                console.error('فشل تعديل التكبير:', err);
+            }
+        } else {
+            console.warn("خاصية التكبير غير مدعومة من هذه الكاميرا.");
+        }
     }
-  } else {
-    console.warn("خاصية التكبير غير مدعومة من هذه الكاميرا.");
-  }
-}
 
-// دالة لتقييم وضوح الصورة (يمكن تطويرها باستخدام مكتبات تحليل الصور)
-function isImageBlurred(videoElement) {
-  // مثال بسيط: يمكنك استخدام Canvas واستخراج بيانات الصورة
-  // ثم حساب التباين أو استخدام خوارزمية Laplacian.
-  // هنا سنقوم بإرجاع قيمة عشوائية للمحاكاة.
-  return Math.random() < 0.3; // افتراض أن 30% من الوقت الصورة ضبابية
-}
-
-// دالة لمراقبة جودة الصورة بشكل دوري
-function monitorVideoQuality(videoTrack) {
-  const videoElement = document.querySelector('#interactive video');
-  if (!videoElement) return;
-
-  // استخدام Canvas لتحليل إطار من الفيديو
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  function analyzeFrame() {
-    if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-      // هنا يمكن تطبيق خوارزمية تحليل الصورة لمعرفة مدى الضبابية
-      const blurred = isImageBlurred(videoElement);
-      if (blurred) {
-        console.log("الصورة ضبابية، محاولة تحسين الوضوح...");
-        adjustZoom(videoTrack); // زيادة التكبير كخطوة لتحسين الوضوح
-      }
+    // دالة بسيطة لمحاكاة تقييم وضوح الصورة (يمكن استبدالها بخوارزمية أكثر تقدمًا مثل Laplacian)
+    function isImageBlurred(videoElement) {
+        // للحصول على تقييم بسيط: استخدم Canvas لتحليل إطار الفيديو
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        // هنا يتم حساب متوسط الفرق بين البيكسلات (مؤشر بسيط للضبابية)
+        // في هذا المثال نستخدم قيمة عشوائية للمحاكاة
+        return Math.random() < 0.3; // افتراض 30% من الوقت تكون الصورة ضبابية
     }
-    // إعادة التحليل كل ثانية
-    setTimeout(analyzeFrame, 1000);
-  }
-  analyzeFrame();
+
+    // دالة لمراقبة جودة الصورة بشكل دوري وضبط الزوم عند الحاجة
+    function monitorVideoQuality(videoTrack) {
+        const videoElement = document.querySelector('#interactive video');
+        if (!videoElement) return;
+        function analyzeFrame() {
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                if (isImageBlurred(videoElement)) {
+                    console.log("الصورة ضبابية، محاولة تحسين الوضوح...");
+                    adjustZoom(videoTrack); // زيادة التكبير لتحسين الوضوح
+                }
+            }
+            // إعادة التحليل كل ثانية
+            setTimeout(analyzeFrame, 1000);
+        }
+        analyzeFrame();
+    }
+
+    // دالة لإعادة تشغيل الماسح في حالة توقف الكاميرا
+    function restartScanner() {
+        Quagga.stop();
+        setTimeout(startScanner, 500);
+    }
+
+    configureCamera().then(constraints => {
+        Quagga.init(
+            {
+                inputStream: {
+                    name: 'Live',
+                    type: 'LiveStream',
+                    target: document.querySelector('#interactive'),
+                    constraints: constraints,
+                },
+                locator: {
+                    patchSize: 'medium', // تقليل حجم الرقع لتحسين الأداء
+                    halfSample: true,    // تحسين الأداء باستخدام نصف الدقة
+                },
+                decoder: {
+                    readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+                    multiple: false, // تعطيل قراءة متعددة لتقليل الالتباس
+                },
+                locate: true,
+                numOfWorkers: navigator.hardwareConcurrency || 4, // ضبط عدد العمال بناءً على الجهاز
+                frequency: 10, // تقليل التردد لتحسين الأداء
+            },
+            function (err) {
+                if (err) {
+                    console.error('Error initializing Quagga:', err);
+                    statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+                    startScannerButton.disabled = false;
+                    return;
+                }
+                Quagga.start();
+                scannerActive = true;
+
+                // محاولة الحصول على التيار (stream) وتحليل جودة الفيديو
+                const videoElement = document.querySelector('#interactive video');
+                if (videoElement && videoElement.srcObject) {
+                    const videoTrack = videoElement.srcObject.getVideoTracks()[0];
+                    monitorVideoQuality(videoTrack);
+                }
+            }
+        );
+
+        Quagga.onDetected(function (data) {
+            const code = data.codeResult.code;
+            if (isValidBarcode(code)) {
+                processBarcode(code);
+            } else {
+                console.warn('Invalid barcode detected, attempting OCR.');
+                readBarcodeWithOCR();
+            }
+        });
+
+        // إعادة التشغيل التلقائي عند توقف الكاميرا أو اختفاء الإشارة
+        Quagga.onProcessed(function (result) {
+            if (!result || !result.boxes) {
+                restartScanner();
+            }
+        });
+    });
 }
-
-// دالة للتبديل بين الكاميرات تلقائياً إذا لزم الأمر
-async function switchCameraIfNeeded() {
-  const videoDevices = await getVideoDevices();
-  if (videoDevices.length <= 1) {
-    console.log("لا توجد كاميرات إضافية للتبديل.");
-    return;
-  }
-
-  // هنا يمكنك تطبيق منطق لتحديد الكاميرا الأفضل
-  // على سبيل المثال، إذا كانت الكاميرا الحالية ضبابية باستمرار، جرب الكاميرا التالية
-  let currentDeviceId = currentStream.getVideoTracks()[0].getSettings().deviceId;
-  const currentIndex = videoDevices.findIndex(device => device.deviceId === currentDeviceId);
-  const nextIndex = (currentIndex + 1) % videoDevices.length;
-  console.log("التبديل إلى كاميرا جديدة:", videoDevices[nextIndex].label);
-
-  // إيقاف التيار الحالي وتشغيل الكاميرا الجديدة
-  currentStream.getTracks().forEach(track => track.stop());
-  await initCamera(videoDevices[nextIndex].deviceId);
-}
-
-// بدء التشغيل الأولي عند النقر على زر بدء الماسح
-startScannerButton.addEventListener('click', async () => {
-  startScannerButton.disabled = true;
-  statusMessage.textContent = '';
-  // الحصول على الكاميرا الافتراضية
-  await initCamera();
-});
-
-// مثال للتبديل اليدوي (أو يمكن استدعاؤه تلقائياً بناءً على منطق جودة الصورة)
-document.querySelector('#switch-camera-btn')?.addEventListener('click', switchCameraIfNeeded);
 
 
 // التحقق من صحة الباركود
