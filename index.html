@@ -764,7 +764,7 @@ function startScanner() {
                 }
 
                 updateZoomButtons();
-
+                
                 // إضافة مستمع لمس الشاشة لضبط التركيز عند اللمس
                 videoElement.addEventListener("touchstart", adjustFocus);
                 videoElement.addEventListener("click", adjustFocus);
@@ -858,6 +858,32 @@ function zoomOut() {
 // إعادة ضبط التكبير إلى 1x
 function resetZoom() {
     setZoom(1);
+}
+
+// ضبط التركيز على الأجسام الأقرب تلقائيًا
+async function autoFocus() {
+    if (videoTrack) {
+        try {
+            // هنا يمكننا استخدام الخوارزميات لاكتشاف الأجسام الأقرب بناءً على أبعاد الصورة
+            const rect = await getObjectInFocus(); // دالة لقياس الأجسام
+            const x = rect.x + rect.width / 2; // أخذ المركز
+            const y = rect.y + rect.height / 2;
+
+            await videoTrack.applyConstraints({
+                advanced: [{ focusMode: "manual", focusPointX: x, focusPointY: y }]
+            });
+
+            console.log(`تم ضبط التركيز تلقائيًا على: X=${x}, Y=${y}`);
+        } catch (err) {
+            console.error("فشل ضبط التركيز تلقائيًا:", err);
+        }
+    }
+}
+
+// دالة للتعرف على الجسم الأقرب (مثال تجريبي)
+async function getObjectInFocus() {
+    // تنفيذ تحليل للصورة عبر Canvas أو طرق أخرى لتحديد الجسم الأقرب.
+    return { x: 0.5, y: 0.5, width: 0.1, height: 0.1 };  // مثال على نقطة مركزة في منتصف الشاشة
 }
 
 // ضبط التركيز عند لمس الشاشة
