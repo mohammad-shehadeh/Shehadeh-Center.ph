@@ -651,11 +651,12 @@ input[type="submit"]:disabled {
     </form>
   </div>
 
-  <div id="zoom-control">
-    <label for="zoom-slider">تحكم يدوي في التكبير:</label>
-    <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1">
-  </div>
-  
+  <div id="zoom-controls">
+    <button id="zoom-in" onclick="zoomIn()">🔍 تكبير</button>
+    <button id="zoom-out" onclick="zoomOut()">🔎 تصغير</button>
+    <button id="reset-zoom" onclick="resetZoom()">🔄 إعادة الضبط</button>
+</div>
+
   <div class="popup" id="result-popup">
     <h2>نتائج البحث:</h2>
     <div class="detail-box" id="product-name">
@@ -704,6 +705,9 @@ input[type="submit"]:disabled {
 // بدء الماسح
 let videoTrack; // تعريف متغير لتخزين مسار الفيديو
 let currentZoom = 1; // تخزين قيمة الزوم الحالية
+let minZoom = 1;
+let maxZoom = 5;
+let zoomStep = 0.5;
 
 function startScanner() {
     startScannerButton.disabled = true;
@@ -731,19 +735,13 @@ function startScanner() {
                 videoTrack = stream.getVideoTracks()[0];
 
                 const capabilities = videoTrack.getCapabilities();
-                const zoomSlider = document.getElementById('zoom-slider');
-
-                if (zoomSlider && capabilities.zoom) {
-                    zoomSlider.min = capabilities.zoom.min;
-                    zoomSlider.max = capabilities.zoom.max;
-                    zoomSlider.step = 0.1;
-                    zoomSlider.value = currentZoom; // الحفاظ على الزوم عند إعادة التهيئة
-
-                    zoomSlider.addEventListener('input', () => {
-                        currentZoom = parseFloat(zoomSlider.value);
-                        setZoom(currentZoom);
-                    });
+                if (capabilities.zoom) {
+                    minZoom = capabilities.zoom.min || 1;
+                    maxZoom = capabilities.zoom.max || 5;
+                    zoomStep = capabilities.zoom.step || 0.5;
                 }
+
+                updateZoomButtons();
             }
         })
         .catch(function (error) {
@@ -795,18 +793,45 @@ function startScanner() {
     });
 }
 
-// وظيفة لضبط التكبير يدويًا ومنع التغيير التلقائي
+// تحديث التكبير يدويًا
 async function setZoom(zoomValue) {
     if (videoTrack) {
         try {
             await videoTrack.applyConstraints({
                 advanced: [{ zoom: zoomValue }]
             });
+            currentZoom = zoomValue;
+            updateZoomButtons();
             console.log(`تم ضبط التكبير على: ${zoomValue}`);
         } catch (err) {
             console.error("فشل ضبط التكبير:", err);
         }
     }
+}
+
+// وظيفة لتحديث الأزرار (تعطيل الزر إذا كان عند الحد الأقصى أو الأدنى)
+function updateZoomButtons() {
+    document.getElementById("zoom-in").disabled = currentZoom >= maxZoom;
+    document.getElementById("zoom-out").disabled = currentZoom <= minZoom;
+}
+
+// تكبير الصورة
+function zoomIn() {
+    if (currentZoom < maxZoom) {
+        setZoom(Math.min(currentZoom + zoomStep, maxZoom));
+    }
+}
+
+// تصغير الصورة
+function zoomOut() {
+    if (currentZoom > minZoom) {
+        setZoom(Math.max(currentZoom - zoomStep, minZoom));
+    }
+}
+
+// إعادة ضبط التكبير إلى 1x
+function resetZoom() {
+    setZoom(1);
 }
 
 
