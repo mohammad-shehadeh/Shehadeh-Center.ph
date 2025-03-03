@@ -652,8 +652,8 @@ input[type="submit"]:disabled {
   </div>
 
   <div id="zoom-control">
-    <label for="zoom-slider">ضبط التكبير:</label>
-    <input type="range" id="zoom-slider" min="0" max="1" step="0.01" value="0">
+    <label for="zoom-slider">تحكم يدوي في التكبير:</label>
+    <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1">
   </div>
   
   <div class="popup" id="result-popup">
@@ -708,139 +708,96 @@ function startScanner() {
 
     scannerContainer.style.display = 'block';
 
-    // دالة لاختيار أفضل كاميرا متاحة باستخدام enumerateDevices
-    function configureCamera() {
-        return navigator.mediaDevices.enumerateDevices().then(devices => {
-            let videoDevices = devices.filter(device => device.kind === 'videoinput');
-            // إعدادات القيود الافتراضية
-            let constraints = {
-                facingMode: 'environment',
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                aspectRatio: { ideal: 16 / 9 },
-                advanced: [
-                    { focusMode: 'continuous' },
-                    { torch: true }
-                ]
-            };
+    // إعداد قيود الكاميرا دون أي تعديل تلقائي
+    const constraints = {
+        video: {
+            facingMode: 'environment',
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            aspectRatio: { ideal: 16 / 9 },
+            focusMode: "continuous" // تأكيد أن التركيز تلقائي فقط دون تغيير الزوم
+        }
+    };
 
-            // إذا كان هناك أكثر من كاميرا، نجرب اختيار الكاميرا الأخيرة (قد تكون عدسة الزوم)
-            if (videoDevices.length > 1) {
-                constraints.deviceId = { exact: videoDevices[videoDevices.length - 1].deviceId };
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(function (stream) {
+            const videoElement = document.querySelector('#interactive video');
+            if (videoElement) {
+                videoElement.srcObject = stream;
+
+                const videoTrack = stream.getVideoTracks()[0];
+                const capabilities = videoTrack.getCapabilities();
+
+                // إعداد شريط التحكم في التكبير (يدوي فقط)
+                const zoomSlider = document.getElementById('zoom-slider');
+                if (zoomSlider && capabilities.zoom) {
+                    zoomSlider.min = capabilities.zoom.min;
+                    zoomSlider.max = capabilities.zoom.max;
+                    zoomSlider.step = 0.1;
+                    zoomSlider.value = capabilities.zoom.min; // ضبط التكبير على أدنى قيمة
+                    zoomSlider.addEventListener('input', () => {
+                        setZoom(videoTrack, parseFloat(zoomSlider.value));
+                    });
+                }
             }
-            return constraints;
+        })
+        .catch(function (error) {
+            console.error('خطأ في تشغيل الكاميرا:', error);
+            statusMessage.textContent = 'خطأ في تشغيل الكاميرا.';
+            startScannerButton.disabled = false;
         });
-    }
 
-    // دالة لضبط التكبير بناءً على القيمة المحددة يدويًا من المستخدم
-    async function setZoom(videoTrack, zoomValue) {
-        const capabilities = videoTrack.getCapabilities();
-        if (capabilities.zoom) {
-            // التأكد من أن القيمة المطلوبة ضمن حدود التكبير
-            const clampedZoom = Math.min(Math.max(zoomValue, capabilities.zoom.min), capabilities.zoom.max);
-            try {
-                await videoTrack.applyConstraints({ advanced: [{ zoom: clampedZoom }] });
-                console.log(`تم ضبط التكبير على: ${clampedZoom}`);
-            } catch (err) {
-                console.error("فشل ضبط التكبير:", err);
-            }
-        } else {
-            console.warn("خاصية التكبير غير مدعومة من هذه الكاميرا.");
-        }
-    }
-
-    // دالة لمراقبة جودة الصورة دون تعديل التكبير تلقائيًا
-    function monitorVideoQuality(videoTrack) {
-        const videoElement = document.querySelector('#interactive video');
-        if (!videoElement) return;
-        function analyzeFrame() {
-            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-                // هنا يمكنك إضافة منطق لتحليل وضوح الصورة دون تعديل الزوم تلقائيًا
-                // مثال: تسجيل ملاحظات أو عرض رسالة للمستخدم
-            }
-            setTimeout(analyzeFrame, 1000);
-        }
-        analyzeFrame();
-    }
-
-    // دالة لإعادة تشغيل الماسح في حالة توقف الكاميرا
-    function restartScanner() {
-        Quagga.stop();
-        setTimeout(startScanner, 500);
-    }
-
-    configureCamera().then(constraints => {
-        Quagga.init(
-            {
-                inputStream: {
-                    name: 'Live',
-                    type: 'LiveStream',
-                    target: document.querySelector('#interactive'),
-                    constraints: constraints,
-                },
-                locator: {
-                    patchSize: 'medium', // تقليل حجم الرقع لتحسين الأداء
-                    halfSample: true,    // تحسين الأداء باستخدام نصف الدقة
-                },
-                decoder: {
-                    readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
-                    multiple: false, // تعطيل قراءة متعددة لتقليل الالتباس
-                },
-                locate: true,
-                numOfWorkers: navigator.hardwareConcurrency || 4, // ضبط عدد العمال بناءً على الجهاز
-                frequency: 10, // تقليل التردد لتحسين الأداء
+    Quagga.init(
+        {
+            inputStream: {
+                name: 'Live',
+                type: 'LiveStream',
+                target: document.querySelector('#interactive'),
+                constraints: constraints.video,
             },
-            function (err) {
-                if (err) {
-                    console.error('Error initializing Quagga:', err);
-                    statusMessage.textContent = 'خطأ في تشغيل الماسح.';
-                    startScannerButton.disabled = false;
-                    return;
-                }
-                Quagga.start();
-                scannerActive = true;
-
-                // محاولة الحصول على التيار (stream) وتحليل جودة الفيديو
-                const videoElement = document.querySelector('#interactive video');
-                if (videoElement && videoElement.srcObject) {
-                    const videoTrack = videoElement.srcObject.getVideoTracks()[0];
-                    monitorVideoQuality(videoTrack);
-
-                    // إضافة مستمع لتغيير التكبير يدويًا من شريط التمرير
-                    const zoomSlider = document.getElementById('zoom-slider');
-                    if (zoomSlider) {
-                        const capabilities = videoTrack.getCapabilities();
-                        zoomSlider.min = capabilities.zoom ? capabilities.zoom.min : 0;
-                        zoomSlider.max = capabilities.zoom ? capabilities.zoom.max : 1;
-                        zoomSlider.step = capabilities.zoom ? 0.01 : 0.01;
-                        zoomSlider.value = videoTrack.getSettings().zoom || capabilities.zoom.min;
-
-                        zoomSlider.addEventListener('input', () => {
-                            const zoomValue = parseFloat(zoomSlider.value);
-                            setZoom(videoTrack, zoomValue);
-                        });
-                    }
-                }
+            locator: {
+                patchSize: 'medium', // تحسين الأداء
+                halfSample: true
+            },
+            decoder: {
+                readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+                multiple: false
+            },
+            locate: true,
+            numOfWorkers: navigator.hardwareConcurrency || 4,
+            frequency: 10
+        },
+        function (err) {
+            if (err) {
+                console.error('Error initializing Quagga:', err);
+                statusMessage.textContent = 'خطأ في تشغيل الماسح.';
+                startScannerButton.disabled = false;
+                return;
             }
-        );
+            Quagga.start();
+            scannerActive = true;
+        }
+    );
 
-        Quagga.onDetected(function (data) {
-            const code = data.codeResult.code;
-            if (isValidBarcode(code)) {
-                processBarcode(code);
-            } else {
-                console.warn('Invalid barcode detected, attempting OCR.');
-                readBarcodeWithOCR();
-            }
-        });
-
-        // إعادة التشغيل التلقائي عند توقف الكاميرا أو اختفاء الإشارة
-        Quagga.onProcessed(function (result) {
-            if (!result || !result.boxes) {
-                restartScanner();
-            }
-        });
+    Quagga.onDetected(function (data) {
+        const code = data.codeResult.code;
+        if (isValidBarcode(code)) {
+            processBarcode(code);
+        } else {
+            console.warn('Invalid barcode detected, attempting OCR.');
+            readBarcodeWithOCR();
+        }
     });
+}
+
+// دالة لضبط التكبير يدويًا فقط
+async function setZoom(videoTrack, zoomValue) {
+    try {
+        await videoTrack.applyConstraints({ advanced: [{ zoom: zoomValue }] });
+        console.log(`تم ضبط التكبير على: ${zoomValue}`);
+    } catch (err) {
+        console.error("فشل ضبط التكبير:", err);
+    }
 }
 
 
