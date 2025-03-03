@@ -764,6 +764,10 @@ function startScanner() {
                 }
 
                 updateZoomButtons();
+
+                // إضافة مستمع لمس الشاشة لضبط التركيز عند اللمس
+                videoElement.addEventListener("touchstart", adjustFocus);
+                videoElement.addEventListener("click", adjustFocus);
             }
         })
         .catch(function (error) {
@@ -833,8 +837,8 @@ async function setZoom(zoomValue) {
 
 // وظيفة لتحديث الأزرار (تعطيل الزر إذا كان عند الحد الأقصى أو الأدنى)
 function updateZoomButtons() {
-    document.getElementById("zoom-in").disabled = currentZoom >= maxZoom;
-    document.getElementById("zoom-out").disabled = currentZoom <= minZoom;
+    document.getElementById("zoom-in-barcode").disabled = currentZoom >= maxZoom;
+    document.getElementById("zoom-out-barcode").disabled = currentZoom <= minZoom;
 }
 
 // تكبير الصورة
@@ -855,6 +859,26 @@ function zoomOut() {
 function resetZoom() {
     setZoom(1);
 }
+
+// ضبط التركيز عند لمس الشاشة
+async function adjustFocus(event) {
+    if (videoTrack) {
+        try {
+            const rect = event.target.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+
+            await videoTrack.applyConstraints({
+                advanced: [{ focusMode: "manual", focusPointX: x, focusPointY: y }]
+            });
+
+            console.log(`تم ضبط التركيز على: X=${x}, Y=${y}`);
+        } catch (err) {
+            console.error("فشل ضبط التركيز:", err);
+        }
+    }
+}
+
 
 
 // التحقق من صحة الباركود
