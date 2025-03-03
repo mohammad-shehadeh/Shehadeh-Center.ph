@@ -702,20 +702,24 @@ input[type="submit"]:disabled {
     });
   
 // بدء الماسح
+let videoTrack; // تعريف متغير لتخزين مسار الفيديو
+let currentZoom = 1; // تخزين قيمة الزوم الحالية
+
 function startScanner() {
     startScannerButton.disabled = true;
     statusMessage.textContent = '';
 
     scannerContainer.style.display = 'block';
 
-    // إعداد قيود الكاميرا دون أي تعديل تلقائي
+    // إعداد قيود الكاميرا بدون أي ضبط تلقائي
     const constraints = {
         video: {
             facingMode: 'environment',
             width: { ideal: 1920 },
             height: { ideal: 1080 },
             aspectRatio: { ideal: 16 / 9 },
-            focusMode: "continuous" // تأكيد أن التركيز تلقائي فقط دون تغيير الزوم
+            focusMode: "continuous", // ضبط التركيز المستمر فقط
+            zoom: currentZoom // الحفاظ على نفس مستوى التكبير عند إعادة التهيئة
         }
     };
 
@@ -724,19 +728,20 @@ function startScanner() {
             const videoElement = document.querySelector('#interactive video');
             if (videoElement) {
                 videoElement.srcObject = stream;
+                videoTrack = stream.getVideoTracks()[0];
 
-                const videoTrack = stream.getVideoTracks()[0];
                 const capabilities = videoTrack.getCapabilities();
-
-                // إعداد شريط التحكم في التكبير (يدوي فقط)
                 const zoomSlider = document.getElementById('zoom-slider');
+
                 if (zoomSlider && capabilities.zoom) {
                     zoomSlider.min = capabilities.zoom.min;
                     zoomSlider.max = capabilities.zoom.max;
                     zoomSlider.step = 0.1;
-                    zoomSlider.value = capabilities.zoom.min; // ضبط التكبير على أدنى قيمة
+                    zoomSlider.value = currentZoom; // الحفاظ على الزوم عند إعادة التهيئة
+
                     zoomSlider.addEventListener('input', () => {
-                        setZoom(videoTrack, parseFloat(zoomSlider.value));
+                        currentZoom = parseFloat(zoomSlider.value);
+                        setZoom(currentZoom);
                     });
                 }
             }
@@ -756,7 +761,7 @@ function startScanner() {
                 constraints: constraints.video,
             },
             locator: {
-                patchSize: 'medium', // تحسين الأداء
+                patchSize: 'medium',
                 halfSample: true
             },
             decoder: {
@@ -790,13 +795,17 @@ function startScanner() {
     });
 }
 
-// دالة لضبط التكبير يدويًا فقط
-async function setZoom(videoTrack, zoomValue) {
-    try {
-        await videoTrack.applyConstraints({ advanced: [{ zoom: zoomValue }] });
-        console.log(`تم ضبط التكبير على: ${zoomValue}`);
-    } catch (err) {
-        console.error("فشل ضبط التكبير:", err);
+// وظيفة لضبط التكبير يدويًا ومنع التغيير التلقائي
+async function setZoom(zoomValue) {
+    if (videoTrack) {
+        try {
+            await videoTrack.applyConstraints({
+                advanced: [{ zoom: zoomValue }]
+            });
+            console.log(`تم ضبط التكبير على: ${zoomValue}`);
+        } catch (err) {
+            console.error("فشل ضبط التكبير:", err);
+        }
     }
 }
 
