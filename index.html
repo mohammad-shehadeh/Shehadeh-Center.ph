@@ -638,6 +638,28 @@ input[type="submit"]:disabled {
         filter: drop-shadow(0 0 5px #FFA07A); /* العودة إلى التوهج الخفيف بلون برتقالي فاتح */
     }
 }
+#zoom-controls-barcode {
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* مسافة بين الأزرار */
+    margin-top: 10px;
+}
+
+.zoom-btn {
+    background-color: #007bff; /* نفس لون زر AI Scanner */
+    color: white;
+    border: none;
+    padding: 6px 12px; /* تصغير الحجم */
+    font-size: 14px; /* جعل النص أصغر */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.zoom-btn:hover {
+    background-color: #0056b3;
+}
+
   </style>
 </head>
 <body>
@@ -652,9 +674,9 @@ input[type="submit"]:disabled {
   </div>
 
   <div id="zoom-controls-barcode">
-    <button id="zoom-in-barcode" onclick="zoomIn()">🔍 تكبير</button>
-    <button id="zoom-out-barcode" onclick="zoomOut()">🔎 تصغير</button>
-    <button id="reset-zoom-barcode" onclick="resetZoom()">🔄 إعادة الضبط</button>
+    <button id="zoom-in-barcode" class="zoom-btn">🔍 تكبير</button>
+    <button id="zoom-out-barcode" class="zoom-btn">🔎 تصغير</button>
+    <button id="reset-zoom-barcode" class="zoom-btn">🔄 إعادة الضبط</button>
 </div>
 
   <div class="popup" id="result-popup">
