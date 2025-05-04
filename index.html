@@ -572,11 +572,48 @@
             </div>
 
             <div id="barcode-tab" class="tab-content active">
-                <!-- محتوى تبويب الباركود -->
+                <form id="barcode-form">
+                    <div class="form-group">
+                        <label for="barcode-input"><i class="fas fa-qrcode"></i> أدخل الباركود:</label>
+                        <input type="text" id="barcode-input" placeholder="مسح الباركود أو إدخاله يدويًا" autocomplete="off">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" id="start-scanner" class="btn"><i class="fas fa-camera"></i> بدء الماسح الضوئي</button>
+                        <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> بحث</button>
+                    </div>
+                </form>
+
+                <div id="scanner-container" class="scanner-container">
+                    <div id="interactive" class="viewport">
+                        <video playsinline></video>
+                        <div class="scan-line"></div>
+                        <div class="scanner-overlay">
+                            <div class="scanner-frame"></div>
+                        </div>
+                    </div>
+                    <div class="scanner-zoom-controls">
+                        <button id="zoom-out-barcode" class="zoom-btn" title="تصغير"><i class="fas fa-search-minus"></i></button>
+                        <button id="zoom-reset-barcode" class="zoom-btn" title="إعادة الضبط"><i class="fas fa-expand-arrows-alt"></i></button>
+                        <button id="zoom-in-barcode" class="zoom-btn" title="تكبير"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                </div>
+
+                <div id="status-message" class="status-message"></div>
             </div>
 
             <div id="name-tab" class="tab-content">
-                <!-- محتوى تبويب الاسم -->
+                <form id="name-search-form">
+                    <div class="form-group">
+                        <label for="name-input"><i class="fas fa-tag"></i> أدخل اسم المنتج:</label>
+                        <input type="text" id="name-input" placeholder="اسم المنتج أو جزء منه" autocomplete="off">
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn"><i class="fas fa-search"></i> بحث</button>
+                    </div>
+                </form>
+
+                <div id="name-search-results" class="search-results" style="margin-top: 20px;"></div>
             </div>
         </section>
 
@@ -590,7 +627,19 @@
 
     <div id="result-popup" class="result-popup">
         <div class="popup-content">
-            <!-- محتوى البوب أب -->
+            <div class="popup-header">
+                <h2 class="popup-title"><i class="fas fa-info-circle"></i> تفاصيل المنتج</h2>
+                <button class="close-popup" id="close-popup">&times;</button>
+            </div>
+            
+            <div class="product-info" id="product-info">
+                <!-- سيتم ملؤه بالنتائج -->
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" id="print-result"><i class="fas fa-print"></i> طباعة</button>
+                <button class="btn btn-secondary" id="close-result">إغلاق</button>
+            </div>
         </div>
     </div>
 
@@ -598,664 +647,635 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script>
-        // الكود JavaScript الأصلي الخاص بك هنا
-document.addEventListener('DOMContentLoaded', function() {
-    // عناصر واجهة المستخدم
-    const elements = {
-        tabButtons: document.querySelectorAll('.tab-btn'),
-        tabContents: document.querySelectorAll('.tab-content'),
-        barcodeInput: document.getElementById('barcode-input'),
-        nameInput: document.getElementById('name-input'),
-        popup: document.getElementById('result-popup'),
-        startScannerButton: document.getElementById('start-scanner'),
-        statusMessage: document.getElementById('status-message'),
-        scannerContainer: document.getElementById('scanner-container'),
-        barcodeForm: document.getElementById('barcode-form'),
-        nameSearchForm: document.getElementById('name-search-form'),
-        searchHistory: document.getElementById('search-history'),
-        productInfo: document.getElementById('product-info'),
-        closePopupBtn: document.getElementById('close-popup'),
-        closeResultBtn: document.getElementById('close-result'),
-        printResultBtn: document.getElementById('print-result'),
-        zoomInBtn: document.getElementById('zoom-in-barcode'),
-        zoomOutBtn: document.getElementById('zoom-out-barcode'),
-        zoomResetBtn: document.getElementById('zoom-reset-barcode'),
-        nameSearchResults: document.getElementById('name-search-results')
-    };
-
-    // متغيرات النظام
-    const state = {
-        lastReadValues: [],
-        isProcessing: false,
-        scannerActive: false,
-        videoTrack: null,
-        currentZoom: 1,
-        minZoom: 1,
-        maxZoom: 5,
-        zoomStep: 0.5,
-        searchHistoryData: JSON.parse(localStorage.getItem('searchHistory')) || []
-    };
-
-    // تهيئة التطبيق
-    function init() {
-        renderSearchHistory();
-        setupEventListeners();
-        checkCameraPermissions();
-    }
-
-    // التحقق من صلاحيات الكاميرا
-    function checkCameraPermissions() {
-        navigator.permissions && navigator.permissions.query({name: 'camera'})
-            .then(permissionStatus => {
-                permissionStatus.onchange = () => {
-                    if (permissionStatus.state === 'denied') {
-                        showStatusMessage('تم رفض صلاحيات الكاميرا. يرجى تعديل الإعدادات', 'error');
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر واجهة المستخدم
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const barcodeInput = document.getElementById('barcode-input');
+            const nameInput = document.getElementById('name-input');
+            const popup = document.getElementById('result-popup');
+            const startScannerButton = document.getElementById('start-scanner');
+            const statusMessage = document.getElementById('status-message');
+            const scannerContainer = document.getElementById('scanner-container');
+            const barcodeForm = document.getElementById('barcode-form');
+            const nameSearchForm = document.getElementById('name-search-form');
+            const searchHistory = document.getElementById('search-history');
+            const productInfo = document.getElementById('product-info');
+            const closePopupBtn = document.getElementById('close-popup');
+            const closeResultBtn = document.getElementById('close-result');
+            const printResultBtn = document.getElementById('print-result');
+            const zoomInBtn = document.getElementById('zoom-in-barcode');
+            const zoomOutBtn = document.getElementById('zoom-out-barcode');
+            const zoomResetBtn = document.getElementById('zoom-reset-barcode');
+            
+            // متغيرات النظام
+            let lastReadValues = [];
+            let isProcessing = false;
+            let scannerActive = false;
+            let videoTrack = null;
+            let currentZoom = 1;
+            let minZoom = 1;
+            let maxZoom = 5;
+            let zoomStep = 0.5;
+            let searchHistoryData = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            
+            // تهيئة سجل البحث
+            renderSearchHistory();
+            
+            // تبديل التبويبات
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // إزالة النشاط من جميع الأزرار والمحتويات
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // إضافة النشاط للعناصر المحددة
+                    button.classList.add('active');
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // إيقاف الماسح إذا كان نشطًا
+                    if (scannerActive) {
+                        stopScanner();
                     }
-                };
+                });
             });
-    }
-
-    // إعداد مستمعات الأحداث
-    function setupEventListeners() {
-        // تبديل التبويبات
-        elements.tabButtons.forEach(button => {
-            button.addEventListener('click', () => switchTab(button));
-        });
-        
-        // بدء/إيقاف الماسح الضوئي
-        elements.startScannerButton.addEventListener('click', toggleScanner);
-        
-        // التحكم في التكبير
-        elements.zoomInBtn.addEventListener('click', zoomIn);
-        elements.zoomOutBtn.addEventListener('click', zoomOut);
-        elements.zoomResetBtn.addEventListener('click', resetZoom);
-        
-        // إدارة النافذة المنبثقة
-        elements.closePopupBtn.addEventListener('click', closePopup);
-        elements.closeResultBtn.addEventListener('click', closePopup);
-        elements.printResultBtn.addEventListener('click', printResult);
-        
-        // نماذج البحث
-        elements.barcodeForm.addEventListener('submit', handleBarcodeSubmit);
-        elements.nameSearchForm.addEventListener('submit', handleNameSearchSubmit);
-        
-        // إغلاق الماسح عند الضغط على ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && state.scannerActive) {
-                stopScanner();
-            }
-        });
-    }
-
-    // تبديل التبويبات
-    function switchTab(button) {
-        elements.tabButtons.forEach(btn => btn.classList.remove('active'));
-        elements.tabContents.forEach(content => content.classList.remove('active'));
-        
-        button.classList.add('active');
-        const tabId = button.getAttribute('data-tab');
-        document.getElementById(tabId).classList.add('active');
-        
-        if (state.scannerActive) {
-            stopScanner();
-        }
-    }
-
-    // تبديل حالة الماسح
-    function toggleScanner() {
-        if (state.scannerActive) {
-            stopScanner();
-        } else {
-            startScanner();
-        }
-    }
-
-    // بدء الماسح الضوئي
-    async function startScanner() {
-        try {
-            elements.startScannerButton.disabled = true;
-            showStatusMessage('جاري تهيئة الماسح الضوئي...', 'success');
-            elements.scannerContainer.style.display = 'block';
             
-            const constraints = {
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    aspectRatio: { ideal: 16/9 },
-                    focusMode: "continuous",
-                    zoom: state.currentZoom
-                }
-            };
+            // بدء الماسح الضوئي
+            startScannerButton.addEventListener('click', startScanner);
             
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            const videoElement = document.querySelector('#interactive video');
+            // التحكم في التكبير
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            zoomResetBtn.addEventListener('click', resetZoom);
             
-            if (videoElement) {
-                videoElement.srcObject = stream;
-                state.videoTrack = stream.getVideoTracks()[0];
-                setupCameraCapabilities();
-                setupFocusHandlers(videoElement);
-            }
+            // إدارة النافذة المنبثقة
+            closePopupBtn.addEventListener('click', closePopup);
+            closeResultBtn.addEventListener('click', closePopup);
+            printResultBtn.addEventListener('click', printResult);
             
-            await initQuagga(constraints);
-            state.scannerActive = true;
-            showStatusMessage('الماسح الضوئي جاهز. قم بتوجيه الكاميرا نحو الباركود', 'success');
-        } catch (error) {
-            handleScannerError(error);
-        }
-    }
-
-    // إعداد إمكانيات الكاميرا
-    function setupCameraCapabilities() {
-        if (state.videoTrack) {
-            const capabilities = state.videoTrack.getCapabilities();
-            if (capabilities.zoom) {
-                state.minZoom = capabilities.zoom.min || 1;
-                state.maxZoom = capabilities.zoom.max || 5;
-                state.zoomStep = capabilities.zoom.step || 0.5;
-            }
-            updateZoomButtons();
-        }
-    }
-
-    // إعداد معالجات التركيز
-    function setupFocusHandlers(videoElement) {
-        videoElement.addEventListener("touchstart", adjustFocus);
-        videoElement.addEventListener("click", adjustFocus);
-    }
-
-    // تهيئة Quagga.js
-    function initQuagga(constraints) {
-        return new Promise((resolve, reject) => {
-            Quagga.init({
-                inputStream: {
-                    name: 'Live',
-                    type: 'LiveStream',
-                    target: document.querySelector('#interactive'),
-                    constraints: constraints.video,
-                },
-                locator: {
-                    patchSize: 'medium',
-                    halfSample: true
-                },
-                decoder: {
-                    readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'code_39_vin_reader', 'codabar_reader'],
-                    multiple: false
-                },
-                locate: true,
-                numOfWorkers: navigator.hardwareConcurrency || 4,
-                frequency: 10
-            }, function(err) {
-                if (err) {
-                    reject(err);
+            // البحث بالباركود
+            barcodeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const barcodeValue = barcodeInput.value.trim();
+                if (!barcodeValue) {
+                    showStatusMessage('الرجاء إدخال الباركود', 'error');
                     return;
                 }
-                Quagga.start();
-                setupQuaggaDetection();
-                resolve();
+                searchProduct(barcodeValue, 'barcode');
             });
-        });
-    }
-
-    // إعداد اكتشاف Quagga
-    function setupQuaggaDetection() {
-        Quagga.onDetected(function(data) {
-            const code = data.codeResult.code;
-            if (isValidBarcode(code)) {
-                processBarcode(code);
-            } else {
-                console.warn('باركود غير صالح، جاري محاولة قراءة النص...');
-                readBarcodeWithOCR();
-            }
-        });
-    }
-
-    // معالجة أخطاء الماسح
-    function handleScannerError(error) {
-        console.error('خطأ في تشغيل الماسح:', error);
-        showStatusMessage('خطأ في تشغيل الماسح. يرجى التحقق من الصلاحيات', 'error');
-        elements.startScannerButton.disabled = false;
-        elements.scannerContainer.style.display = 'none';
-    }
-
-    // إيقاف الماسح الضوئي
-    function stopScanner() {
-        if (state.scannerActive) {
-            Quagga.stop();
-            state.scannerActive = false;
-            state.lastReadValues = [];
-            elements.startScannerButton.disabled = false;
             
-            const videoElement = document.querySelector('#interactive video');
-            if (videoElement && videoElement.srcObject) {
-                videoElement.srcObject.getTracks().forEach(track => track.stop());
-            }
-            
-            elements.scannerContainer.style.display = 'none';
-            showStatusMessage('', '');
-        }
-    }
-
-    // التحقق من صحة الباركود
-    function isValidBarcode(code) {
-        if (!code) return false;
-        
-        if (!isCompleteBarcode(code)) {
-            console.warn('الباركود غير مكتمل أو مغطى');
-            return false;
-        }
-        
-        if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
-        
-        state.lastReadValues.push(code);
-        if (state.lastReadValues.length > 3) state.lastReadValues.shift();
-        
-        return state.lastReadValues.every((val) => val === code);
-    }
-
-    // التحقق من اكتمال الباركود
-    function isCompleteBarcode(code) {
-        const minLength = 8;
-        const maxLength = 13;
-        return code.length >= minLength && code.length <= maxLength;
-    }
-
-    // التحقق من checksum لـ EAN-13
-    function isValidEAN13Checksum(code) {
-        let sum = 0;
-        for (let i = 0; i < 12; i++) {
-            sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
-        }
-        const checksum = (10 - (sum % 10)) % 10;
-        return checksum === parseInt(code[12]);
-    }
-
-    // معالجة الباركود
-    function processBarcode(code) {
-        if (state.isProcessing) return;
-        state.isProcessing = true;
-        
-        if (elements.barcodeInput.value !== code) {
-            elements.barcodeInput.value = code;
-        }
-        
-        showStatusMessage(`تم اكتشاف باركود: ${code}`, 'success');
-        
-        setTimeout(() => {
-            stopScanner();
-            searchProduct(code, 'barcode');
-            state.isProcessing = false;
-        }, 300);
-    }
-
-    // معالجة إرسال نموذج الباركود
-    function handleBarcodeSubmit(e) {
-        e.preventDefault();
-        const barcodeValue = elements.barcodeInput.value.trim();
-        if (!barcodeValue) {
-            showStatusMessage('الرجاء إدخال الباركود', 'error');
-            return;
-        }
-        searchProduct(barcodeValue, 'barcode');
-    }
-
-    // معالجة إرسال نموذج البحث بالاسم
-    function handleNameSearchSubmit(e) {
-        e.preventDefault();
-        const nameValue = elements.nameInput.value.trim();
-        if (!nameValue) {
-            showStatusMessage('الرجاء إدخال اسم المنتج', 'error');
-            return;
-        }
-        searchProduct(nameValue, 'name');
-    }
-
-    // البحث عن المنتج
-    async function searchProduct(searchValue, searchType) {
-        showStatusMessage('جاري البحث...', 'success');
-        
-        try {
-            const response = await fetch('products.txt');
-            if (!response.ok) throw new Error('فشل تحميل ملف البيانات');
-            
-            const data = await response.text();
-            const products = parseProductData(data);
-            const foundProducts = filterProducts(products, searchValue, searchType);
-            
-            if (foundProducts.length > 0) {
-                if (searchType === 'barcode') {
-                    displayProductInfo(foundProducts[0]);
-                    addToSearchHistory(foundProducts[0]);
-                } else {
-                    displayNameSearchResults(foundProducts);
+            // البحث بالاسم
+            nameSearchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nameValue = nameInput.value.trim();
+                if (!nameValue) {
+                    showStatusMessage('الرجاء إدخال اسم المنتج', 'error');
+                    return;
                 }
-            } else {
-                if (searchType === 'barcode') {
-                    displayProductInfo(null);
-                } else {
-                    displayNameSearchResults([]);
+                searchProduct(nameValue, 'name');
+            });
+            
+            // بدء الماسح الضوئي
+            function startScanner() {
+                startScannerButton.disabled = true;
+                showStatusMessage('جاري تهيئة الماسح الضوئي...', 'success');
+                scannerContainer.style.display = 'block';
+                
+                // قيود الكاميرا مع تحسينات للقراءة
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        aspectRatio: { ideal: 16/9 },
+                        focusMode: "continuous",
+                        zoom: currentZoom
+                    }
+                };
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function(stream) {
+                        const videoElement = document.querySelector('#interactive video');
+                        if (videoElement) {
+                            videoElement.srcObject = stream;
+                            videoTrack = stream.getVideoTracks()[0];
+                            
+                            // التحقق من إمكانيات الكاميرا
+                            const capabilities = videoTrack.getCapabilities();
+                            if (capabilities.zoom) {
+                                minZoom = capabilities.zoom.min || 1;
+                                maxZoom = capabilities.zoom.max || 5;
+                                zoomStep = capabilities.zoom.step || 0.5;
+                            }
+                            
+                            updateZoomButtons();
+                            
+                            // إضافة مستمعات للتركيز
+                            videoElement.addEventListener("touchstart", adjustFocus);
+                            videoElement.addEventListener("click", adjustFocus);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('خطأ في تشغيل الكاميرا:', error);
+                        showStatusMessage('خطأ في تشغيل الكاميرا. يرجى التحقق من الصلاحيات', 'error');
+                        startScannerButton.disabled = false;
+                        scannerContainer.style.display = 'none';
+                    });
+                
+                // تهيئة Quagga.js
+                Quagga.init({
+                    inputStream: {
+                        name: 'Live',
+                        type: 'LiveStream',
+                        target: document.querySelector('#interactive'),
+                        constraints: constraints.video,
+                    },
+                    locator: {
+                        patchSize: 'medium',
+                        halfSample: true
+                    },
+                    decoder: {
+                        readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'code_39_vin_reader', 'codabar_reader'],
+                        multiple: false
+                    },
+                    locate: true,
+                    numOfWorkers: navigator.hardwareConcurrency || 4,
+                    frequency: 10
+                }, function(err) {
+                    if (err) {
+                        console.error('Error initializing Quagga:', err);
+                        showStatusMessage('خطأ في تشغيل الماسح الضوئي', 'error');
+                        startScannerButton.disabled = false;
+                        scannerContainer.style.display = 'none';
+                        return;
+                    }
+                    Quagga.start();
+                    scannerActive = true;
+                    showStatusMessage('الماسح الضوئي جاهز. قم بتوجيه الكاميرا نحو الباركود', 'success');
+                });
+                
+                Quagga.onDetected(function(data) {
+                    const code = data.codeResult.code;
+                    if (isValidBarcode(code)) {
+                        processBarcode(code);
+                    } else {
+                        console.warn('باركود غير صالح، جاري محاولة قراءة النص...');
+                        readBarcodeWithOCR();
+                    }
+                });
+            }
+            
+            // إيقاف الماسح الضوئي
+            function stopScanner() {
+                if (scannerActive) {
+                    Quagga.stop();
+                    scannerActive = false;
+                    lastReadValues = [];
+                    startScannerButton.disabled = false;
+                    
+                    // إيقاف تدفق الفيديو
+                    const videoElement = document.querySelector('#interactive video');
+                    if (videoElement && videoElement.srcObject) {
+                        videoElement.srcObject.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    scannerContainer.style.display = 'none';
+                    showStatusMessage('', '');
                 }
             }
             
-            showStatusMessage('', '');
-        } catch (error) {
-            console.error('Error:', error);
-            showStatusMessage(error.message, 'error');
-        }
-    }
-
-    // تحليل بيانات المنتج
-    function parseProductData(data) {
-        return data.split('\n').map(line => {
-            const [productName, productPrice, barcode] = line.split('/').map(item => item.trim());
-            return { productName, productPrice, barcode };
-        });
-    }
-
-    // تصفية المنتجات حسب البحث
-    function filterProducts(products, searchValue, searchType) {
-        return products.filter(product => {
-            if (searchType === 'barcode') {
-                return product.barcode === searchValue;
-            } else {
-                return product.productName.toLowerCase().includes(searchValue.toLowerCase());
+            // التحقق من صحة الباركود
+            function isValidBarcode(code) {
+                if (!code) return false;
+                
+                // تحقق من أن الباركود كامل وغير مغطى
+                if (!isCompleteBarcode(code)) {
+                    console.warn('الباركود غير مكتمل أو مغطى');
+                    return false;
+                }
+                
+                // استخدام خوارزمية checksum إذا كان الباركود يحتوي على معيار يدعم ذلك
+                if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
+                
+                lastReadValues.push(code);
+                if (lastReadValues.length > 3) lastReadValues.shift();
+                
+                return lastReadValues.every((val) => val === code);
             }
-        });
-    }
-
-    // عرض معلومات المنتج
-    function displayProductInfo(product) {
-        if (product) {
-            elements.productInfo.innerHTML = `
-                <div class="info-row product-name">
-                    <span class="info-label">اسم المنتج:</span>
-                    <span class="info-value">${product.productName}</span>
-                </div>
-                <div class="info-row product-price">
-                    <span class="info-label">السعر:</span>
-                    <span class="info-value">${product.productPrice} ر.س</span>
-                </div>
-                <div class="info-row product-barcode">
-                    <span class="info-label">الباركود:</span>
-                    <span class="info-value">${product.barcode}</span>
-                </div>
-            `;
-        } else {
-            elements.productInfo.innerHTML = `
-                <div class="not-found">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>المنتج غير موجود في قاعدة البيانات</p>
-                </div>
-            `;
-        }
-        
-        openPopup();
-    }
-
-    // عرض نتائج البحث بالاسم
-    function displayNameSearchResults(products) {
-        if (products.length > 0) {
-            let html = '<div class="search-results-list">';
-            html += `<h3>تم العثور على ${products.length} نتيجة:</h3>`;
             
-            products.forEach(product => {
-                html += `
-                    <div class="product-result" data-barcode="${product.barcode}">
-                        <h4>${product.productName}</h4>
-                        <p>السعر: ${product.productPrice} ر.س | الباركود: ${product.barcode}</p>
-                        <button class="btn btn-secondary view-product" style="margin-top: 5px;">عرض التفاصيل</button>
+            // التحقق من اكتمال الباركود
+            function isCompleteBarcode(code) {
+                const minLength = 8;
+                const maxLength = 13;
+                
+                if (code.length < minLength || code.length > maxLength) {
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // التحقق من checksum لـ EAN-13
+            function isValidEAN13Checksum(code) {
+                let sum = 0;
+                for (let i = 0; i < 12; i++) {
+                    sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
+                }
+                const checksum = (10 - (sum % 10)) % 10;
+                return checksum === parseInt(code[12]);
+            }
+            
+            // معالجة الباركود
+            function processBarcode(code) {
+                if (isProcessing) return;
+                isProcessing = true;
+                
+                if (barcodeInput.value !== code) {
+                    barcodeInput.value = code;
+                }
+                
+                showStatusMessage(`تم اكتشاف باركود: ${code}`, 'success');
+                
+                setTimeout(() => {
+                    stopScanner();
+                    searchProduct(code, 'barcode');
+                    isProcessing = false;
+                }, 300);
+            }
+            
+            // قراءة النص باستخدام OCR
+            function readBarcodeWithOCR() {
+                const videoElement = document.querySelector('#interactive video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const width = videoElement.videoWidth;
+                const height = videoElement.videoHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(videoElement, 0, 0, width, height);
+                
+                showStatusMessage('جاري قراءة النص...', 'success');
+                
+                Tesseract.recognize(
+                    canvas.toDataURL(),
+                    'eng',
+                    {
+                        logger: m => console.log(m),
+                    }
+                ).then(({ data: { text } }) => {
+                    const extractedText = text.replace(/\s+/g, '').trim();
+                    if (extractedText) {
+                        console.log('النص المستخرج:', extractedText);
+                        if (isValidBarcode(extractedText)) {
+                            processBarcode(extractedText);
+                        } else {
+                            showStatusMessage('تعذر قراءة الباركود. يرجى المحاولة مرة أخرى', 'error');
+                        }
+                    }
+                }).catch(err => {
+                    console.error('خطأ في OCR:', err);
+                    showStatusMessage('خطأ في قراءة النص', 'error');
+                });
+            }
+            
+            // البحث عن المنتج
+            function searchProduct(searchValue, searchType) {
+                showStatusMessage('جاري البحث...', 'success');
+                
+                fetch('test.txt')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('فشل تحميل ملف البيانات');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        const lines = data.split('\n');
+                        let foundProducts = [];
+                        
+                        for (let line of lines) {
+                            const [productName, productPrice, barcode] = line.split('/').map(item => item.trim());
+                            if (searchType === 'barcode' && barcode === searchValue) {
+                                foundProducts.push({ productName, productPrice, barcode });
+                                break;
+                            } else if (searchType === 'name' && productName.toLowerCase().includes(searchValue.toLowerCase())) {
+                                foundProducts.push({ productName, productPrice, barcode });
+                            }
+                        }
+                        
+                        if (foundProducts.length > 0) {
+                            if (searchType === 'barcode') {
+                                displayProductInfo(foundProducts[0]);
+                                addToSearchHistory(foundProducts[0]);
+                            } else {
+                                displayNameSearchResults(foundProducts);
+                            }
+                        } else {
+                            if (searchType === 'barcode') {
+                                displayProductInfo(null);
+                            } else {
+                                displayNameSearchResults([]);
+                            }
+                        }
+                        
+                        showStatusMessage('', '');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showStatusMessage(error.message, 'error');
+                    });
+            }
+            
+            // عرض معلومات المنتج
+            function displayProductInfo(product) {
+                const productInfo = document.getElementById('product-info');
+                
+                if (product) {
+                    productInfo.innerHTML = `
+                        <div class="info-row product-name">
+                            <span class="info-label">اسم المنتج:</span>
+                            <span class="info-value">${product.productName}</span>
+                        </div>
+                        <div class="info-row product-price">
+                            <span class="info-label">السعر:</span>
+                            <span class="info-value">${product.productPrice} ر.س</span>
+                        </div>
+                        <div class="info-row product-barcode">
+                            <span class="info-label">الباركود:</span>
+                            <span class="info-value">${product.barcode}</span>
+                        </div>
+                    `;
+                } else {
+                    productInfo.innerHTML = `
+                        <div class="not-found">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>المنتج غير موجود في قاعدة البيانات</p>
+                        </div>
+                    `;
+                }
+                
+                openPopup();
+            }
+            
+            // عرض نتائج البحث بالاسم
+            function displayNameSearchResults(products) {
+                const resultsContainer = document.getElementById('name-search-results');
+                
+                if (products.length > 0) {
+                    let html = '<div class="search-results-list">';
+                    html += `<h3>تم العثور على ${products.length} نتيجة:</h3>`;
+                    
+                    products.forEach(product => {
+                        html += `
+                            <div class="product-result" data-barcode="${product.barcode}">
+                                <h4>${product.productName}</h4>
+                                <p>السعر: ${product.productPrice} ر.س | الباركود: ${product.barcode}</p>
+                                <button class="btn btn-secondary view-product" style="margin-top: 5px;">عرض التفاصيل</button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    resultsContainer.innerHTML = html;
+                    
+                    // إضافة مستمعات الأحداث للأزرار
+                    document.querySelectorAll('.view-product').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const barcode = this.closest('.product-result').getAttribute('data-barcode');
+                            const product = products.find(p => p.barcode === barcode);
+                            displayProductInfo(product);
+                            addToSearchHistory(product);
+                        });
+                    });
+                } else {
+                    resultsContainer.innerHTML = `
+                        <div class="not-found">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>لا توجد منتجات مطابقة للبحث</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // إضافة إلى سجل البحث
+            function addToSearchHistory(product) {
+                if (!product) return;
+                
+                // تجنب التكرار
+                const existingIndex = searchHistoryData.findIndex(item => item.barcode === product.barcode);
+                if (existingIndex !== -1) {
+                    searchHistoryData.splice(existingIndex, 1);
+                }
+                
+                // إضافة إلى بداية المصفوفة
+                searchHistoryData.unshift({
+                    name: product.productName,
+                    price: product.productPrice,
+                    barcode: product.barcode,
+                    date: new Date().toISOString()
+                });
+                
+                // الحفاظ على آخر 10 عمليات بحث فقط
+                if (searchHistoryData.length > 10) {
+                    searchHistoryData.pop();
+                }
+                
+                // حفظ في localStorage
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistoryData));
+                
+                // تحديث العرض
+                renderSearchHistory();
+            }
+            
+            // عرض سجل البحث
+            function renderSearchHistory() {
+                searchHistory.innerHTML = '';
+                
+                if (searchHistoryData.length === 0) {
+                    searchHistory.innerHTML = '<li style="text-align: center; padding: 20px; color: #666;">لا توجد عمليات بحث سابقة</li>';
+                    return;
+                }
+                
+                searchHistoryData.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.innerHTML = `
+                        <div class="history-item-info">
+                            <div class="history-item-name">${item.name}</div>
+                            <div class="history-item-details">
+                                <span>${item.price} ر.س</span>
+                                <span>${formatDate(item.date)}</span>
+                                <span>${item.barcode}</span>
+                            </div>
+                        </div>
+                        <div class="history-item-actions">
+                            <button class="action-btn view" title="عرض"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn delete" title="حذف"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    
+                    // إضافة مستمعات الأحداث
+                    li.querySelector('.view').addEventListener('click', () => {
+                        searchProduct(item.barcode, 'barcode');
+                    });
+                    
+                    li.querySelector('.delete').addEventListener('click', () => {
+                        deleteSearchHistoryItem(item.barcode);
+                    });
+                    
+                    searchHistory.appendChild(li);
+                });
+            }
+            
+            // حذف عنصر من سجل البحث
+            function deleteSearchHistoryItem(barcode) {
+                searchHistoryData = searchHistoryData.filter(item => item.barcode !== barcode);
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistoryData));
+                renderSearchHistory();
+            }
+            
+            // تنسيق التاريخ
+            function formatDate(isoString) {
+                const date = new Date(isoString);
+                return date.toLocaleString('ar-SA');
+            }
+            
+            // عرض رسالة الحالة
+            function showStatusMessage(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                if (type) {
+                    statusMessage.classList.add(type);
+                }
+            }
+            
+            // فتح النافذة المنبثقة
+            function openPopup() {
+                popup.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // إغلاق النافذة المنبثقة
+            function closePopup() {
+                popup.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            // طباعة النتيجة
+            function printResult() {
+                const printContent = `
+                    <div style="font-family: 'Tajawal', sans-serif; text-align: right; direction: rtl; padding: 20px;">
+                        <h2 style="color: #4361ee; border-bottom: 2px solid #4361ee; padding-bottom: 10px; margin-bottom: 20px;">
+                            تفاصيل المنتج
+                        </h2>
+                        ${document.getElementById('product-info').innerHTML}
+                        <p style="margin-top: 30px; font-size: 12px; color: #666; text-align: left;">
+                            تم الطباعة في ${new Date().toLocaleString('ar-SA')}
+                        </p>
                     </div>
                 `;
-            });
-            
-            html += '</div>';
-            elements.nameSearchResults.innerHTML = html;
-            
-            document.querySelectorAll('.view-product').forEach(button => {
-                button.addEventListener('click', function() {
-                    const barcode = this.closest('.product-result').getAttribute('data-barcode');
-                    const product = products.find(p => p.barcode === barcode);
-                    displayProductInfo(product);
-                    addToSearchHistory(product);
-                });
-            });
-        } else {
-            elements.nameSearchResults.innerHTML = `
-                <div class="not-found">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>لا توجد منتجات مطابقة للبحث</p>
-                </div>
-            `;
-        }
-    }
-
-    // إضافة إلى سجل البحث
-    function addToSearchHistory(product) {
-        if (!product) return;
-        
-        const existingIndex = state.searchHistoryData.findIndex(item => item.barcode === product.barcode);
-        if (existingIndex !== -1) {
-            state.searchHistoryData.splice(existingIndex, 1);
-        }
-        
-        state.searchHistoryData.unshift({
-            name: product.productName,
-            price: product.productPrice,
-            barcode: product.barcode,
-            date: new Date().toISOString()
-        });
-        
-        if (state.searchHistoryData.length > 10) {
-            state.searchHistoryData.pop();
-        }
-        
-        localStorage.setItem('searchHistory', JSON.stringify(state.searchHistoryData));
-        renderSearchHistory();
-    }
-
-    // عرض سجل البحث
-    function renderSearchHistory() {
-        elements.searchHistory.innerHTML = '';
-        
-        if (state.searchHistoryData.length === 0) {
-            elements.searchHistory.innerHTML = '<li style="text-align: center; padding: 20px; color: #666;">لا توجد عمليات بحث سابقة</li>';
-            return;
-        }
-        
-        state.searchHistoryData.forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'history-item';
-            li.innerHTML = `
-                <div class="history-item-info">
-                    <div class="history-item-name">${item.name}</div>
-                    <div class="history-item-details">
-                        <span>${item.price} ر.س</span>
-                        <span>${formatDate(item.date)}</span>
-                        <span>${item.barcode}</span>
-                    </div>
-                </div>
-                <div class="history-item-actions">
-                    <button class="action-btn view" title="عرض"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn delete" title="حذف"><i class="fas fa-trash"></i></button>
-                </div>
-            `;
-            
-            li.querySelector('.view').addEventListener('click', () => {
-                searchProduct(item.barcode, 'barcode');
-            });
-            
-            li.querySelector('.delete').addEventListener('click', () => {
-                deleteSearchHistoryItem(item.barcode);
-            });
-            
-            elements.searchHistory.appendChild(li);
-        });
-    }
-
-    // حذف عنصر من سجل البحث
-    function deleteSearchHistoryItem(barcode) {
-        state.searchHistoryData = state.searchHistoryData.filter(item => item.barcode !== barcode);
-        localStorage.setItem('searchHistory', JSON.stringify(state.searchHistoryData));
-        renderSearchHistory();
-    }
-
-    // التحكم في التكبير
-    async function setZoom(zoomValue) {
-        if (state.videoTrack) {
-            try {
-                await state.videoTrack.applyConstraints({
-                    advanced: [{ zoom: zoomValue }]
-                });
-                state.currentZoom = zoomValue;
-                updateZoomButtons();
-            } catch (err) {
-                console.error("فشل ضبط التكبير:", err);
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>طباعة تفاصيل المنتج</title>
+                            <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+                            <style>
+                                body { margin: 0; padding: 0; }
+                                @media print {
+                                    @page { size: auto; margin: 10mm; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            ${printContent}
+                            <script>
+                                window.onload = function() {
+                                    setTimeout(function() {
+                                        window.print();
+                                        window.close();
+                                    }, 200);
+                                };
+                            </script>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
             }
-        }
-    }
-
-    function zoomIn() {
-        if (state.currentZoom < state.maxZoom) {
-            setZoom(Math.min(state.currentZoom + state.zoomStep, state.maxZoom));
-        }
-    }
-
-    function zoomOut() {
-        if (state.currentZoom > state.minZoom) {
-            setZoom(Math.max(state.currentZoom - state.zoomStep, state.minZoom));
-        }
-    }
-
-    function resetZoom() {
-        setZoom(1);
-    }
-
-    function updateZoomButtons() {
-        if (elements.zoomInBtn && elements.zoomOutBtn) {
-            elements.zoomInBtn.disabled = state.currentZoom >= state.maxZoom;
-            elements.zoomOutBtn.disabled = state.currentZoom <= state.minZoom;
-        }
-    }
-
-    // ضبط التركيز
-    async function adjustFocus(event) {
-        if (state.videoTrack) {
-            try {
-                const rect = event.target.getBoundingClientRect();
-                const x = (event.clientX - rect.left) / rect.width;
-                const y = (event.clientY - rect.top) / rect.height;
-
-                await state.videoTrack.applyConstraints({
-                    advanced: [{ focusMode: "manual", focusPointX: x, focusPointY: y }]
-                });
-            } catch (err) {
-                console.error("فشل ضبط التركيز:", err);
-            }
-        }
-    }
-
-    // قراءة النص باستخدام OCR
-    function readBarcodeWithOCR() {
-        const videoElement = document.querySelector('#interactive video');
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        const width = videoElement.videoWidth;
-        const height = videoElement.videoHeight;
-        
-        canvas.width = width;
-        canvas.height = height;
-        context.drawImage(videoElement, 0, 0, width, height);
-        
-        showStatusMessage('جاري قراءة النص...', 'success');
-        
-        Tesseract.recognize(
-            canvas.toDataURL(),
-            'eng',
-            { logger: m => console.log(m) }
-        ).then(({ data: { text } }) => {
-            const extractedText = text.replace(/\s+/g, '').trim();
-            if (extractedText) {
-                console.log('النص المستخرج:', extractedText);
-                if (isValidBarcode(extractedText)) {
-                    processBarcode(extractedText);
-                } else {
-                    showStatusMessage('تعذر قراءة الباركود. يرجى المحاولة مرة أخرى', 'error');
+            
+            // التحكم في التكبير
+            async function setZoom(zoomValue) {
+                if (videoTrack) {
+                    try {
+                        await videoTrack.applyConstraints({
+                            advanced: [{ zoom: zoomValue }]
+                        });
+                        currentZoom = zoomValue;
+                        updateZoomButtons();
+                    } catch (err) {
+                        console.error("فشل ضبط التكبير:", err);
+                    }
                 }
             }
-        }).catch(err => {
-            console.error('خطأ في OCR:', err);
-            showStatusMessage('خطأ في قراءة النص', 'error');
+            
+            // تكبير
+            function zoomIn() {
+                if (currentZoom < maxZoom) {
+                    setZoom(Math.min(currentZoom + zoomStep, maxZoom));
+                }
+            }
+            
+            // تصغير
+            function zoomOut() {
+                if (currentZoom > minZoom) {
+                    setZoom(Math.max(currentZoom - zoomStep, minZoom));
+                }
+            }
+            
+            // إعادة الضبط
+            function resetZoom() {
+                setZoom(1);
+            }
+            
+            // تحديث أزرار التكبير
+            function updateZoomButtons() {
+                zoomInBtn.disabled = currentZoom >= maxZoom;
+                zoomOutBtn.disabled = currentZoom <= minZoom;
+            }
+            
+            // ضبط التركيز
+            async function adjustFocus(event) {
+                if (videoTrack) {
+                    try {
+                        const rect = event.target.getBoundingClientRect();
+                        const x = (event.clientX - rect.left) / rect.width;
+                        const y = (event.clientY - rect.top) / rect.height;
+                        
+                        await videoTrack.applyConstraints({
+                            advanced: [{ focusMode: "manual", focusPointX: x, focusPointY: y }]
+                        });
+                    } catch (err) {
+                        console.error("فشل ضبط التركيز:", err);
+                    }
+                }
+            }
+            
+            // تسجيل Service Worker للتطبيق التقدمي (PWA)
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful');
+                        })
+                        .catch(err => {
+                            console.log('ServiceWorker registration failed: ', err);
+                        });
+                });
+            }
         });
-    }
-
-    // تنسيق التاريخ
-    function formatDate(isoString) {
-        const date = new Date(isoString);
-        return date.toLocaleString('ar-SA');
-    }
-
-    // عرض رسالة الحالة
-    function showStatusMessage(message, type) {
-        elements.statusMessage.textContent = message;
-        elements.statusMessage.className = 'status-message';
-        if (type) {
-            elements.statusMessage.classList.add(type);
-        }
-    }
-
-    // فتح النافذة المنبثقة
-    function openPopup() {
-        elements.popup.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    // إغلاق النافذة المنبثقة
-    function closePopup() {
-        elements.popup.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    // طباعة النتيجة
-    function printResult() {
-        const printContent = `
-            <div style="font-family: 'Tajawal', sans-serif; text-align: right; direction: rtl; padding: 20px;">
-                <h2 style="color: #4361ee; border-bottom: 2px solid #4361ee; padding-bottom: 10px; margin-bottom: 20px;">
-                    تفاصيل المنتج
-                </h2>
-                ${elements.productInfo.innerHTML}
-                <p style="margin-top: 30px; font-size: 12px; color: #666; text-align: left;">
-                    تم الطباعة في ${new Date().toLocaleString('ar-SA')}
-                </p>
-            </div>
-        `;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>طباعة تفاصيل المنتج</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-                    <style>
-                        body { margin: 0; padding: 0; }
-                        @media print {
-                            @page { size: auto; margin: 10mm; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${printContent}
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() {
-                                window.print();
-                                window.close();
-                            }, 200);
-                        };
-                    </script>
-                </body>
-            </html>
-
-</script>
+    </script>
 </body>
 </html>
