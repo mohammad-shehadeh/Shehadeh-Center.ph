@@ -572,48 +572,11 @@
             </div>
 
             <div id="barcode-tab" class="tab-content active">
-                <form id="barcode-form">
-                    <div class="form-group">
-                        <label for="barcode-input"><i class="fas fa-qrcode"></i> أدخل الباركود:</label>
-                        <input type="text" id="barcode-input" placeholder="مسح الباركود أو إدخاله يدويًا" autocomplete="off">
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button type="button" id="start-scanner" class="btn"><i class="fas fa-camera"></i> بدء الماسح الضوئي</button>
-                        <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> بحث</button>
-                    </div>
-                </form>
-
-                <div id="scanner-container" class="scanner-container">
-                    <div id="interactive" class="viewport">
-                        <video playsinline></video>
-                        <div class="scan-line"></div>
-                        <div class="scanner-overlay">
-                            <div class="scanner-frame"></div>
-                        </div>
-                    </div>
-                    <div class="scanner-zoom-controls">
-                        <button id="zoom-out-barcode" class="zoom-btn" title="تصغير"><i class="fas fa-search-minus"></i></button>
-                        <button id="zoom-reset-barcode" class="zoom-btn" title="إعادة الضبط"><i class="fas fa-expand-arrows-alt"></i></button>
-                        <button id="zoom-in-barcode" class="zoom-btn" title="تكبير"><i class="fas fa-search-plus"></i></button>
-                    </div>
-                </div>
-
-                <div id="status-message" class="status-message"></div>
+                <!-- محتوى تبويب الباركود -->
             </div>
 
             <div id="name-tab" class="tab-content">
-                <form id="name-search-form">
-                    <div class="form-group">
-                        <label for="name-input"><i class="fas fa-tag"></i> أدخل اسم المنتج:</label>
-                        <input type="text" id="name-input" placeholder="اسم المنتج أو جزء منه" autocomplete="off">
-                    </div>
-                    <div class="btn-group">
-                        <button type="submit" class="btn"><i class="fas fa-search"></i> بحث</button>
-                    </div>
-                </form>
-
-                <div id="name-search-results" class="search-results" style="margin-top: 20px;"></div>
+                <!-- محتوى تبويب الاسم -->
             </div>
         </section>
 
@@ -627,26 +590,15 @@
 
     <div id="result-popup" class="result-popup">
         <div class="popup-content">
-            <div class="popup-header">
-                <h2 class="popup-title"><i class="fas fa-info-circle"></i> تفاصيل المنتج</h2>
-                <button class="close-popup" id="close-popup">&times;</button>
-            </div>
-            
-            <div class="product-info" id="product-info">
-                <!-- سيتم ملؤه بالنتائج -->
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn" id="print-result"><i class="fas fa-print"></i> طباعة</button>
-                <button class="btn btn-secondary" id="close-result">إغلاق</button>
-            </div>
+            <!-- محتوى البوب أب -->
         </div>
     </div>
 
     <!-- مكتبات JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-   <script>
+    <script>
+        // الكود JavaScript الأصلي الخاص بك هنا
 document.addEventListener('DOMContentLoaded', function() {
     // عناصر واجهة المستخدم
     const elements = {
