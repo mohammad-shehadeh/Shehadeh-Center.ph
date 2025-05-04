@@ -1,1464 +1,1224 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="نظام البحث الذكي عن المنتجات باستخدام الباركود أو اسم المنتج">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000"> <!-- تغيير لون شريط الحالة -->
+  <meta name="description" content="وصف الموقع هنا"> <!-- وصف الموقع -->
+  <meta name="mobile-web-app-capable" content="yes"> <!-- لتمكين المظهر كـ تطبيق -->
+  <meta name="apple-mobile-web-app-capable" content="yes"> <!-- لتمكين المظهر على أجهزة iOS -->
   
-  <title>نظام البحث الذكي - شحادة</title>
+  <title>Shehadeh AI</title>
 
-  <link rel="icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg">
-  <link rel="apple-touch-icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg">
+  <!-- إضافة أيقونة للموقع تظهر عند إضافته للشاشة الرئيسية -->
+  <link rel="icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg" type="image/gif">
+  <link rel="apple-touch-icon" href="https://www.shutterstock.com/image-vector/generate-ai-artificial-intelligence-logo-600nw-2492648971.jpg" type="image/gif">
+
+  <!-- إضافة ملف manifest -->
   <link rel="manifest" href="/manifest.json">
-  
-  <!-- إضافة خطوط Google -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <!-- مكتبة SweetAlert2 للإشعارات الجميلة -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  
+</head>
+<body>
+  <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" style="display:block; margin-left:auto; margin-right:auto; max-width:60%; height:auto;"> <style>@media (max-width: 768px) {.logo {max-width: 100%;}}</style>
+</body>
+</html>
   <style>
-    :root {
-      --primary-color: #8e0e0e;
-      --secondary-color: #000000;
-      --accent-color: #ff6f61;
-      --text-color: #ffffff;
-      --light-gray: #f5f5f5;
-      --dark-gray: #333333;
-      --success-color: #28a745;
-      --error-color: #dc3545;
-      --warning-color: #ffc107;
-      --info-color: #17a2b8;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-      color: var(--text-color);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-      text-align: center;
-    }
-    
-    /* تأثيرات الخلفية */
-    .bg-pattern {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-      background-size: 30px 30px;
-      z-index: -1;
-      opacity: 0.5;
-    }
-    
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-    }
-    
-    .particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 50%;
-      animation: float 15s infinite linear;
-    }
-    
-    @keyframes float {
-      0% {
-        transform: translateY(0) translateX(0);
-        opacity: 0;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100vh) translateX(100px);
-        opacity: 0;
-      }
-    }
-    
-    /* التصميم العام */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
-    }
-    
-    .header {
-      margin-bottom: 30px;
-      position: relative;
-    }
-    
-    .logo {
-      max-width: 150px;
-      height: auto;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-      animation: pulse 2s infinite ease-in-out;
-    }
-    
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-    
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      color: var(--text-color);
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-      position: relative;
-      display: inline-block;
-    }
-    
-    h1::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 3px;
-      background: var(--accent-color);
-      border-radius: 3px;
-    }
-    
-    /* تصميم الماسح الضوئي */
-    .scanner-section {
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
-    }
-    
-    .scanner-section:hover {
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-      transform: translateY(-5px);
-    }
-    
-    #scanner-container {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      background: #000;
-      display: none;
-    }
-    
-    #scanner-container.active {
-      display: block;
-    }
-    
-    #interactive {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-    
-    #interactive video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .scanner-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0) 20%,
-        rgba(0, 0, 0, 0) 80%,
-        rgba(0, 0, 0, 0.7) 100%
-      );
-      pointer-events: none;
-    }
-    
-    .scanner-frame {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 150px;
-      border: 3px solid var(--accent-color);
-      border-radius: 10px;
-      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5),
-                  0 0 20px var(--accent-color);
-      animation: scanner-frame-pulse 2s infinite ease-in-out;
-    }
-    
-    @keyframes scanner-frame-pulse {
-      0%, 100% {
-        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5),
-                    0 0 20px var(--accent-color);
-      }
-      50% {
-        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5),
-                    0 0 40px var(--accent-color);
-      }
-    }
-    
-    .scanner-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--accent-color);
-      box-shadow: 0 0 10px var(--accent-color);
-      animation: scanner-line 2s infinite linear;
-    }
-    
-    @keyframes scanner-line {
-      0% {
-        top: 0;
-      }
-      100% {
-        top: 100%;
-      }
-    }
-    
-    /* أزرار التحكم */
-    .scanner-controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      padding: 12px 25px;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-      color: white;
-      box-shadow: 0 5px 15px rgba(142, 14, 14, 0.4);
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(142, 14, 14, 0.6);
-    }
-    
-    .btn-primary:active {
-      transform: translateY(1px);
-    }
-    
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    .btn-icon {
-      font-size: 20px;
-    }
-    
-    /* تصميم البحث */
-    .search-section {
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .search-tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .tab-btn {
-      padding: 10px 20px;
-      background: transparent;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 700;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s ease;
-    }
-    
-    .tab-btn.active {
-      color: white;
-    }
-    
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--accent-color);
-      border-radius: 3px 3px 0 0;
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.5s ease;
-    }
-    
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .search-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    
-    .form-group {
-      position: relative;
-    }
-    
-    .search-input {
-      width: 100%;
-      padding: 15px 20px;
-      font-size: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 50px;
-      background: rgba(0, 0, 0, 0.3);
-      color: white;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(5px);
-    }
-    
-    .search-input:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(142, 14, 14, 0.3);
-    }
-    
-    .search-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-    
-    .search-btn {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-      color: white;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(142, 14, 14, 0.4);
-    }
-    
-    .search-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(142, 14, 14, 0.6);
-    }
-    
-    .search-btn:active {
-      transform: translateY(1px);
-    }
-    
-    /* نتائج البحث */
-    .results-section {
-      display: none;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      animation: fadeIn 0.5s ease;
-    }
-    
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .results-title {
-      font-size: 1.5rem;
-      color: var(--text-color);
-    }
-    
-    .results-count {
-      background: var(--primary-color);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 700;
-    }
-    
-    .product-card {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      transition: all 0.3s ease;
-      border-left: 3px solid var(--primary-color);
-    }
-    
-    .product-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      background: rgba(0, 0, 0, 0.4);
-    }
-    
-    .product-image {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .product-image i {
-      font-size: 30px;
-      color: rgba(255, 255, 255, 0.3);
-    }
-    
-    .product-info {
-      flex: 1;
-      text-align: right;
-    }
-    
-    .product-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 5px;
-      color: var(--text-color);
-    }
-    
-    .product-details {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 5px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-    
-    .product-price {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--accent-color);
-    }
-    
-    .product-barcode {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: monospace;
-    }
-    
-    .no-results {
-      text-align: center;
-      padding: 30px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-    
-    /* النافذة المنبثقة */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .popup-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .popup {
-      background: linear-gradient(145deg, #1a1a1a, #000000);
-      border-radius: 15px;
-      width: 90%;
-      max-width: 500px;
-      padding: 30px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-      transform: scale(0.9);
-      opacity: 0;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-    }
-    
-    .popup-overlay.active .popup {
-      transform: scale(1);
-      opacity: 1;
-    }
-    
-    .popup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .popup-title {
-      font-size: 1.5rem;
-      color: var(--text-color);
-      font-weight: 700;
-    }
-    
-    .close-btn {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .close-btn:hover {
-      color: var(--accent-color);
-      transform: rotate(90deg);
-    }
-    
-    .popup-content {
-      margin-bottom: 25px;
-    }
-    
-    .popup-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 15px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .popup-label {
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 500;
-    }
-    
-    .popup-value {
-      color: var(--text-color);
-      font-weight: 700;
-    }
-    
-    .popup-price {
-      font-size: 2rem;
-      color: var(--accent-color);
-      font-weight: 700;
-      text-align: center;
-      margin: 20px 0;
-      text-shadow: 0 0 10px rgba(142, 14, 14, 0.5);
-    }
-    
-    .barcode-image {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 0 auto;
-      display: block;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-    }
-    
-    .popup-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .popup-btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .popup-btn-primary {
-      background: var(--primary-color);
-      color: white;
-    }
-    
-    .popup-btn-primary:hover {
-      background: var(--accent-color);
-    }
-    
-    .popup-btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-    
-    .popup-btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* التكيف مع الشاشات الصغيرة */
-    @media (max-width: 768px) {
-      .container {
-        padding: 15px;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-      }
-      
-      .scanner-controls {
-        flex-direction: column;
-      }
-      
-      .btn {
-        width: 100%;
-      }
-      
-      .product-card {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .product-info {
-        text-align: center;
-      }
-      
-      .product-details {
-        justify-content: center;
-      }
-      
-      .popup {
-        padding: 20px;
-      }
-      
-      .popup-actions {
-        flex-direction: column;
-      }
-    }
-    
-    /* الرسائل والتنبيهات */
-    .status-message {
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-weight: 500;
-      display: none;
-    }
-    
-    .status-message.success {
-      background: rgba(40, 167, 69, 0.2);
-      border: 1px solid var(--success-color);
-      color: var(--success-color);
-      display: block;
-    }
-    
-    .status-message.error {
-      background: rgba(220, 53, 69, 0.2);
-      border: 1px solid var(--error-color);
-      color: var(--error-color);
-      display: block;
-    }
-    
-    .status-message.warning {
-      background: rgba(255, 193, 7, 0.2);
-      border: 1px solid var(--warning-color);
-      color: var(--warning-color);
-      display: block;
-    }
-    
-    .status-message.info {
-      background: rgba(23, 162, 184, 0.2);
-      border: 1px solid var(--info-color);
-      color: var(--info-color);
-      display: block;
-    }
-    
-    /* التذييل */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 14px;
-      margin-top: 50px;
-    }
-    
-    .footer a {
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-    
-    .footer a:hover {
-      color: var(--accent-color);
-    }
-    
-    /* تأثيرات خاصة */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(0);
-      animation: ripple 0.6s linear;
-      pointer-events: none;
-    }
-    
-    @keyframes ripple {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-    
-    /* تحسينات للوضوح */
-    .focus-enhance {
-      position: relative;
-    }
-    
-    .focus-enhance::after {
-      content: '';
-      position: absolute;
-      top: -5px;
-      left: -5px;
-      right: -5px;
-      bottom: -5px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: inherit;
-      pointer-events: none;
-      animation: focus-pulse 2s infinite ease-in-out;
-    }
-    
-    @keyframes focus-pulse {
-      0%, 100% {
-        opacity: 0.5;
-      }
-      50% {
-        opacity: 1;
-      }
-    }
-    
-    /* تأثيرات الكاميرا المحسنة */
-    .camera-enhance {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .camera-enhance::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.3) 0%,
-        rgba(0, 0, 0, 0) 20%,
-        rgba(0, 0, 0, 0) 80%,
-        rgba(0, 0, 0, 0.3) 100%
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-    
-    /* تحسينات للوضوح التلقائي */
-    .auto-focus {
-      animation: auto-focus 3s infinite ease-in-out;
-    }
-    
-    @keyframes auto-focus {
-      0%, 100% {
-        filter: contrast(1) brightness(1) saturate(1);
-      }
-      50% {
-        filter: contrast(1.2) brightness(1.1) saturate(1.2);
-      }
-    }
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #000000, #000000, #8e0e0e);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+  animation: backgroundMove 30s linear infinite; /* حركة للخلفية */
+}
+
+/* تأثير الشلال المائي */
+@keyframes waterfall {
+  0% { top: -100%; opacity: 0; }
+  50% { top: 50%; opacity: 0.5; }
+  100% { top: 100%; opacity: 1; }
+}
+
+.waterfall {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.5);
+  animation: waterfall 3s infinite;
+  opacity: 0.8;
+  z-index: -1;
+}
+
+/* تأثير الأمواج */
+@keyframes waves {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.6);
+  background-image: url('https://www.transparenttextures.com/patterns/waves.png'); /* يمكنك تغيير الرابط إلى صورة أمواج أخرى */
+  animation: waves 5s linear infinite;
+  z-index: -2;
+}
+
+/* حركة مستمرة للخلفية */
+@keyframes backgroundMove {
+  0% { background-position: 0 0; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0 0; }
+}
+
+/* تحسين مظهر النص */
+h1, p {
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* تحسين الأزرار */
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ff3e1d;
+}
+
+/* تحسين التباين */
+.container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2); /* ظل الحاوية */
+  animation: float 3s infinite ease-in-out;
+}
+
+/* تأثير طفو خفيف */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* تحسين التوافق مع الأجهزة المحمولة */
+@media (max-width: 768px) {
+  body {
+    text-align: left;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  p {
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+}
+
+h1 {
+  color: #fff; /* نص أبيض لتباين أفضل مع الخلفية */
+  font-size: 2.8rem;
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8); /* ظلال لتحسين وضوح النص */
+  margin-top: 30px;
+  animation: fadeIn 2s ease-in-out;
+}
+
+/* Fade-in animation for h1 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* تحسين النصوص الأخرى */
+p, button {
+  color: #fff;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.6); /* ظلال خفيفة لتحسين الوضوح */
+}
+
+/* Slide-in animation for container */
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* تصميم حديث للماسح */
+#scanner-container {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  border-radius: 15px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #000000, #1a1a1a);
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4), inset 0px -2px 8px rgba(255, 255, 255, 0.1);
+  animation: scaleUp 0.8s ease-in-out;
+}
+
+/* تأثير الذكاء الصناعي على الماسح */
+#scanner-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 255, 255, 0.1);
+  border-radius: 15px;
+  box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.6), inset 0px 0px 10px rgba(0, 255, 255, 0.3);
+  animation: scannerLight 1.5s infinite ease-in-out;
+}
+
+/* تأثير مسح بالضوء */
+@keyframes scannerLight {
+  0% {
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    opacity: 0;
+  }
+}
+
+/* تحسين شكل الأزرار */
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  color: #ffffff;
+  background: linear-gradient(145deg, #2196f3, #42a5f5);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0px 5px 15px rgba(33, 150, 243, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0px 8px 20px rgba(33, 150, 243, 0.5);
+}
+
+#scanner-container video {
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  opacity: 0.9;
+}
+
+/* Input and Button Styles */
+input[type="text"] {
+  width: 100%;
+  max-width: 100%; /* لضمان أن العرض لا يتجاوز العرض الكامل */
+  padding: 12px;
+  font-size: 18px;
+  border: 2px solid #ff0000cd;
+  border-radius: 10px;
+  margin-top: 20px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box; /* لتضمين الحدود والمسافات الداخلية ضمن العرض الكلي */
+}
+
+/* تحسين التوافق مع الأجهزة المحمولة */
+@media (max-width: 768px) {
+  input[type="text"] {
+    font-size: 16px; /* تصغير الخط في الشاشات الصغيرة */
+    padding: 10px; /* تقليل المسافات الداخلية لتناسب الشاشة الصغيرة */
+  }
+}
+
+input[type="text"]:focus {
+  border-color: #ff9900;
+  box-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+}
+
+button {
+  margin-top: 20px;
+  padding: 14px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    0 0 5px #fff, 
+    0 0 10px #ffae00, 
+    0 0 20px #ff5700, 
+    0 0 30px #0056b3, 
+    0 0 40px #0056b3, 
+    0 0 50px #ff5700, 
+    0 0 60px #ffae00;
+  background: linear-gradient(90deg, #ffae00, #ff5700, #ffae00, #ffae00);
+  background-size: 300% 300%;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 87, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: rotateColors 3s linear infinite, glowing 2s infinite ease-in-out;
+}
+
+@keyframes rotateColors {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.4), 0 0 30px rgba(255, 87, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 87, 0, 0.7), 0 0 40px rgba(255, 87, 0, 0.6), 0 0 60px rgba(255, 87, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.4), 0 0 30px rgba(255, 87, 0, 0.3);
+  }
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+button:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+button:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 87, 0, 0.5), 0 0 40px rgba(255, 87, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+button:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 3px 10px rgba(255, 87, 0, 0.5), 0 0 20px rgba(255, 87, 0, 0.6), inset 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Submit Button Style */
+input[type="submit"] {
+  width: 90%;
+  padding: 12px 0;
+  font-size: 18px;
+  color: white;
+  background-color: #fa0202b8;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+input[type="submit"]:hover {
+  background-color: #047bca;
+  transform: translateY(-3px);
+}
+
+input[type="submit"]:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Status Message */
+#status-message {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.success {
+  color: #28a745;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+  font-size: 1.2rem;
+  text-align: center; /* لمحاذاة النص أفقيًا */
+  display: flex; /* استخدام flexbox */
+  align-items: center; /* محاذاة النص عموديًا */
+  justify-content: center; /* محاذاة النص في المنتصف أفقياً وعمودياً */
+  height: 100%; /* لضمان أن الحاوية تمتلك ارتفاعًا كافيًا لمحاذاة العنصر عموديًا */
+}
+
+  input[type="text"], button, input[type="submit"] {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
+/* Popup Styles */
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  width: 400px;
+  animation: popupAnimation 0.5s ease-out;
+  overflow: hidden;
+}
+
+@keyframes popupAnimation {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Content Frame */
+.popup .content-frame {
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(145deg, #ffffff, #f3f3f3);
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1), -5px -5px 15px rgba(255, 255, 255, 0.9);
+}
+
+/* Heading Styles */
+.popup h2 {
+  font-size: 1.8rem;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Detail Box */
+.detail-box {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 15px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Price Frame */
+.price-frame {
+  border: 3px solid #2196F3;
+  border-radius: 12px;
+  padding: 15px;
+  background: linear-gradient(145deg, #2196F3, #1e88e5);
+  box-shadow: 0 8px 15px rgba(33, 150, 243, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.3);
+  text-align: center;
+  margin-top: 15px;
+}
+
+.price-frame .price {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(33, 150, 243, 0.8), 0 0 20px rgba(0, 100, 255, 0.5);
+}
+
+/* Barcode Frame */
+.barcode-frame {
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  padding: 15px;
+  background: linear-gradient(145deg, #e8f5e9, #c8e6c9);
+  box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.5);
+  margin-top: 20px;
+  text-align: center;
+}
+
+.barcode-frame img {
+  width: 100%;
+  max-width: 250px;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+}
+
+/* Close Button */
+.close-btn {
+  background: linear-gradient(145deg, #FF5722, #E64A19);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+  margin-top: 20px;
+  display: block;
+  width: 100%;
+  text-transform: uppercase;
+}
+
+.close-btn:hover {
+  background: linear-gradient(145deg, #E64A19, #FF5722);
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(255, 87, 34, 0.4);
+}
+
+.close-btn:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .popup {
+    width: 90%;
+    padding: 20px;
+    text-align: center; /* توسيط النصوص داخل الحاوية */
+  }
+
+  .popup h2 {
+    font-size: 1.5rem;
+    text-align: center; /* توسيط العنوان */
+  }
+
+  .detail-box {
+    font-size: 1rem;
+    text-align: center; /* توسيط النصوص */
+  }
+
+  .price-frame .price {
+    font-size: 1.4rem;
+    text-align: center; /* توسيط النص */
+  }
+
+  .barcode-frame img {
+    max-width: 200px;
+    display: block; /* لجعل الصورة عنصر بلوك */
+    margin: 0 auto; /* لتوسيط الصورة أفقياً */
+  }
+
+  .close-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    display: block; /* جعل الزر عنصر بلوك */
+    margin: 10px auto; /* لتوسيط الزر أفقياً */
+    text-align: center; /* توسيط النص داخل الزر */
+  }
+}
+.footer {
+      background-color: #01080800; /* خلفية سوداء */
+      color: #fff; /* النص باللون الأبيض */
+      text-align: center; /* توسيط النص */
+      padding: 20px; /* مسافة داخلية من الأعلى والأسفل */
+      font-family: Arial, sans-serif; /* خط النص */
+      font-size: 10px; /* حجم النص */
+      line-height: 1.5; /* تباعد بين الأسطر */
+    }
+    .footer .line {
+      margin: 5px 0; /* مسافة صغيرة بين الأسطر */
+    }
+
+    #barcode-input {
+    transform: translateY(-13.5px);
+}
+    .image-container {
+    display: flex; /* استخدام Flexbox */
+    justify-content: center; /* توسيط أفقي فقط */
+}
+
+.image-container img {
+    width: 120px; /* حجم الصورة */
+    filter: drop-shadow(0 0 5px #FFA07A); /* بداية بتوهج خفيف بلون برتقالي فاتح */
+    animation: glow 5s infinite ease-in-out; /* حركة التوهج مع تحسين الأداء */
+}
+
+@keyframes glow {
+    0% {
+        filter: drop-shadow(0 0 5px #FFA07A); /* توهج خفيف بلون برتقالي فاتح */
+    }
+    10% {
+        filter: drop-shadow(0 0 7px #FF8C00); /* درجة توهج 2 بلون برتقالي داكن */
+    }
+    20% {
+        filter: drop-shadow(0 0 12px #FF7F50); /* درجة توهج 3 بلون شعاب مرجانية */
+    }
+    30% {
+        filter: drop-shadow(0 0 16px #FF6347); /* درجة توهج 4 بلون طماطم */
+    }
+    40% {
+        filter: drop-shadow(0 0 20px #FF4500); /* درجة توهج 5 بلون أحمر برتقالي */
+    }
+    50% {
+        filter: drop-shadow(0 0 24px #FF0000); /* درجة توهج 6 بلون أحمر */
+    }
+    60% {
+        filter: drop-shadow(0 0 28px #D70000); /* درجة توهج 7 بلون أحمر داكن */
+    }
+    70% {
+        filter: drop-shadow(0 0 40px #B22222); /* درجة توهج 8 بلون حجر نار */
+    }
+    80% {
+        filter: drop-shadow(0 0 30px #8B0000); /* درجة توهج 9 بلون أحمر غامق */
+    }
+    90% {
+        filter: drop-shadow(0 0 20px #800000); /* درجة توهج 10 بلون بني محمر (تم تصحيح اللون هنا) */
+    }
+    100% {
+        filter: drop-shadow(0 0 5px #FFA07A); /* العودة إلى التوهج الخفيف بلون برتقالي فاتح */
+    }
+}
+#zoom-controls-barcode {
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* مسافة بين الأزرار */
+    margin-top: 10px;
+}
+
+.zoom-btn {
+    background-color: #007bff; /* نفس لون زر AI Scanner */
+    color: white;
+    border: none;
+    padding: 6px 12px; /* تصغير الحجم */
+    font-size: 14px; /* جعل النص أصغر */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.zoom-btn:hover {
+    background-color: #0056b3;
+}
+
+h8 {
+  color: white;
+}
+
   </style>
 </head>
 <body>
-  <!-- تأثيرات الخلفية -->
-  <div class="bg-pattern"></div>
-  <div class="particles" id="particles"></div>
-  
+
   <div class="container">
-    <header class="header">
-      <img src="https://miro.medium.com/v2/resize:fit:996/0*cryUnGm37uA1poft.gif" alt="Shehadeh AI Logo" class="logo">
-      <h1>نظام البحث الذكي عن المنتجات</h1>
-    </header>
+    <h1>بحث المنتجات باستخدام الباركود</h1>
+
+    <div id="scanner-container">
+        <div id="interactive" class="viewport"></div>
+      </div>
     
-    <!-- قسم الماسح الضوئي -->
-    <section class="scanner-section">
-      <div id="scanner-container">
-        <div id="interactive" class="viewport camera-enhance auto-focus">
-          <div class="scanner-overlay"></div>
-          <div class="scanner-frame"></div>
-          <div class="scanner-line"></div>
-        </div>
-      </div>
-      
-      <div id="status-message" class="status-message"></div>
-      
-      <div class="scanner-controls">
-        <button id="start-scanner" class="btn btn-primary">
-          <span class="btn-icon">✨</span> بدء المسح الضوئي
-        </button>
-        <button id="stop-scanner" class="btn btn-secondary" disabled>
-          <span class="btn-icon">⏹️</span> إيقاف المسح
-        </button>
-      </div>
-      
-      <div id="zoom-controls" class="scanner-controls" style="display: none;">
-        <button id="zoom-out" class="btn btn-secondary">
-          <span class="btn-icon">🔎</span> تصغير
-        </button>
-        <button id="zoom-reset" class="btn btn-secondary">
-          <span class="btn-icon">🔄</span> إعادة ضبط
-        </button>
-        <button id="zoom-in" class="btn btn-secondary">
-          <span class="btn-icon">🔍</span> تكبير
-        </button>
-      </div>
-    </section>
+      <button id="start-scanner">✨AI Scanner</button>
+      <p id="status-message"></p>
     
-    <!-- قسم البحث -->
-    <section class="search-section">
-      <div class="search-tabs">
-        <button class="tab-btn active" data-tab="name-tab">بحث بالاسم</button>
-      </div>
-      
-      <div id="name-tab" class="tab-content active">
-        <form id="name-search-form" class="search-form">
-          <div class="form-group">
-            <input type="text" id="product-name-input" class="search-input" placeholder="أدخل اسم المنتج هنا..." required>
-          </div>
-          <button type="submit" class="search-btn">بحث بالاسم</button>
-        </form>
-      </div>
-    </section>
-    
-    <!-- قسم نتائج البحث -->
-    <section id="results-section" class="results-section">
-      <div class="results-header">
-        <h2 class="results-title">نتائج البحث</h2>
-        <span class="results-count" id="results-count">0 منتجات</span>
-      </div>
-      
-      <div id="results-container">
-        <!-- سيتم ملء النتائج هنا ديناميكيًا -->
-      </div>
-    </section>
-  </div>
-  
-  <!-- نافذة النتائج المنبثقة -->
-  <div class="popup-overlay" id="popup-overlay">
-    <div class="popup">
-      <div class="popup-header">
-        <h3 class="popup-title">تفاصيل المنتج</h3>
-        <button class="close-btn" id="close-popup">×</button>
-      </div>
-      
-      <div class="popup-content">
-        <div class="popup-row">
-          <span class="popup-label">اسم المنتج:</span>
-          <span class="popup-value" id="popup-product-name">-</span>
-        </div>
-        
-        <div class="popup-row">
-          <span class="popup-label">الفئة:</span>
-          <span class="popup-value" id="popup-product-category">-</span>
-        </div>
-        
-        <div class="popup-row">
-          <span class="popup-label">الشركة المصنعة:</span>
-          <span class="popup-value" id="popup-product-manufacturer">-</span>
-        </div>
-        
-        <div class="popup-row">
-          <span class="popup-label">الباركود:</span>
-          <span class="popup-value" id="popup-product-barcode">-</span>
-        </div>
-        
-        <div class="popup-price" id="popup-product-price">-</div>
-        
-        <img id="barcode-image" class="barcode-image" src="" alt="باركود المنتج" style="display: none;">
-      </div>
-      
-      <div class="popup-actions">
-        <button class="popup-btn popup-btn-primary" id="print-btn">طباعة</button>
-        <button class="popup-btn popup-btn-secondary" id="close-popup-btn">إغلاق</button>
-      </div>
+  <div id="zoom-controls-barcode">
+    <button id="reset-zoom-barcode" onclick="resetZoom()">🔄 الضبط</button>
+    <button id="zoom-out-barcode" onclick="zoomOut()">🔎 تصغير</button>
+    <button id="zoom-in-barcode" onclick="zoomIn()">🔍 تكبير</button>
+</div>
+
+  <div class="popup" id="result-popup">
+    <h2>نتائج البحث:</h2>
+    <div class="detail-box" id="product-name">
+      <strong>الاسم:</strong> <span id="product-name-result">-</span>
     </div>
+    <div class="price-box" id="product-price">
+      <strong>السعر:</strong> <span id="product-price-result">-</span>
+    </div>
+    <div class="detail-box" id="product-barcode">
+      <strong>الباركود:</strong> <span id="product-barcode-result">-</span>
+    </div>
+    <button class="close-btn" onclick="closePopup()">إغلاق</button>
+  </div>
+
+  <br>
+  <form id="barcode-form">
+    <input type="text" id="barcode-input" placeholder=" Start Scanner أدخل الباركود يدويا أو استخدم " required>
+    <input type="submit" value="بحث">
+  </form>
+</div>
+
+  <div class="footer">
+    <div class="line">تصميم وتطوير بواسطة محمد شحادة | Designed and Developed by Mohammed Shehadeh</div>
   </div>
   
-  <!-- التذييل -->
-  <footer class="footer">
-    <p>تصميم وتطوير بواسطة محمد شحادة | &copy; <span id="current-year"></span> جميع الحقوق محفوظة</p>
-  </footer>
-  
-  <!-- المكتبات المطلوبة -->
+    </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  
-  <script>
-    // تهيئة المتغيرات
-    const productNameInput = document.getElementById('product-name-input');
-    const startScannerBtn = document.getElementById('start-scanner');
-    const stopScannerBtn = document.getElementById('stop-scanner');
-    const zoomControls = document.getElementById('zoom-controls');
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
-    const zoomResetBtn = document.getElementById('zoom-reset');
-    const statusMessage = document.getElementById('status-message');
-    const scannerContainer = document.getElementById('scanner-container');
-    const nameSearchForm = document.getElementById('name-search-form');
-    const resultsSection = document.getElementById('results-section');
-    const resultsContainer = document.getElementById('results-container');
-    const resultsCount = document.getElementById('results-count');
-    const popupOverlay = document.getElementById('popup-overlay');
-    const closePopupBtn = document.getElementById('close-popup');
-    const closePopupBtn2 = document.getElementById('close-popup-btn');
-    const printBtn = document.getElementById('print-btn');
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    let scannerActive = false;
-    let videoTrack = null;
-    let currentZoom = 1;
-    let minZoom = 1;
-    let maxZoom = 5;
-    let zoomStep = 0.5;
-    let lastReadValues = [];
-    let isProcessing = false;
-    let productsDatabase = [];
-    
-    // تحميل قاعدة البيانات عند بدء الصفحة
-    document.addEventListener('DOMContentLoaded', function() {
-      // تعيين سنة التذييل
-      document.getElementById('current-year').textContent = new Date().getFullYear();
-      
-      // إنشاء تأثير الجسيمات
-      createParticles();
-      
-      // تحميل قاعدة البيانات
-      loadDatabase();
-      
-      // إضافة تأثير النقرة على الأزرار
-      addRippleEffect();
-      
-      // إغلاق النافذة المنبثقة
-      closePopupBtn.addEventListener('click', closePopup);
-      closePopupBtn2.addEventListener('click', closePopup);
-      
-      // طباعة النتيجة
-      printBtn.addEventListener('click', function() {
-        window.print();
-      });
-    });
-    
-    // تحميل قاعدة البيانات
-    async function loadDatabase() {
-      try {
-        const response = await fetch('products-database.txt');
-        if (!response.ok) throw new Error('فشل تحميل قاعدة البيانات');
-        
-        const data = await response.text();
-        productsDatabase = data.split('\n').map(line => {
-          const [name, category, manufacturer, price, barcode] = line.split('|');
-          return { name, category, manufacturer, price, barcode: barcode?.trim() };
-        }).filter(product => product.barcode);
-        
-        console.log('تم تحميل قاعدة البيانات بنجاح:', productsDatabase.length, 'منتج');
-      } catch (error) {
-        console.error('خطأ في تحميل قاعدة البيانات:', error);
-        showAlert('error', 'خطأ', 'تعذر تحميل قاعدة البيانات');
-      }
-    }
+  const barcodeInput = document.getElementById('barcode-input');
+const popup = document.getElementById('result-popup');
+const startScannerButton = document.getElementById('start-scanner');
+const statusMessage = document.getElementById('status-message');
+const scannerContainer = document.getElementById('scanner-container');
+const form = document.getElementById('barcode-form');
+const barcodeOverlay = document.getElementById('barcode-overlay');
+const zoomControls = document.getElementById('zoom-controls');
 
-    // بدء الماسح الضوئي
-    async function startScanner() {
-      try {
-        startScannerBtn.disabled = true;
-        stopScannerBtn.disabled = false;
-        statusMessage.textContent = '';
-        statusMessage.className = 'status-message';
-        
-        // إظهار عناصر التحكم في التكبير
-        zoomControls.style.display = 'flex';
-        scannerContainer.classList.add('active');
-        
-        // إعداد قيود الكاميرا
-        const constraints = {
-          video: {
+let videoTrack;
+let currentZoom = 1;
+let minZoom = 1;
+let maxZoom = 5;
+let zoomStep = 0.5;
+let lastReadValues = [];
+let isProcessing = false;
+let scannerActive = false;
+let scanAttempts = 0;
+const maxScanAttempts = 5;
+
+// تحسينات للواجهة عند التحميل
+document.addEventListener('DOMContentLoaded', () => {
+    scannerContainer.style.display = 'none';
+    zoomControls.style.display = 'none';
+    
+    // تحسينات للعرض على أجهزة سامسونج
+    if (/samsung/i.test(navigator.userAgent)) {
+        document.querySelector('#interactive video').style.objectFit = 'cover';
+    }
+});
+
+// بدء الماسح مع تحسينات كبيرة
+function startScanner() {
+    startScannerButton.disabled = true;
+    statusMessage.textContent = 'جاري تهيئة الماسح...';
+    scannerContainer.style.display = 'block';
+    zoomControls.style.display = 'flex';
+    barcodeOverlay.style.display = 'block';
+
+    // قيود متقدمة للكاميرا لدعم الدقة العالية
+    const constraints = {
+        video: {
             facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 4096 },
+            height: { ideal: 2160 },
             aspectRatio: { ideal: 16/9 },
-            focusMode: 'continuous',
-            zoom: currentZoom
-          }
-        };
+            focusMode: "continuous",
+            zoom: currentZoom,
+            advanced: [{
+                brightness: { ideal: 0.5 },
+                contrast: { ideal: 0.5 },
+                saturation: { ideal: 0.5 }
+            }]
+        }
+    };
 
-        // الحصول على إذن الكاميرا
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoTrack = stream.getVideoTracks()[0];
-        
-        // ضبط حدود التكبير
-        const capabilities = videoTrack.getCapabilities();
-        if (capabilities.zoom
-        updateZoomButtons();
-        
-        // تهيئة QuaggaJS
-        Quagga.init({
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#interactive'),
-            constraints: constraints.video,
-          },
-          decoder: {
-            readers: ['ean_reader', 'ean_8_reader', 'code_128_reader', 'upc_reader', 'upc_e_reader'],
-            multiple: false
-          },
-          locate: true,
-          numOfWorkers: navigator.hardwareConcurrency || 4,
-          frequency: 10
-        }, function(err) {
-          if (err) {
-            console.error('خطأ في تهيئة الماسح:', err);
-            showAlert('error', 'خطأ', 'تعذر تهيئة الماسح الضوئي');
-            resetScanner();
-            return;
-          }
-          
-          Quagga.start();
-          scannerActive = true;
-          showAlert('success', 'تم التشغيل', 'الماسح الضوئي جاهز للاستخدام');
-        });
-
-        // عند اكتشاف الباركود
-        Quagga.onDetected(async function(result) {
-          const code = result.codeResult.code;
-          
-          if (!isValidBarcode(code)) {
-            console.warn('باركود غير صالح:', code);
-            return;
-          }
-          
-          // معالجة الباركود
-          await processBarcode(code);
-        });
-
-      } catch (error) {
-        console.error('خطأ في تشغيل الماسح:', error);
-        showAlert('error', 'خطأ', 'تعذر الوصول إلى الكاميرا');
-        resetScanner();
-      }
+    // تحسينات لأجهزة سامسونج
+    if (/samsung/i.test(navigator.userAgent)) {
+        constraints.video.width = { ideal: 3840 };
+        constraints.video.height = { ideal: 2160 };
     }
 
-    // إيقاف الماسح الضوئي
-    function stopScanner() {
-      if (scannerActive) {
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream) {
+            const videoElement = document.querySelector('#interactive video');
+            videoElement.srcObject = stream;
+            videoTrack = stream.getVideoTracks()[0];
+
+            // تحسينات للتركيز التلقائي
+            setupAutoFocus(videoTrack);
+            
+            // إعداد التكبير/التصغير
+            setupZoomControls(videoTrack);
+            
+            // بدء Quagga مع إعدادات محسنة
+            initQuaggaScanner();
+            
+            // تحسينات للعرض على الشاشة
+            videoElement.onloadedmetadata = () => {
+                statusMessage.textContent = 'جاهز للمسح. ضع الباركود داخل المربع';
+                adjustVideoOrientation(videoElement);
+            };
+        })
+        .catch(handleCameraError);
+}
+
+// إعداد Quagga مع تحسينات الدقة
+function initQuaggaScanner() {
+    Quagga.init({
+        inputStream: {
+            name: 'Live',
+            type: 'LiveStream',
+            target: document.querySelector('#interactive'),
+            constraints: {
+                width: { min: 1280 },
+                height: { min: 720 },
+                facingMode: 'environment',
+                aspectRatio: { min: 1, max: 2 }
+            },
+            area: { // تحديد منطقة المسح لتحسين الأداء
+                top: '25%',
+                right: '25%',
+                left: '25%',
+                bottom: '25%'
+            },
+            singleChannel: false
+        },
+        locator: {
+            patchSize: 'large', // زيادة حجم البقعة لاكتشاف أفضل
+            halfSample: true
+        },
+        decoder: {
+            readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'],
+            multiple: false
+        },
+        locate: true,
+        numOfWorkers: navigator.hardwareConcurrency || 4,
+        frequency: 5, // تقليل التكرار لتحسين الأداء
+        debug: {
+            drawBoundingBox: true,
+            showFrequency: true,
+            drawScanline: true,
+            showPattern: true
+        }
+    }, function(err) {
+        if (err) {
+            console.error('Error initializing Quagga:', err);
+            statusMessage.textContent = 'خطأ في تشغيل الماسح. جارٍ المحاولة بطريقة بديلة...';
+            initAlternativeScanner();
+            return;
+        }
+        Quagga.start();
+        scannerActive = true;
+        
+        // إضافة مستمع للكشف عن الباركود مع تحسينات
+        Quagga.onDetected(handleBarcodeDetection);
+    });
+}
+
+// طريقة بديلة في حالة فشل Quagga
+function initAlternativeScanner() {
+    const videoElement = document.querySelector('#interactive video');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    // مسح متكرر للإطار
+    const scanInterval = setInterval(() => {
+        if (!scannerActive) {
+            clearInterval(scanInterval);
+            return;
+        }
+        
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        
+        // استخدام ZXing كبديل
+        try {
+            const barcode = scanBarcodeWithZXing(canvas);
+            if (barcode) {
+                processBarcode(barcode);
+                clearInterval(scanInterval);
+            }
+        } catch (e) {
+            console.log('المحاولة باستخدام ZXing:', e);
+        }
+    }, 500);
+}
+
+// معالجة اكتشاف الباركود مع تحسينات التحقق
+function handleBarcodeDetection(data) {
+    if (isProcessing || scanAttempts >= maxScanAttempts) return;
+    
+    const code = data.codeResult.code;
+    const codeBounds = data.codeResult.box;
+    
+    // التحقق من جودة الباركود
+    if (!isHighQualityBarcode(codeBounds)) {
+        statusMessage.textContent = 'جودة الباركود منخفضة. يرجى تثبيت الكاميرا';
+        scanAttempts++;
+        return;
+    }
+    
+    if (isValidBarcode(code)) {
+        scanAttempts = 0;
+        processBarcode(code);
+    } else {
+        statusMessage.textContent = 'جارٍ التحقق من الباركود...';
+        scanAttempts++;
+        setTimeout(() => {
+            readBarcodeWithOCR();
+        }, 500);
+    }
+}
+
+// التحقق من جودة الباركود بناءً على موقعه وحجمه
+function isHighQualityBarcode(box) {
+    const videoElement = document.querySelector('#interactive video');
+    const videoWidth = videoElement.videoWidth;
+    const videoHeight = videoElement.videoHeight;
+    
+    // حساب مساحة الباركود بالنسبة للشاشة
+    const barcodeArea = calculatePolygonArea(box);
+    const videoArea = videoWidth * videoHeight;
+    const areaRatio = barcodeArea / videoArea;
+    
+    // يجب أن يكون الباركود يشغل مساحة معقولة من الشاشة
+    if (areaRatio < 0.2 || areaRatio > 0.8) {
+        return false;
+    }
+    
+    // التحقق من أن الباركود في منتصف الشاشة
+    const centerX = videoWidth / 2;
+    const centerY = videoHeight / 2;
+    const barcodeCenter = getPolygonCenter(box);
+    const distance = Math.sqrt(
+        Math.pow(barcodeCenter.x - centerX, 2) + 
+        Math.pow(barcodeCenter.y - centerY, 2)
+    );
+    
+    return distance < (videoWidth * 0.3);
+}
+
+// حساب مساحة المضلع
+function calculatePolygonArea(points) {
+    let area = 0;
+    for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        area += points[i].x * points[j].y;
+        area -= points[j].x * points[i].y;
+    }
+    return Math.abs(area / 2);
+}
+
+// حساب مركز المضلع
+function getPolygonCenter(points) {
+    const center = { x: 0, y: 0 };
+    for (const point of points) {
+        center.x += point.x;
+        center.y += point.y;
+    }
+    center.x /= points.length;
+    center.y /= points.length;
+    return center;
+}
+
+// إعداد عناصر التحكم بالتكبير/التصغير
+function setupZoomControls(track) {
+    const capabilities = track.getCapabilities();
+    if (capabilities.zoom) {
+        minZoom = capabilities.zoom.min || 1;
+        maxZoom = capabilities.zoom.max || 5;
+        zoomStep = capabilities.zoom.step || 0.1;
+        
+        document.getElementById("zoom-in-barcode").onclick = zoomIn;
+        document.getElementById("zoom-out-barcode").onclick = zoomOut;
+        document.getElementById("zoom-reset-barcode").onclick = resetZoom;
+        updateZoomButtons();
+    } else {
+        zoomControls.style.display = 'none';
+    }
+}
+
+// إعداد التركيز التلقائي
+function setupAutoFocus(track) {
+    const capabilities = track.getCapabilities();
+    if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+        track.applyConstraints({
+            advanced: [{ focusMode: 'continuous' }]
+        }).catch(e => console.error('Error setting continuous focus:', e));
+    }
+    
+    // إضافة مستمع لللمس للتركيز اليدوي
+    const videoElement = document.querySelector('#interactive video');
+    videoElement.addEventListener('touchstart', handleManualFocus);
+    videoElement.addEventListener('click', handleManualFocus);
+}
+
+// معالجة التركيز اليدوي
+function handleManualFocus(event) {
+    if (!videoTrack) return;
+    
+    const videoElement = event.target;
+    const rect = videoElement.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    
+    videoTrack.applyConstraints({
+        advanced: [{ focusMode: 'manual', focusPointOfInterest: { x, y } }]
+    }).then(() => {
+        statusMessage.textContent = 'تم ضبط التركيز يدويًا';
+        setTimeout(() => {
+            if (statusMessage.textContent.includes('يدويًا')) {
+                statusMessage.textContent = 'جاهز للمسح';
+            }
+        }, 2000);
+    }).catch(e => console.error('Error setting manual focus:', e));
+}
+
+// التحقق من صحة الباركود مع تحسينات
+function isValidBarcode(code) {
+    if (!code || code.length < 6) return false;
+    
+    // التحقق من التكرار لتجنب القراءات الخاطئة
+    lastReadValues.push(code);
+    if (lastReadValues.length > 5) lastReadValues.shift();
+    
+    // يجب أن تتطابق جميع القراءات الأخيرة
+    const allMatch = lastReadValues.every(val => val === code);
+    if (!allMatch) return false;
+    
+    // التحقق من checksum للباركود
+    return validateBarcodeChecksum(code);
+}
+
+// تحسينات للتحقق من checksum
+function validateBarcodeChecksum(code) {
+    // EAN-13
+    if (code.length === 13) {
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+            sum += parseInt(code[i]) * (i % 2 === 0 ? 1 : 3);
+        }
+        const checksum = (10 - (sum % 10)) % 10;
+        return checksum === parseInt(code[12]);
+    }
+    
+    // UPC-A
+    if (code.length === 12) {
+        let sum = 0;
+        for (let i = 0; i < 11; i++) {
+            sum += parseInt(code[i]) * (i % 2 === 0 ? 3 : 1);
+        }
+        const checksum = (10 - (sum % 10)) % 10;
+        return checksum === parseInt(code[11]);
+    }
+    
+    // Code 128 (لا يوجد checksum قياسي)
+    if (code.length >= 4 && code.length <= 32) {
+        return true;
+    }
+    
+    return false;
+}
+
+// معالجة الباركود مع تحسينات
+function processBarcode(code) {
+    if (isProcessing) return;
+    isProcessing = true;
+    
+    // التأكد من تحديث واجهة المستخدم
+    statusMessage.textContent = `تم اكتشاف الباركود: ${code}`;
+    barcodeInput.value = code;
+    
+    // إبراز الباركود المكتشف
+    highlightDetectedBarcode();
+    
+    // تأخير لإظهار التأكيد للمستخدم قبل الإرسال
+    setTimeout(() => {
+        stopScanner();
+        submitBarcodeForm();
+        isProcessing = false;
+    }, 800);
+}
+
+// إبراز الباركود المكتشف
+function highlightDetectedBarcode() {
+    const highlight = document.createElement('div');
+    highlight.className = 'barcode-highlight';
+    barcodeOverlay.appendChild(highlight);
+    
+    setTimeout(() => {
+        highlight.style.transform = 'scale(1.1)';
+        highlight.style.opacity = '0';
+        
+        setTimeout(() => {
+            barcodeOverlay.removeChild(highlight);
+        }, 500);
+    }, 50);
+}
+
+// إرسال النموذج
+function submitBarcodeForm() {
+    const submitButton = form.querySelector('input[type="submit"], button[type="submit"]');
+    if (submitButton) {
+        submitButton.click();
+    } else {
+        form.submit();
+    }
+}
+
+// إيقاف الماسح
+function stopScanner() {
+    if (scannerActive) {
+        Quagga.offDetected(handleBarcodeDetection);
         Quagga.stop();
         scannerActive = false;
-      }
-      
-      if (videoTrack) {
+    }
+    
+    if (videoTrack) {
         videoTrack.stop();
         videoTrack = null;
-      }
-      
-      resetScanner();
-      showAlert('info', 'تم الإيقاف', 'تم إيقاف الماسح الضوئي');
     }
+    
+    startScannerButton.disabled = false;
+    scannerContainer.style.display = 'none';
+    zoomControls.style.display = 'none';
+    barcodeOverlay.style.display = 'none';
+    statusMessage.textContent = '';
+    
+    // إعادة تعيين المتغيرات
+    lastReadValues = [];
+    scanAttempts = 0;
+}
 
-    // إعادة تعيين الماسح
-    function resetScanner() {
-      startScannerBtn.disabled = false;
-      stopScannerBtn.disabled = true;
-      zoomControls.style.display = 'none';
-      scannerContainer.classList.remove('active');
-      currentZoom = 1;
+// التعامل مع أخطاء الكاميرا
+function handleCameraError(error) {
+    console.error('Camera error:', error);
+    statusMessage.textContent = 'خطأ في الكاميرا: ' + error.message;
+    startScannerButton.disabled = false;
+    
+    // عرض خيارات بديلة
+    if (error.name === 'NotAllowedError') {
+        statusMessage.textContent += '. يرجى منح الإذن لاستخدام الكاميرا';
+    } else if (error.name === 'NotFoundError') {
+        statusMessage.textContent += '. لا توجد كاميرا خلفية';
     }
+}
 
-    // التحكم في التكبير
-    async function setZoom(zoomValue) {
-      if (!videoTrack) return;
-      
-      try {
-        await videoTrack.applyConstraints({
-          advanced: [{ zoom: zoomValue }]
-        });
-        currentZoom = zoomValue;
-        updateZoomButtons();
-      } catch (err) {
-        console.error('فشل ضبط التكبير:', err);
-      }
+// بدء الماسح عند النقر على الزر
+startScannerButton.addEventListener('click', startScanner);
+
+// إغلاق الماسح عند النقر خارج المنطقة
+document.addEventListener('click', (e) => {
+    if (scannerActive && !scannerContainer.contains(e.target) && e.target !== startScannerButton) {
+        stopScanner();
     }
+});
 
-    // تكبير الصورة
-    function zoomIn() {
-      if (currentZoom < maxZoom) {
-        setZoom(Math.min(currentZoom + zoomStep, maxZoom));
-      }
+// CSS الإضافي المطلوب
+const style = document.createElement('style');
+style.textContent = `
+    #barcode-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
     }
-
-    // تصغير الصورة
-    function zoomOut() {
-      if (currentZoom > minZoom) {
-        setZoom(Math.max(currentZoom - zoomStep, minZoom));
-      }
+    
+    .barcode-highlight {
+        position: absolute;
+        top: 25%;
+        left: 25%;
+        width: 50%;
+        height: 20%;
+        border: 4px solid rgba(0, 255, 0, 0.7);
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        transition: all 0.5s ease;
+        transform: scale(1);
+        opacity: 1;
     }
-
-    // إعادة ضبط التكبير
-    function resetZoom() {
-      setZoom(1);
+    
+    #zoom-controls {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 20;
     }
-
-    // تحديث حالة أزرار التكبير
-    function updateZoomButtons() {
-      zoomInBtn.disabled = currentZoom >= maxZoom;
-      zoomOutBtn.disabled = currentZoom <= minZoom;
+    
+    #zoom-controls button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-
-    // التحقق من صحة الباركود
-    function isValidBarcode(code) {
-      if (!code || code.length < 8) return false;
-      
-      // استخدام خوارزمية checksum لبعض أنواع الباركود
-      if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
-      if (code.length === 8 && !isValidEAN8Checksum(code)) return false;
-      
-      // تجنب تكرار القراءة
-      lastReadValues.push(code);
-      if (lastReadValues.length > 3) lastReadValues.shift();
-      
-      return lastReadValues.every(val => val === code);
+    
+    #zoom-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
-
-    // خوارزمية التحقق من EAN-13
-    function isValidEAN13Checksum(code) {
-      let sum = 0;
-      for (let i = 0; i < 12; i++) {
-        sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
-      }
-      const checksum = (10 - (sum % 10)) % 10;
-      return checksum === parseInt(code[12]);
+    
+    #status-message {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: white;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        z-index: 20;
+        font-size: 16px;
     }
-
-    // خوارزمية التحقق من EAN-8
-    function isValidEAN8Checksum(code) {
-      let sum = 0;
-      for (let i = 0; i < 7; i++) {
-        sum += (i % 2 === 0 ? 3 : 1) * parseInt(code[i]);
-      }
-      const checksum = (10 - (sum % 10)) % 10;
-      return checksum === parseInt(code[7]);
-    }
-
-    // معالجة الباركود
-    async function processBarcode(code) {
-      if (isProcessing) return;
-      isProcessing = true;
-      
-      // إظهار رسالة الحالة
-      showStatusMessage(`تم اكتشاف الباركود: ${code}`, 'success');
-      
-      // إيقاف الماسح مؤقتًا
-      stopScanner();
-      
-      // البحث عن المنتج
-      searchProductByBarcode(code);
-      
-      // إعادة تعيين العلم بعد تأخير
-      setTimeout(() => {
-        isProcessing = false;
-      }, 1000);
-    }
-
-    // البحث عن المنتج بالباركود
-    function searchProductByBarcode(barcode) {
-      const product = productsDatabase.find(p => p.barcode === barcode);
-      
-      if (product) {
-        showProductResult(product);
-      } else {
-        showAlert('warning', 'غير موجود', 'لم يتم العثور على المنتج في قاعدة البيانات');
-      }
-    }
-
-    // البحث عن المنتج بالاسم
-    function searchProductByName(name) {
-      const searchTerm = name.toLowerCase();
-      const results = productsDatabase.filter(p => 
-        p.name.toLowerCase().includes(searchTerm) ||
-        p.category.toLowerCase().includes(searchTerm) ||
-        p.manufacturer.toLowerCase().includes(searchTerm)
-      );
-      
-      if (results.length > 0) {
-        showSearchResults(results);
-      } else {
-        showAlert('warning', 'غير موجود', 'لم يتم العثور على منتجات تطابق البحث');
-      }
-    }
-
-    // عرض نتيجة منتج واحد
-    function showProductResult(product) {
-      // ملء بيانات النافذة المنبثقة
-      document.getElementById('popup-product-name').textContent = product.name;
-      document.getElementById('popup-product-category').textContent = product.category;
-      document.getElementById('popup-product-manufacturer').textContent = product.manufacturer;
-      document.getElementById('popup-product-barcode').textContent = product.barcode;
-      document.getElementById('popup-product-price').textContent = `${product.price} ر.س`;
-      
-      // إنشاء صورة الباركود
-      const barcodeImg = document.getElementById('barcode-image');
-      JsBarcode(barcodeImg, product.barcode, {
-        format: "CODE128",
-        lineColor: "#000",
-        width: 2,
-        height: 60,
-        displayValue: true
-      });
-      barcodeImg.style.display = 'block';
-      
-      // عرض النافذة المنبثقة
-      openPopup();
-    }
-
-    // عرض نتائج البحث المتعددة
-    function showSearchResults(results) {
-      resultsContainer.innerHTML = '';
-      
-      results.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.innerHTML = `
-          <div class="product-image">
-            <i class="fas fa-box-open"></i>
-          </div>
-          <div class="product-info">
-            <h3 class="product-name">${product.name}</h3>
-            <div class="product-details">
-              <span>${product.category}</span>
-              <span>${product.manufacturer}</span>
-            </div>
-            <div class="product-details">
-              <span class="product-price">${product.price} ر.س</span>
-              <span class="product-barcode">${product.barcode}</span>
-            </div>
-          </div>
-        `;
-        
-        productCard.addEventListener('click', () => showProductResult(product));
-        resultsContainer.appendChild(productCard);
-      });
-      
-      resultsCount.textContent = `${results.length} منتجات`;
-      resultsSection.style.display = 'block';
-    }
-
-    // فتح النافذة المنبثقة
-    function openPopup() {
-      popupOverlay.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    // إغلاق النافذة المنبثقة
-    function closePopup() {
-      popupOverlay.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
-    // عرض رسالة الحالة
-    function showStatusMessage(message, type) {
-      statusMessage.textContent = message;
-      statusMessage.className = `status-message ${type}`;
-    }
-
-    // عرض تنبيه جميل
-    function showAlert(icon, title, text) {
-      Swal.fire({
-        icon: icon,
-        title: title,
-        text: text,
-        timer: 3000,
-        showConfirmButton: false
-      });
-    }
-
-    // إنشاء تأثير الجسيمات
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      const particleCount = 30;
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // تحديد حجم عشوائي
-        const size = Math.random() * 5 + 2;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // تحديد موقع عشوائي
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // تحديد تأخير عشوائي للحركة
-        particle.style.animationDelay = `${Math.random() * 15}s`;
-        
-        // تحديد الشفافية
-        particle.style.opacity = Math.random() * 0.5 + 0.1;
-        
-        particlesContainer.appendChild(particle);
-      }
-    }
-
-    // إضافة تأثير النقرة على الأزرار
-    function addRippleEffect() {
-      const buttons = document.querySelectorAll('.btn, .search-btn, .popup-btn');
-      
-      buttons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          const rect = this.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          
-          const ripple = document.createElement('span');
-          ripple.className = 'ripple';
-          ripple.style.left = `${x}px`;
-          ripple.style.top = `${y}px`;
-          
-          this.appendChild(ripple);
-          
-          setTimeout(() => {
-            ripple.remove();
-          }, 600);
-        });
-      });
-    }
-
-    // أحداث النماذج
-    nameSearchForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = productNameInput.value.trim();
-      
-      if (!name || name.length < 3) {
-        showAlert('warning', 'تحذير', 'الرجاء إدخال اسم منتج صحيح (3 أحرف على الأقل)');
-        return;
-      }
-      
-      searchProductByName(name);
-    });
-
-    // أحداث أزرار التحكم في التكبير
-    zoomInBtn.addEventListener('click', zoomIn);
-    zoomOutBtn.addEventListener('click', zoomOut);
-    zoomResetBtn.addEventListener('click', resetZoom);
-
-    // أحداث أزرار الماسح الضوئي
-    startScannerBtn.addEventListener('click', startScanner);
-    stopScannerBtn.addEventListener('click', stopScanner);
-
-    // تسجيل Service Worker لتطبيق PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registered:', registration);
-          })
-          .catch(error => {
-            console.log('ServiceWorker registration failed:', error);
-          });
-      });
-    }
-  </script>
-</body>
+`;
+document.head.appendChild(style);
+</script>
+      </body>
 </html>
