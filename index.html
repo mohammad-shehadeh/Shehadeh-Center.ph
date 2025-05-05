@@ -1001,7 +1001,7 @@
                         </div>
                         <div class="info-row product-price">
                             <span class="info-label">السعر:</span>
-                            <span class="info-value">${product.productPrice} ر.س</span>
+                            <span class="info-value">${product.productPrice} ₪</span>
                         </div>
                         <div class="info-row product-barcode">
                             <span class="info-label">الباركود:</span>
@@ -1032,7 +1032,7 @@
                         html += `
                             <div class="product-result" data-barcode="${product.barcode}">
                                 <h4>${product.productName}</h4>
-                                <p>السعر: ${product.productPrice} ر.س | الباركود: ${product.barcode}</p>
+                                <p>السعر: ${product.productPrice} ₪ | الباركود: ${product.barcode}</p>
                                 <button class="btn btn-secondary view-product" style="margin-top: 5px;">عرض التفاصيل</button>
                             </div>
                         `;
@@ -1106,7 +1106,7 @@
                         <div class="history-item-info">
                             <div class="history-item-name">${item.name}</div>
                             <div class="history-item-details">
-                                <span>${item.price} ر.س</span>
+                                <span>${item.price} ₪</span>
                                 <span>${formatDate(item.date)}</span>
                                 <span>${item.barcode}</span>
                             </div>
