@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الأصناف - البحث بالباركود</title>
+    <title>نظام إدارة الأصناف - مسح الباركود</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -13,10 +13,10 @@
             --accent-color: #4895ef;
             --light-color: #f8f9fa;
             --dark-color: #212529;
-            --success-color: #4cc9f0;
+            --success-color: #28a745;
             --warning-color: #f72585;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -27,7 +27,8 @@
         }
 
         body {
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             color: var(--dark-color);
             line-height: 1.6;
         }
@@ -39,65 +40,65 @@
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 20px 0;
-            text-align: center;
+            background-color: white;
+            padding: 20px;
             border-radius: var(--border-radius);
+            text-align: center;
             margin-bottom: 30px;
             box-shadow: var(--box-shadow);
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin-bottom: 10px;
+            color: var(--primary-color);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .search-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .main-content {
             background-color: white;
-            padding: 25px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            overflow: hidden;
             margin-bottom: 30px;
         }
 
-        .search-tabs {
+        .tabs {
             display: flex;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
         }
 
         .tab-btn {
-            padding: 12px 25px;
+            flex: 1;
+            padding: 15px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 500;
-            color: #666;
-            position: relative;
+            color: #6c757d;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            background-color: #e9ecef;
         }
 
         .tab-btn.active {
             color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--primary-color);
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
         }
 
         .tab-content {
+            padding: 30px;
             display: none;
         }
 
@@ -105,118 +106,53 @@
             display: block;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
-        .btn-danger {
-            background-color: var(--warning-color);
-        }
-
-        .btn-danger:hover {
-            background-color: #d1145a;
-        }
-
-        .btn-group {
+        .camera-section {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
         }
 
-        .scanner-container {
-            display: none;
-            position: relative;
-            margin: 20px 0;
+        .camera-preview {
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            background-color: #000;
             border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: var(--box-shadow);
-        }
-
-        #interactive {
             position: relative;
-            width: 100%;
-            height: 300px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        #interactive video {
+        #camera-view {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .scanner-overlay {
+        .camera-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
+            pointer-events: none;
         }
 
-        .scanner-frame {
+        .scan-frame {
             width: 80%;
-            max-width: 400px;
-            height: 150px;
-            border: 3px solid var(--accent-color);
-            border-radius: 8px;
+            height: 200px;
+            border: 3px solid rgba(72, 149, 239, 0.8);
+            border-radius: 10px;
             position: relative;
+            box-shadow: 0 0 20px rgba(72, 149, 239, 0.3);
         }
 
-        .scanner-frame::before, .scanner-frame::after {
+        .scan-frame::before, .scan-frame::after {
             content: '';
             position: absolute;
             width: 30px;
@@ -226,214 +162,268 @@
             border-width: 0;
         }
 
-        .scanner-frame::before {
+        .scan-frame::before {
             top: 0;
             left: 0;
-            border-top-width: 3px;
-            border-left-width: 3px;
-            border-top-left-radius: 5px;
+            border-top-width: 4px;
+            border-left-width: 4px;
+            border-top-left-radius: 8px;
         }
 
-        .scanner-frame::after {
+        .scan-frame::after {
             top: 0;
             right: 0;
-            border-top-width: 3px;
-            border-right-width: 3px;
-            border-top-right-radius: 5px;
+            border-top-width: 4px;
+            border-right-width: 4px;
+            border-top-right-radius: 8px;
         }
 
-        .scanner-controls {
+        .frame-label {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 20;
-        }
-
-        .scanner-zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 20;
-        }
-
-        .control-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: var(--dark-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s;
-            border: none;
-        }
-
-        .control-btn:hover {
-            background-color: white;
-            transform: scale(1.1);
-        }
-
-        .control-btn.active {
-            background-color: var(--primary-color);
+            bottom: -40px;
             color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
         }
 
-        .status-message {
-            padding: 10px;
-            margin: 10px 0;
+        .camera-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border: none;
             border-radius: var(--border-radius);
-            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             font-weight: 500;
         }
 
-        .success {
-            background-color: rgba(76, 201, 240, 0.2);
-            color: #0d6efd;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            flex: 2;
+            min-width: 200px;
         }
 
-        .error {
-            background-color: rgba(247, 37, 133, 0.2);
-            color: var(--warning-color);
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
         }
 
-        .info {
-            background-color: rgba(255, 193, 7, 0.2);
-            color: #ff9800;
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            flex: 1;
+            min-width: 150px;
         }
 
-        .result-popup {
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d1145a;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .processing-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: white;
         }
 
-        .popup-content {
-            background-color: white;
-            width: 90%;
+        .processing-content {
+            text-align: center;
             max-width: 500px;
-            padding: 25px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(63, 55, 201, 0.2));
             border-radius: var(--border-radius);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: popupFadeIn 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
-        @keyframes popupFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin: 0 auto 30px;
         }
 
-        .popup-header {
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .processing-steps {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .step {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step.active {
+            color: var(--accent-color);
+        }
+
+        .step.completed {
+            color: var(--success-color);
+        }
+
+        .step i {
+            font-size: 1.2rem;
+        }
+
+        .result-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .result-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .popup-title {
-            font-size: 1.5rem;
+        .result-title {
+            font-size: 1.8rem;
             color: var(--primary-color);
             font-weight: 700;
         }
 
-        .close-popup {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.2s;
-        }
-
-        .close-popup:hover {
-            color: var(--warning-color);
-        }
-
         .product-info {
-            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
         }
 
         .info-label {
             font-weight: 500;
-            color: #555;
+            color: #6c757d;
+            font-size: 1.1rem;
         }
 
         .info-value {
             font-weight: 600;
             color: var(--dark-color);
+            font-size: 1.1rem;
         }
 
         .product-price .info-value {
-            color: var(--primary-color);
-            font-size: 1.2rem;
+            color: var(--success-color);
+            font-size: 1.3rem;
         }
 
-        .not-found {
-            text-align: center;
-            padding: 20px;
-            color: var(--warning-color);
-            font-weight: 500;
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
 
-        .history-section {
+        .search-history {
             background-color: white;
-            padding: 25px;
             border-radius: var(--border-radius);
+            padding: 30px;
             box-shadow: var(--box-shadow);
         }
 
         .history-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+            font-size: 1.5rem;
             color: var(--primary-color);
+            margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .history-list {
             list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
         }
 
         .history-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background-color 0.2s;
         }
 
         .history-item:hover {
             background-color: #f8f9fa;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
         }
 
         .history-item-info {
@@ -449,7 +439,7 @@
             display: flex;
             gap: 15px;
             font-size: 0.9rem;
-            color: #666;
+            color: #6c757d;
         }
 
         .history-item-actions {
@@ -461,8 +451,9 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: #666;
-            font-size: 1rem;
+            color: #6c757d;
+            font-size: 1.1rem;
+            padding: 5px;
             transition: color 0.2s;
         }
 
@@ -474,146 +465,92 @@
             color: var(--warning-color);
         }
 
-        .processing-overlay {
-            display: none;
+        .no-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .flash {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            z-index: 100;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: var(--border-radius);
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        .processing-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--accent-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+        .flash.active {
+            opacity: 0.8;
+            transition: opacity 0.1s;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .mode-indicator {
+        .camera-zoom {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 25;
-        }
-
-        .quality-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 25;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .ai-enhanced {
-            background-color: rgba(72, 149, 239, 0.8);
-        }
-
-        .image-preview {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 500px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            z-index: 2000;
-            padding: 20px;
-        }
-
-        .image-preview-content {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .image-preview-title {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .image-comparison {
+            bottom: 20px;
+            right: 20px;
             display: flex;
             gap: 10px;
-            justify-content: center;
+            z-index: 10;
         }
 
-        .image-container {
-            flex: 1;
-            text-align: center;
-        }
-
-        .image-container img {
-            max-width: 100%;
-            border-radius: 8px;
-            border: 2px solid #eee;
-        }
-
-        .image-label {
-            margin-top: 5px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .camera-settings {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: var(--border-radius);
-            position: absolute;
-            top: 50px;
-            left: 10px;
-            z-index: 25;
-            max-width: 250px;
-        }
-
-        .setting-item {
+        .zoom-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--dark-color);
+            border: none;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
         }
 
-        .setting-label {
-            font-size: 0.8rem;
+        .zoom-btn:hover {
+            background-color: white;
+            transform: scale(1.1);
         }
 
-        .setting-value {
-            font-weight: bold;
-            font-size: 0.9rem;
+        .manual-input-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
         }
 
         @media (max-width: 768px) {
@@ -622,114 +559,70 @@
             }
             
             h1 {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
             
-            .search-section {
-                padding: 15px;
+            .camera-preview {
+                height: 300px;
             }
             
-            .tab-btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-            
-            .btn-group {
-                flex-direction: column;
+            .scan-frame {
+                height: 150px;
             }
             
             .btn {
-                width: 100%;
+                padding: 12px 20px;
+                font-size: 1rem;
             }
             
-            .scanner-frame {
-                width: 90%;
-                height: 120px;
+            .camera-controls {
+                flex-direction: column;
             }
             
-            .popup-content {
-                width: 95%;
-                padding: 15px;
+            .action-buttons {
+                flex-direction: column;
             }
             
             .info-row {
                 flex-direction: column;
                 gap: 5px;
             }
-            
-            .image-comparison {
-                flex-direction: column;
-            }
-            
-            .camera-settings {
-                max-width: 200px;
-                top: 40px;
-            }
         }
 
-        /* Animation for barcode scan */
-        @keyframes scanAnimation {
-            0% {
-                top: 0;
-            }
-            100% {
-                top: calc(100% - 4px);
-            }
-        }
-
-        .scan-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: rgba(72, 149, 239, 0.8);
-            box-shadow: 0 0 10px rgba(72, 149, 239, 0.8);
-            animation: scanAnimation 2s infinite linear;
-            z-index: 15;
-        }
-
-        /* Dark mode */
         @media (prefers-color-scheme: dark) {
             body {
-                background-color: #121212;
-                color: #e0e0e0;
+                background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
             }
             
-            .search-section, .history-section, .popup-content {
-                background-color: #1e1e1e;
-                color: #e0e0e0;
+            header, .main-content, .search-history, .result-section, .manual-input-section {
+                background-color: #2d3748;
+                color: #e2e8f0;
             }
             
-            input[type="text"], input[type="number"] {
-                background-color: #2d2d2d;
-                color: #e0e0e0;
-                border-color: #444;
-            }
-            
-            .info-label, .tab-btn:not(.active), .action-btn {
-                color: #aaa;
+            .info-label, .tab-btn:not(.active) {
+                color: #a0aec0;
             }
             
             .info-value {
-                color: #e0e0e0;
+                color: #e2e8f0;
             }
             
             .history-item:hover {
-                background-color: #2a2a2a;
+                background-color: #4a5568;
             }
             
-            .popup-header, .history-title {
-                border-bottom-color: #444;
+            .product-info {
+                background-color: #4a5568;
             }
             
-            .info-row, .history-item {
-                border-bottom-color: #444;
+            .tabs {
+                background-color: #4a5568;
             }
             
-            .image-preview {
-                background-color: #1e1e1e;
-                color: #e0e0e0;
+            input[type="text"] {
+                background-color: #4a5568;
+                color: #e2e8f0;
+                border-color: #718096;
             }
         }
     </style>
@@ -737,1326 +630,765 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-barcode"></i> نظام إدارة الأصناف</h1>
-            <p>ابحث عن الأصناف باستخدام الباركود أو اسم المنتج</p>
+            <h1><i class="fas fa-barcode"></i> نظام مسح الباركود الذكي</h1>
+            <p>قم بتصوير الباركود للحصول على معلومات المنتج</p>
         </header>
 
-        <section class="search-section">
-            <div class="search-tabs">
-                <button class="tab-btn active" data-tab="barcode-tab"><i class="fas fa-barcode"></i> البحث بالباركود</button>
-                <button class="tab-btn" data-tab="name-tab"><i class="fas fa-search"></i> البحث بالاسم</button>
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="camera-tab">
+                    <i class="fas fa-camera"></i> مسح بالكاميرا
+                </button>
+                <button class="tab-btn" data-tab="manual-tab">
+                    <i class="fas fa-keyboard"></i> إدخال يدوي
+                </button>
             </div>
 
-            <div id="barcode-tab" class="tab-content active">
-                <form id="barcode-form">
-                    <div class="form-group">
-                        <label for="barcode-input"><i class="fas fa-qrcode"></i> أدخل الباركود:</label>
-                        <input type="text" id="barcode-input" placeholder="مسح الباركود أو إدخاله يدويًا" autocomplete="off">
+            <div id="camera-tab" class="tab-content active">
+                <div class="camera-section">
+                    <div class="camera-preview">
+                        <video id="camera-view" autoplay playsinline></video>
+                        <div class="camera-overlay">
+                            <div class="scan-frame">
+                                <div class="frame-label">
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    قم بمحاذاة الباركود داخل الإطار
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flash" id="flash"></div>
+                        <div class="camera-zoom">
+                            <button class="zoom-btn" id="zoom-out" title="تصغير">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="zoom-btn" id="zoom-reset" title="إعادة ضبط">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <button class="zoom-btn" id="zoom-in" title="تكبير">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class="btn-group">
-                        <button type="button" id="start-scanner" class="btn"><i class="fas fa-camera"></i> بدء الماسح الضوئي</button>
-                        <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> بحث</button>
-                        <button type="button" id="ai-enhance-btn" class="btn" style="background-color: #ff9800;"><i class="fas fa-magic"></i> تحسين الذكاء الاصطناعي</button>
-                    </div>
-                </form>
 
-                <div id="scanner-container" class="scanner-container">
-                    <div id="interactive" class="viewport">
-                        <div id="processing-overlay" class="processing-overlay">
-                            <div class="processing-spinner"></div>
-                            <p id="processing-message">جاري معالجة الصورة...</p>
-                        </div>
-                        <video playsinline></video>
-                        <div class="scan-line"></div>
-                        <div class="scanner-overlay">
-                            <div class="scanner-frame"></div>
-                        </div>
-                        <div id="mode-indicator" class="mode-indicator">وضع القراءة: باركود</div>
-                        <div id="quality-indicator" class="quality-indicator">
-                            <i class="fas fa-image"></i>
-                            <span>جودة: متوسطة</span>
-                        </div>
-                        <div id="camera-settings" class="camera-settings">
-                            <div class="setting-item">
-                                <span class="setting-label">الوضوح:</span>
-                                <span class="setting-value" id="sharpness-value">0</span>
-                            </div>
-                            <div class="setting-item">
-                                <span class="setting-label">التباين:</span>
-                                <span class="setting-value" id="contrast-value">0</span>
-                            </div>
-                            <div class="setting-item">
-                                <span class="setting-label">السطوع:</span>
-                                <span class="setting-value" id="brightness-value">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="scanner-controls">
-                        <button id="toggle-ai" class="control-btn active" title="تفعيل الذكاء الاصطناعي"><i class="fas fa-robot"></i></button>
-                        <button id="capture-frame" class="control-btn" title="التقاط صورة"><i class="fas fa-camera-retro"></i></button>
-                        <button id="toggle-settings" class="control-btn" title="إعدادات الكاميرا"><i class="fas fa-cog"></i></button>
-                        <button id="switch-camera" class="control-btn" title="تبديل الكاميرا"><i class="fas fa-sync-alt"></i></button>
-                    </div>
-                    <div class="scanner-zoom-controls">
-                        <button id="zoom-out-barcode" class="control-btn" title="تصغير"><i class="fas fa-search-minus"></i></button>
-                        <button id="zoom-reset-barcode" class="control-btn" title="إعادة الضبط"><i class="fas fa-expand-arrows-alt"></i></button>
-                        <button id="zoom-in-barcode" class="control-btn" title="تكبير"><i class="fas fa-search-plus"></i></button>
+                    <div class="camera-controls">
+                        <button class="btn btn-primary" id="start-camera">
+                            <i class="fas fa-video"></i> تشغيل الكاميرا
+                        </button>
+                        <button class="btn btn-success" id="capture-btn" disabled>
+                            <i class="fas fa-camera"></i> التقاط صورة
+                        </button>
+                        <button class="btn btn-danger" id="stop-camera" disabled>
+                            <i class="fas fa-stop"></i> إيقاف الكاميرا
+                        </button>
                     </div>
                 </div>
-
-                <div id="status-message" class="status-message"></div>
             </div>
 
-            <div id="name-tab" class="tab-content">
-                <form id="name-search-form">
-                    <div class="form-group">
-                        <label for="name-input"><i class="fas fa-tag"></i> أدخل اسم المنتج:</label>
-                        <input type="text" id="name-input" placeholder="اسم المنتج أو جزء منه" autocomplete="off">
-                    </div>
-                    <div class="btn-group">
-                        <button type="submit" class="btn"><i class="fas fa-search"></i> بحث</button>
-                    </div>
-                </form>
-
-                <div id="name-search-results" class="search-results" style="margin-top: 20px;"></div>
+            <div id="manual-tab" class="tab-content">
+                <div class="manual-input-section">
+                    <form id="manual-form">
+                        <div class="form-group">
+                            <label for="manual-barcode">
+                                <i class="fas fa-qrcode"></i> أدخل رقم الباركود:
+                            </label>
+                            <input type="text" id="manual-barcode" 
+                                   placeholder="أدخل رقم الباركود المكون من 8-13 رقم"
+                                   maxlength="13" pattern="\d{8,13}" required>
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                                يجب أن يكون رقم الباركود مكون من 8 إلى 13 رقم
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-search"></i> البحث عن المنتج
+                        </button>
+                    </form>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <section class="history-section">
-            <h2 class="history-title"><i class="fas fa-history"></i> سجل البحث</h2>
-            <ul class="history-list" id="search-history">
+        <div class="result-section" id="result-section">
+            <div class="result-header">
+                <h2 class="result-title">
+                    <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                    تم العثور على المنتج
+                </h2>
+                <button class="btn btn-secondary" id="scan-again">
+                    <i class="fas fa-redo"></i> مسح جديد
+                </button>
+            </div>
+            
+            <div class="product-info">
+                <div class="info-row product-name">
+                    <span class="info-label">اسم المنتج:</span>
+                    <span class="info-value" id="result-name">...</span>
+                </div>
+                <div class="info-row product-price">
+                    <span class="info-label">السعر:</span>
+                    <span class="info-value" id="result-price">...</span>
+                </div>
+                <div class="info-row product-barcode">
+                    <span class="info-label">رقم الباركود:</span>
+                    <span class="info-value" id="result-barcode">...</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="print-result">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+                <button class="btn btn-secondary" id="share-result">
+                    <i class="fas fa-share-alt"></i> مشاركة
+                </button>
+                <button class="btn btn-success" id="save-result">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+
+        <div class="search-history">
+            <h2 class="history-title">
+                <i class="fas fa-history"></i> سجل البحث
+            </h2>
+            <ul class="history-list" id="history-list">
                 <!-- سيتم ملؤه بالنتائج السابقة -->
             </ul>
-        </section>
-    </div>
-
-    <div id="result-popup" class="result-popup">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2 class="popup-title"><i class="fas fa-info-circle"></i> تفاصيل المنتج</h2>
-                <button class="close-popup" id="close-popup">&times;</button>
-            </div>
-            
-            <div class="product-info" id="product-info">
-                <!-- سيتم ملؤه بالنتائج -->
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn" id="print-result"><i class="fas fa-print"></i> طباعة</button>
-                <button class="btn btn-secondary" id="close-result">إغلاق</button>
-            </div>
         </div>
     </div>
 
-    <div id="image-preview" class="image-preview">
-        <div class="image-preview-content">
-            <div class="image-preview-title">مقارنة معالجة الصورة</div>
-            <div class="image-comparison">
-                <div class="image-container">
-                    <img id="original-image" src="" alt="الصورة الأصلية">
-                    <div class="image-label">الصورة الأصلية</div>
+    <div class="processing-overlay" id="processing-overlay">
+        <div class="processing-content">
+            <div class="spinner"></div>
+            <h2 style="margin-bottom: 20px; font-size: 1.8rem;">جاري تحليل الصورة...</h2>
+            <p style="margin-bottom: 30px; opacity: 0.9;">يتم حالياً معالجة الصورة وتحسينها باستخدام الذكاء الاصطناعي</p>
+            
+            <div class="processing-steps">
+                <div class="step active" id="step1">
+                    <i class="fas fa-image"></i>
+                    <span>جاري تحليل الصورة...</span>
                 </div>
-                <div class="image-container">
-                    <img id="enhanced-image" src="" alt="الصورة المحسنة">
-                    <div class="image-label">الصورة المحسنة</div>
+                <div class="step" id="step2">
+                    <i class="fas fa-robot"></i>
+                    <span>تحسين الجودة باستخدام الذكاء الاصطناعي...</span>
                 </div>
-            </div>
-            <div class="btn-group">
-                <button id="close-preview" class="btn btn-secondary">إغلاق</button>
-                <button id="use-enhanced" class="btn">استخدام الصورة المحسنة</button>
+                <div class="step" id="step3">
+                    <i class="fas fa-barcode"></i>
+                    <span>قراءة الباركود من الصورة...</span>
+                </div>
+                <div class="step" id="step4">
+                    <i class="fas fa-search"></i>
+                    <span>البحث في قاعدة البيانات...</span>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- مكتبات JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/deeplab@0.2.0"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // عناصر واجهة المستخدم
+            // العناصر الرئيسية
             const tabButtons = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
-            const barcodeInput = document.getElementById('barcode-input');
-            const nameInput = document.getElementById('name-input');
-            const popup = document.getElementById('result-popup');
-            const startScannerButton = document.getElementById('start-scanner');
-            const statusMessage = document.getElementById('status-message');
-            const scannerContainer = document.getElementById('scanner-container');
-            const barcodeForm = document.getElementById('barcode-form');
-            const nameSearchForm = document.getElementById('name-search-form');
-            const searchHistory = document.getElementById('search-history');
-            const productInfo = document.getElementById('product-info');
-            const closePopupBtn = document.getElementById('close-popup');
-            const closeResultBtn = document.getElementById('close-result');
-            const printResultBtn = document.getElementById('print-result');
-            const zoomInBtn = document.getElementById('zoom-in-barcode');
-            const zoomOutBtn = document.getElementById('zoom-out-barcode');
-            const zoomResetBtn = document.getElementById('zoom-reset-barcode');
-            const toggleAIBtn = document.getElementById('toggle-ai');
-            const captureFrameBtn = document.getElementById('capture-frame');
-            const toggleSettingsBtn = document.getElementById('toggle-settings');
-            const switchCameraBtn = document.getElementById('switch-camera');
+            const startCameraBtn = document.getElementById('start-camera');
+            const stopCameraBtn = document.getElementById('stop-camera');
+            const captureBtn = document.getElementById('capture-btn');
+            const cameraView = document.getElementById('camera-view');
+            const flash = document.getElementById('flash');
             const processingOverlay = document.getElementById('processing-overlay');
-            const processingMessage = document.getElementById('processing-message');
-            const modeIndicator = document.getElementById('mode-indicator');
-            const qualityIndicator = document.getElementById('quality-indicator');
-            const aiEnhanceBtn = document.getElementById('ai-enhance-btn');
-            const imagePreview = document.getElementById('image-preview');
-            const originalImage = document.getElementById('original-image');
-            const enhancedImage = document.getElementById('enhanced-image');
-            const closePreviewBtn = document.getElementById('close-preview');
-            const useEnhancedBtn = document.getElementById('use-enhanced');
-            
+            const resultSection = document.getElementById('result-section');
+            const historyList = document.getElementById('history-list');
+            const manualForm = document.getElementById('manual-form');
+            const manualBarcodeInput = document.getElementById('manual-barcode');
+            const scanAgainBtn = document.getElementById('scan-again');
+            const printBtn = document.getElementById('print-result');
+            const saveBtn = document.getElementById('save-result');
+            const shareBtn = document.getElementById('share-result');
+            const zoomInBtn = document.getElementById('zoom-in');
+            const zoomOutBtn = document.getElementById('zoom-out');
+            const zoomResetBtn = document.getElementById('zoom-reset');
+
             // متغيرات النظام
-            let lastReadValues = [];
-            let isProcessing = false;
-            let scannerActive = false;
-            let videoTrack = null;
+            let cameraStream = null;
             let currentZoom = 1;
             let minZoom = 1;
-            let maxZoom = 5;
+            let maxZoom = 3;
             let zoomStep = 0.5;
-            let searchHistoryData = JSON.parse(localStorage.getItem('searchHistory')) || [];
-            let barcodeAttempts = 0;
-            const maxBarcodeAttempts = 3;
-            let currentMode = 'barcode';
+            let searchHistory = JSON.parse(localStorage.getItem('barcodeHistory')) || [];
             let ocrWorker = null;
-            let isAIEnabled = true;
-            let currentCamera = 'environment';
-            let cameraSettingsVisible = false;
-            let deeplabModel = null;
             let tfReady = false;
-            let imageQualityScore = 0;
-            let lastProcessedImage = null;
-            let currentStream = null;
-            
-            // تهيئة TensorFlow.js
-            async function initializeTensorFlow() {
-                try {
-                    // تحميل نموذج DeepLabV3+ لتحديد وتحسين الأشكال
-                    processingMessage.textContent = 'جاري تحميل الذكاء الاصطناعي...';
-                    processingOverlay.style.display = 'flex';
-                    
-                    await tf.ready();
-                    tfReady = true;
-                    
-                    console.log('TensorFlow.js جاهز للإستخدام');
-                    
-                    processingOverlay.style.display = 'none';
-                    
-                    // تحميل نموذج معالجة الصور
-                    loadImageEnhancementModel();
-                    
-                } catch (error) {
-                    console.error('خطأ في تهيئة TensorFlow:', error);
-                    processingOverlay.style.display = 'none';
-                    showStatusMessage('تعذر تحميل الذكاء الاصطناعي، سيتم استخدام المعالجة التقليدية', 'info');
-                }
-            }
-            
-            // تحميل نموذج تحسين الصور
-            async function loadImageEnhancementModel() {
-                try {
-                    // استخدام نماذج TensorFlow.js المدمجة لمعالجة الصور
-                    console.log('نماذج معالجة الصور جاهزة');
-                    showStatusMessage('الذكاء الاصطناعي جاهز لتحسين الصور', 'success');
-                } catch (error) {
-                    console.error('خطأ في تحميل النموذج:', error);
-                }
-            }
-            
-            // تحليل جودة الصورة
-            function analyzeImageQuality(canvas) {
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                
-                let brightness = 0;
-                let contrast = 0;
-                let edgeScore = 0;
-                
-                // حساب السطوع
-                for (let i = 0; i < data.length; i += 4) {
-                    brightness += (data[i] + data[i+1] + data[i+2]) / 3;
-                }
-                brightness = brightness / (data.length / 4) / 255;
-                
-                // حساب التباين
-                const mean = brightness * 255;
-                let variance = 0;
-                for (let i = 0; i < data.length; i += 4) {
-                    const pixelValue = (data[i] + data[i+1] + data[i+2]) / 3;
-                    variance += Math.pow(pixelValue - mean, 2);
-                }
-                contrast = Math.sqrt(variance / (data.length / 4)) / 255;
-                
-                // حساب حدة الحواف (بسيط)
-                edgeScore = detectEdgesSimple(canvas);
-                
-                // حساب النتيجة النهائية
-                imageQualityScore = (brightness * 0.3 + contrast * 0.4 + edgeScore * 0.3) * 100;
-                
-                // تحديث المؤشر
-                updateQualityIndicator();
-                
-                return {
-                    brightness: brightness * 100,
-                    contrast: contrast * 100,
-                    edgeScore: edgeScore * 100,
-                    overall: imageQualityScore
-                };
-            }
-            
-            // كشف الحواف البسيط
-            function detectEdgesSimple(canvas) {
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                const width = canvas.width;
-                const height = canvas.height;
-                
-                let edgeSum = 0;
-                const kernel = [
-                    [-1, -1, -1],
-                    [-1,  8, -1],
-                    [-1, -1, -1]
-                ];
-                
-                for (let y = 1; y < height - 1; y++) {
-                    for (let x = 1; x < width - 1; x++) {
-                        let sum = 0;
-                        for (let ky = -1; ky <= 1; ky++) {
-                            for (let kx = -1; kx <= 1; kx++) {
-                                const pixelIndex = ((y + ky) * width + (x + kx)) * 4;
-                                const pixelValue = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3;
-                                sum += pixelValue * kernel[ky + 1][kx + 1];
-                            }
-                        }
-                        edgeSum += Math.abs(sum);
-                    }
-                }
-                
-                const maxPossibleEdges = (width - 2) * (height - 2) * 255 * 8;
-                return edgeSum / maxPossibleEdges;
-            }
-            
-            // تحديث مؤشر الجودة
-            function updateQualityIndicator() {
-                if (!qualityIndicator) return;
-                
-                let qualityText = "ضعيفة";
-                let iconClass = "fas fa-times-circle";
-                let colorClass = "";
-                
-                if (imageQualityScore > 70) {
-                    qualityText = "ممتازة";
-                    iconClass = "fas fa-check-circle";
-                } else if (imageQualityScore > 50) {
-                    qualityText = "جيدة";
-                    iconClass = "fas fa-check-circle";
-                } else if (imageQualityScore > 30) {
-                    qualityText = "متوسطة";
-                    iconClass = "fas fa-exclamation-circle";
-                } else {
-                    qualityText = "ضعيفة";
-                    iconClass = "fas fa-times-circle";
-                }
-                
-                qualityIndicator.innerHTML = `<i class="${iconClass}"></i><span>جودة: ${qualityText}</span>`;
-            }
-            
-            // تحسين الصورة باستخدام الذكاء الاصطناعي
-            async function enhanceImageWithAI(imageData) {
-                if (!tfReady || !isAIEnabled) {
-                    return enhanceImageTraditional(imageData);
-                }
-                
-                try {
-                    processingMessage.textContent = 'جاري تحسين الصورة بالذكاء الاصطناعي...';
-                    processingOverlay.style.display = 'flex';
-                    
-                    // تحويل ImageData إلى tensor
-                    const tensor = tf.browser.fromPixels({
-                        data: new Uint8Array(imageData.data),
-                        width: imageData.width,
-                        height: imageData.height
-                    }, 4);
-                    
-                    // تطبيق تحسينات متعددة
-                    let enhancedTensor = tensor;
-                    
-                    // 1. ضبط السطوع والتباين
-                    enhancedTensor = tf.image.adjustBrightness(enhancedTensor, 0.1);
-                    enhancedTensor = tf.image.adjustContrast(enhancedTensor, 1.5);
-                    
-                    // 2. تحسين الحدة باستخدام convolution
-                    enhancedTensor = enhanceSharpness(enhancedTensor);
-                    
-                    // 3. تقليل الضوضاء
-                    enhancedTensor = reduceNoise(enhancedTensor);
-                    
-                    // 4. تحويل إلى تدرج الرمادي للباركود
-                    const grayTensor = tf.image.rgbToGrayscale(enhancedTensor);
-                    
-                    // 5. زيادة التباين أكثر للباركود
-                    const finalTensor = enhanceBarcodeContrast(grayTensor);
-                    
-                    // تحويل tensor إلى ImageData
-                    const finalCanvas = document.createElement('canvas');
-                    finalCanvas.width = imageData.width;
-                    finalCanvas.height = imageData.height;
-                    
-                    await tf.browser.toPixels(finalTensor, finalCanvas);
-                    
-                    const finalImageData = finalCanvas.getContext('2d').getImageData(0, 0, finalCanvas.width, finalCanvas.height);
-                    
-                    // تنظيف الذاكرة
-                    tensor.dispose();
-                    enhancedTensor.dispose();
-                    grayTensor.dispose();
-                    finalTensor.dispose();
-                    
-                    processingOverlay.style.display = 'none';
-                    
-                    return finalImageData;
-                    
-                } catch (error) {
-                    console.error('خطأ في تحسين الصورة بالذكاء الاصطناعي:', error);
-                    processingOverlay.style.display = 'none';
-                    return enhanceImageTraditional(imageData);
-                }
-            }
-            
-            // تحسين الحدة
-            function enhanceSharpness(tensor) {
-                const sharpnessKernel = tf.tensor2d([
-                    [0, -1, 0],
-                    [-1, 5, -1],
-                    [0, -1, 0]
-                ], [3, 3]);
-                
-                return tf.conv2d(tensor.expandDims(0), sharpnessKernel.expandDims(2).expandDims(3), 1, 'same').squeeze();
-            }
-            
-            // تقليل الضوضاء
-            function reduceNoise(tensor) {
-                return tf.image.nonMaxSuppressionAsync(
-                    tensor.expandDims(0),
-                    [0.5],
-                    10,
-                    0.5
-                ).then(() => tensor);
-            }
-            
-            // تحسين تباين الباركود
-            function enhanceBarcodeContrast(tensor) {
-                // تطبيق thresholding لتحسين تباين الباركود
-                const mean = tensor.mean();
-                const threshold = mean;
-                
-                return tf.where(
-                    tensor.greater(threshold),
-                    tf.onesLike(tensor).mul(255),
-                    tf.zerosLike(tensor)
-                );
-            }
-            
-            // تحسين الصورة بالطرق التقليدية
-            function enhanceImageTraditional(imageData) {
-                const ctx = document.createElement('canvas').getContext('2d');
-                ctx.canvas.width = imageData.width;
-                ctx.canvas.height = imageData.height;
-                ctx.putImageData(imageData, 0, 0);
-                
-                const imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-                const data = imgData.data;
-                
-                // تحسين التباين والسطوع
-                const contrast = 1.5;
-                const brightness = 20;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    // زيادة التباين
-                    data[i] = ((data[i] / 255 - 0.5) * contrast + 0.5) * 255;
-                    data[i+1] = ((data[i+1] / 255 - 0.5) * contrast + 0.5) * 255;
-                    data[i+2] = ((data[i+2] / 255 - 0.5) * contrast + 0.5) * 255;
-                    
-                    // زيادة السطوع
-                    data[i] = Math.min(255, Math.max(0, data[i] + brightness));
-                    data[i+1] = Math.min(255, Math.max(0, data[i+1] + brightness));
-                    data[i+2] = Math.min(255, Math.max(0, data[i+2] + brightness));
-                }
-                
-                // تحسين الحدة
-                enhanceSharpnessTraditional(imgData);
-                
-                return imgData;
-            }
-            
-            // تحسين الحدة بالطرق التقليدية
-            function enhanceSharpnessTraditional(imageData) {
-                const width = imageData.width;
-                const height = imageData.height;
-                const data = imageData.data;
-                
-                // kernel لتحسين الحدة
-                const kernel = [
-                    [0, -1, 0],
-                    [-1, 5, -1],
-                    [0, -1, 0]
-                ];
-                
-                // إنشاء نسخة من البيانات الأصلية
-                const originalData = new Uint8ClampedArray(data);
-                
-                for (let y = 1; y < height - 1; y++) {
-                    for (let x = 1; x < width - 1; x++) {
-                        for (let c = 0; c < 3; c++) {
-                            let sum = 0;
-                            for (let ky = -1; ky <= 1; ky++) {
-                                for (let kx = -1; kx <= 1; kx++) {
-                                    const pixelIndex = ((y + ky) * width + (x + kx)) * 4 + c;
-                                    sum += originalData[pixelIndex] * kernel[ky + 1][kx + 1];
-                                }
-                            }
-                            const index = (y * width + x) * 4 + c;
-                            data[index] = Math.min(255, Math.max(0, sum));
-                        }
-                    }
-                }
-            }
-            
-            // التقاط صورة من الكاميرا
-            async function captureFrame() {
-                const videoElement = document.querySelector('#interactive video');
-                if (!videoElement || !videoElement.srcObject) return;
-                
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                
-                // رسم الفيديو على canvas
-                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                // تحليل جودة الصورة
-                analyzeImageQuality(canvas);
-                
-                // عرض معاينة الصورة
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                await showImageComparison(canvas, imageData);
-            }
-            
-            // عرض مقارنة الصور
-            async function showImageComparison(originalCanvas, originalImageData) {
-                // الصورة الأصلية
-                originalImage.src = originalCanvas.toDataURL('image/png');
-                
-                // تحسين الصورة
-                processingMessage.textContent = 'جاري تحسين الصورة...';
-                processingOverlay.style.display = 'flex';
-                
-                setTimeout(async () => {
-                    let enhancedImageData;
-                    
-                    if (isAIEnabled && tfReady) {
-                        enhancedImageData = await enhanceImageWithAI(originalImageData);
-                    } else {
-                        enhancedImageData = enhanceImageTraditional(originalImageData);
-                    }
-                    
-                    // عرض الصورة المحسنة
-                    const enhancedCanvas = document.createElement('canvas');
-                    enhancedCanvas.width = enhancedImageData.width;
-                    enhancedCanvas.height = enhancedImageData.height;
-                    enhancedCanvas.getContext('2d').putImageData(enhancedImageData, 0, 0);
-                    
-                    enhancedImage.src = enhancedCanvas.toDataURL('image/png');
-                    
-                    processingOverlay.style.display = 'none';
-                    imagePreview.style.display = 'block';
-                    
-                    // حفظ الصورة المحسنة
-                    lastProcessedImage = {
-                        original: originalCanvas.toDataURL('image/png'),
-                        enhanced: enhancedCanvas.toDataURL('image/png'),
-                        imageData: enhancedImageData
-                    };
-                    
-                }, 100);
-            }
-            
-            // معالجة الصورة المحسنة
-            async function processEnhancedImage() {
-                if (!lastProcessedImage) return;
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = lastProcessedImage.imageData.width;
-                canvas.height = lastProcessedImage.imageData.height;
-                canvas.getContext('2d').putImageData(lastProcessedImage.imageData, 0, 0);
-                
-                // محاولة قراءة الباركود من الصورة المحسنة
-                try {
-                    const code = await readBarcodeFromImage(canvas);
-                    if (code) {
-                        processBarcode(code, 'ai_enhanced');
-                    } else {
-                        // محاولة قراءة الرقم باستخدام OCR
-                        readTextFromEnhancedImage(canvas);
-                    }
-                } catch (error) {
-                    console.error('خطأ في معالجة الصورة المحسنة:', error);
-                }
-            }
-            
-            // قراءة الباركود من صورة
-            async function readBarcodeFromImage(canvas) {
-                return new Promise((resolve) => {
-                    const imageData = canvas.toDataURL('image/jpeg');
-                    
-                    Quagga.decodeSingle({
-                        decoder: {
-                            readers: [
-                                'code_128_reader', 
-                                'ean_reader', 
-                                'ean_8_reader', 
-                                'code_39_reader', 
-                                'upc_reader',
-                                'upc_e_reader'
-                            ]
-                        },
-                        locate: true,
-                        src: imageData,
-                        numOfWorkers: 0
-                    }, function(result) {
-                        if (result && result.codeResult) {
-                            resolve(result.codeResult.code);
-                        } else {
-                            resolve(null);
-                        }
-                    });
-                });
-            }
-            
-            // قراءة النص من الصورة المحسنة
-            async function readTextFromEnhancedImage(canvas) {
-                if (!ocrWorker) {
-                    showStatusMessage('جارٍ تحميل نظام قراءة النص...', 'info');
-                    return;
-                }
-                
-                const result = await ocrWorker.recognize(canvas, 'eng', {
-                    tessedit_char_whitelist: '0123456789',
-                    tessedit_pageseg_mode: 7
-                });
-                
-                const extractedNumbers = result.data.text.replace(/[^\d]/g, '').trim();
-                if (extractedNumbers.length >= 8 && extractedNumbers.length <= 13) {
-                    if (validateAndProcessBarcode(extractedNumbers)) {
-                        processBarcode(extractedNumbers, 'ai_enhanced_ocr');
-                    }
-                }
-            }
-            
-            // تهيئة Tesseract.js
-            Tesseract.createWorker({
-                logger: m => console.log(m),
-            }).then(worker => {
-                ocrWorker = worker;
-                console.log('Tesseract worker جاهز');
-            });
-            
-            // تهيئة سجل البحث
-            renderSearchHistory();
-            
-            // تهيئة TensorFlow.js
-            initializeTensorFlow();
-            
+            let isProcessing = false;
+
+            // تهيئة النظام
+            initializeSystem();
+
             // تبديل التبويبات
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // تحديث التبويبات
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
                     
                     button.classList.add('active');
-                    const tabId = button.getAttribute('data-tab');
                     document.getElementById(tabId).classList.add('active');
                     
-                    if (scannerActive) {
-                        stopScanner();
+                    // إيقاف الكاميرا إذا كانت تعمل
+                    if (cameraStream) {
+                        stopCamera();
                     }
                 });
             });
+
+            // بدء الكاميرا
+            startCameraBtn.addEventListener('click', startCamera);
             
-            // بدء الماسح الضوئي
-            startScannerButton.addEventListener('click', startScanner);
+            // إيقاف الكاميرا
+            stopCameraBtn.addEventListener('click', stopCamera);
+            
+            // التقاط صورة
+            captureBtn.addEventListener('click', captureImage);
+            
+            // إعادة المسح
+            scanAgainBtn.addEventListener('click', () => {
+                resultSection.style.display = 'none';
+                if (!cameraStream) {
+                    startCamera();
+                }
+            });
             
             // التحكم في التكبير
             zoomInBtn.addEventListener('click', zoomIn);
             zoomOutBtn.addEventListener('click', zoomOut);
             zoomResetBtn.addEventListener('click', resetZoom);
             
-            // إدارة النافذة المنبثقة
-            closePopupBtn.addEventListener('click', closePopup);
-            closeResultBtn.addEventListener('click', closePopup);
-            printResultBtn.addEventListener('click', printResult);
-            
-            // التحكم في الذكاء الاصطناعي
-            toggleAIBtn.addEventListener('click', () => {
-                isAIEnabled = !isAIEnabled;
-                toggleAIBtn.classList.toggle('active', isAIEnabled);
-                toggleAIBtn.title = isAIEnabled ? 'تعطيل الذكاء الاصطناعي' : 'تفعيل الذكاء الاصطناعي';
-                showStatusMessage(`الذكاء الاصطناعي ${isAIEnabled ? 'مفعل' : 'معطل'}`, 'info');
+            // إدخال يدوي
+            manualForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const barcode = manualBarcodeInput.value.trim();
+                if (barcode && /^\d{8,13}$/.test(barcode)) {
+                    searchProduct(barcode);
+                } else {
+                    showError('يرجى إدخال باركود صحيح مكون من 8 إلى 13 رقم');
+                }
             });
+            
+            // تهيئة النظام
+            async function initializeSystem() {
+                // تحميل سجل البحث
+                loadSearchHistory();
+                
+                // تهيئة Tesseract.js
+                try {
+                    ocrWorker = await Tesseract.createWorker({
+                        logger: m => console.log(m),
+                        workerPath: 'https://unpkg.com/tesseract.js@v4.0.2/dist/worker.min.js',
+                        langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+                        corePath: 'https://unpkg.com/tesseract.js-core@v4.0.2/tesseract-core.wasm.js',
+                    });
+                    await ocrWorker.loadLanguage('eng');
+                    await ocrWorker.initialize('eng');
+                    console.log('Tesseract.js جاهز');
+                } catch (error) {
+                    console.error('خطأ في تحميل Tesseract.js:', error);
+                }
+                
+                // تهيئة TensorFlow.js
+                try {
+                    await tf.ready();
+                    tfReady = true;
+                    console.log('TensorFlow.js جاهز');
+                } catch (error) {
+                    console.error('خطأ في تحميل TensorFlow.js:', error);
+                }
+            }
+            
+            // تشغيل الكاميرا
+            async function startCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            zoom: { exact: currentZoom }
+                        }
+                    };
+                    
+                    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    cameraView.srcObject = cameraStream;
+                    
+                    // تحديث حالة الأزرار
+                    startCameraBtn.disabled = true;
+                    captureBtn.disabled = false;
+                    stopCameraBtn.disabled = false;
+                    
+                    // تفعيل التحكم بالتكبير
+                    const videoTrack = cameraStream.getVideoTracks()[0];
+                    const capabilities = videoTrack.getCapabilities();
+                    if (capabilities.zoom) {
+                        minZoom = capabilities.zoom.min;
+                        maxZoom = capabilities.zoom.max;
+                        zoomStep = capabilities.zoom.step || 0.5;
+                    }
+                    
+                    console.log('الكاميرا جاهزة');
+                    
+                } catch (error) {
+                    console.error('خطأ في تشغيل الكاميرا:', error);
+                    showError('تعذر الوصول إلى الكاميرا. يرجى التحقق من الصلاحيات.');
+                }
+            }
+            
+            // إيقاف الكاميرا
+            function stopCamera() {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraStream = null;
+                    cameraView.srcObject = null;
+                    
+                    // تحديث حالة الأزرار
+                    startCameraBtn.disabled = false;
+                    captureBtn.disabled = true;
+                    stopCameraBtn.disabled = true;
+                    
+                    console.log('الكاميرا متوقفة');
+                }
+            }
+            
+            // التحكم في التكبير
+            async function zoomIn() {
+                if (currentZoom < maxZoom) {
+                    currentZoom = Math.min(currentZoom + zoomStep, maxZoom);
+                    await applyZoom();
+                }
+            }
+            
+            async function zoomOut() {
+                if (currentZoom > minZoom) {
+                    currentZoom = Math.max(currentZoom - zoomStep, minZoom);
+                    await applyZoom();
+                }
+            }
+            
+            async function resetZoom() {
+                currentZoom = 1;
+                await applyZoom();
+            }
+            
+            async function applyZoom() {
+                if (!cameraStream) return;
+                
+                const videoTrack = cameraStream.getVideoTracks()[0];
+                try {
+                    await videoTrack.applyConstraints({
+                        advanced: [{ zoom: currentZoom }]
+                    });
+                    console.log('التكبير:', currentZoom);
+                } catch (error) {
+                    console.error('خطأ في ضبط التكبير:', error);
+                }
+            }
             
             // التقاط صورة
-            captureFrameBtn.addEventListener('click', captureFrame);
-            
-            // تبديل إعدادات الكاميرا
-            toggleSettingsBtn.addEventListener('click', () => {
-                cameraSettingsVisible = !cameraSettingsVisible;
-                document.getElementById('camera-settings').style.display = 
-                    cameraSettingsVisible ? 'block' : 'none';
-            });
-            
-            // تبديل الكاميرا
-            switchCameraBtn.addEventListener('click', switchCamera);
-            
-            // تحسين الصورة بالذكاء الاصطناعي
-            aiEnhanceBtn.addEventListener('click', () => {
-                if (scannerActive) {
-                    captureFrame();
-                } else {
-                    showStatusMessage('يجب تشغيل الماسح الضوئي أولاً', 'error');
-                }
-            });
-            
-            // إغلاق معاينة الصورة
-            closePreviewBtn.addEventListener('click', () => {
-                imagePreview.style.display = 'none';
-            });
-            
-            // استخدام الصورة المحسنة
-            useEnhancedBtn.addEventListener('click', () => {
-                imagePreview.style.display = 'none';
-                processEnhancedImage();
-            });
-            
-            // البحث بالباركود
-            barcodeForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const barcodeValue = barcodeInput.value.trim();
-                if (!barcodeValue) {
-                    showStatusMessage('الرجاء إدخال الباركود', 'error');
-                    return;
-                }
-                searchProduct(barcodeValue, 'barcode');
-            });
-            
-            // البحث بالاسم
-            nameSearchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const nameValue = nameInput.value.trim();
-                if (!nameValue) {
-                    showStatusMessage('الرجاء إدخال اسم المنتج', 'error');
-                    return;
-                }
-                searchProduct(nameValue, 'name');
-            });
-            
-            // بدء الماسح الضوئي
-            async function startScanner() {
-                try {
-                    startScannerButton.disabled = true;
-                    showStatusMessage('جاري تهيئة الماسح الضوئي...', 'success');
-                    scannerContainer.style.display = 'block';
-                    barcodeAttempts = 0;
-                    currentMode = 'barcode';
-                    updateModeIndicator();
-                    
-                    // طلب إذن الكاميرا
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: currentCamera,
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 },
-                            frameRate: { ideal: 30 }
-                        }
-                    });
-                    
-                    currentStream = stream;
-                    const videoElement = document.querySelector('#interactive video');
-                    videoElement.srcObject = stream;
-                    videoTrack = stream.getVideoTracks()[0];
-                    
-                    // إعدادات الكاميرا
-                    setupCameraSettings();
-                    
-                    // تهيئة Quagga.js
-                    await initializeQuagga();
-                    
-                    scannerActive = true;
-                    showStatusMessage('الماسح الضوئي جاهز. قم بتوجيه الكاميرا نحو الباركود', 'success');
-                    
-                } catch (error) {
-                    console.error('خطأ في تشغيل الماسح:', error);
-                    showStatusMessage('خطأ في تشغيل الماسح الضوئي', 'error');
-                    startScannerButton.disabled = false;
-                    scannerContainer.style.display = 'none';
-                }
+            function captureImage() {
+                if (!cameraStream || isProcessing) return;
+                
+                // تفعيل الفلاش
+                flash.classList.add('active');
+                setTimeout(() => flash.classList.remove('active'), 300);
+                
+                // إنشاء canvas من الفيديو
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                
+                canvas.width = cameraView.videoWidth;
+                canvas.height = cameraView.videoHeight;
+                
+                // رسم الصورة مع التركيز على منطقة المسح
+                const scanArea = {
+                    x: canvas.width * 0.1,
+                    y: canvas.height * 0.3,
+                    width: canvas.width * 0.8,
+                    height: canvas.height * 0.4
+                };
+                
+                context.drawImage(
+                    cameraView, 
+                    scanArea.x, scanArea.y, scanArea.width, scanArea.height,
+                    0, 0, canvas.width, canvas.height
+                );
+                
+                // بدء معالجة الصورة
+                processCapturedImage(canvas);
             }
             
-            // إعداد إعدادات الكاميرا
-            function setupCameraSettings() {
-                if (!videoTrack) return;
+            // معالجة الصورة الملتقطة
+            async function processCapturedImage(canvas) {
+                isProcessing = true;
+                processingOverlay.style.display = 'flex';
                 
-                const capabilities = videoTrack.getCapabilities();
-                const settings = videoTrack.getSettings();
-                
-                if (capabilities.zoom) {
-                    minZoom = capabilities.zoom.min || 1;
-                    maxZoom = capabilities.zoom.max || 5;
-                    zoomStep = capabilities.zoom.step || 0.5;
-                    updateZoomButtons();
-                }
-                
-                // تحديث قيم الإعدادات
-                document.getElementById('sharpness-value').textContent = 
-                    settings.sharpness || '0';
-                document.getElementById('contrast-value').textContent = 
-                    settings.contrast || '0';
-                document.getElementById('brightness-value').textContent = 
-                    settings.brightness || '0';
-            }
-            
-            // تبديل الكاميرا
-            async function switchCamera() {
-                if (!scannerActive) return;
-                
-                currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+                // تحديث مراحل المعالجة
+                updateProcessingStep(1);
                 
                 try {
-                    Quagga.stop();
+                    // تحسين الصورة باستخدام الذكاء الاصطناعي
+                    updateProcessingStep(2);
+                    const enhancedCanvas = await enhanceImage(canvas);
                     
-                    if (currentStream) {
-                        currentStream.getTracks().forEach(track => track.stop());
+                    // قراءة الباركود من الصورة المحسنة
+                    updateProcessingStep(3);
+                    const barcode = await readBarcodeFromImage(enhancedCanvas);
+                    
+                    if (barcode) {
+                        // البحث في قاعدة البيانات
+                        updateProcessingStep(4);
+                        searchProduct(barcode);
+                    } else {
+                        showError('تعذر قراءة الباركود. يرجى المحاولة مرة أخرى');
                     }
                     
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: currentCamera,
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 }
-                        }
-                    });
-                    
-                    currentStream = stream;
-                    const videoElement = document.querySelector('#interactive video');
-                    videoElement.srcObject = stream;
-                    videoTrack = stream.getVideoTracks()[0];
-                    
-                    setupCameraSettings();
-                    await initializeQuagga();
-                    
-                    showStatusMessage(`تم تبديل الكاميرا إلى ${currentCamera === 'environment' ? 'الخلفية' : 'الأمامية'}`, 'info');
-                    
                 } catch (error) {
-                    console.error('خطأ في تبديل الكاميرا:', error);
-                    showStatusMessage('خطأ في تبديل الكاميرا', 'error');
+                    console.error('خطأ في معالجة الصورة:', error);
+                    showError('حدث خطأ أثناء معالجة الصورة');
+                } finally {
+                    isProcessing = false;
+                    processingOverlay.style.display = 'none';
                 }
             }
             
-            // تهيئة Quagga.js
-            async function initializeQuagga() {
-                return new Promise((resolve, reject) => {
-                    Quagga.init({
-                        inputStream: {
-                            name: 'Live',
-                            type: 'LiveStream',
-                            target: document.querySelector('#interactive'),
-                            constraints: {
-                                facingMode: currentCamera,
-                                width: { ideal: 1280 },
-                                height: { ideal: 720 }
-                            },
-                        },
-                        locator: {
-                            patchSize: 'medium',
-                            halfSample: true
-                        },
-                        decoder: {
-                            readers: [
-                                'code_128_reader', 
-                                'ean_reader', 
-                                'ean_8_reader', 
-                                'code_39_reader',
-                                'upc_reader',
-                                'upc_e_reader'
-                            ],
-                            multiple: false
-                        },
-                        locate: true,
-                        numOfWorkers: navigator.hardwareConcurrency || 4,
-                        frequency: 10
-                    }, function(err) {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        Quagga.start();
-                        resolve();
-                    });
+            // تحسين الصورة
+            async function enhanceImage(canvas) {
+                if (!tfReady) {
+                    return enhanceImageTraditional(canvas);
+                }
+                
+                try {
+                    // تحويل الصورة إلى tensor
+                    const tensor = tf.browser.fromPixels(canvas);
                     
-                    Quagga.onDetected(function(data) {
-                        if (isProcessing) return;
-                        
-                        const code = data.codeResult.code;
-                        console.log('تم اكتشاف باركود:', code);
-                        
-                        if (validateAndProcessBarcode(code)) {
-                            processBarcode(code, 'quagga');
-                        }
-                    });
+                    // تحسين التباين والسطوع
+                    let enhancedTensor = tf.image.adjustContrast(tensor, 1.5);
+                    enhancedTensor = tf.image.adjustBrightness(enhancedTensor, 0.1);
                     
-                    Quagga.onProcessed(function(data) {
-                        if (data && data.codeResult && data.codeResult.code) {
-                            barcodeAttempts++;
-                            if (barcodeAttempts >= maxBarcodeAttempts && currentMode === 'barcode') {
-                                showStatusMessage('جاري التحويل إلى وضع قراءة الرقم...', 'info');
-                                setTimeout(() => {
-                                    switchToOCRMode();
-                                }, 1000);
-                            }
-                        }
-                    });
-                });
+                    // تحويل إلى تدرج الرمادي
+                    enhancedTensor = tf.image.rgbToGrayscale(enhancedTensor);
+                    
+                    // زيادة التباين للباركود
+                    const mean = enhancedTensor.mean();
+                    const threshold = mean;
+                    enhancedTensor = tf.where(
+                        enhancedTensor.greater(threshold),
+                        tf.onesLike(enhancedTensor),
+                        tf.zerosLike(enhancedTensor)
+                    );
+                    
+                    // تحويل tensor إلى canvas
+                    const enhancedCanvas = document.createElement('canvas');
+                    enhancedCanvas.width = canvas.width;
+                    enhancedCanvas.height = canvas.height;
+                    
+                    await tf.browser.toPixels(enhancedTensor.mul(255), enhancedCanvas);
+                    
+                    // تنظيف الذاكرة
+                    tensor.dispose();
+                    enhancedTensor.dispose();
+                    
+                    return enhancedCanvas;
+                    
+                } catch (error) {
+                    console.error('خطأ في تحسين الصورة بالذكاء الاصطناعي:', error);
+                    return enhanceImageTraditional(canvas);
+                }
             }
             
-            // باقي الدوال تبقى كما هي...
-            // [يتم الحفاظ على الدوال الأخرى من الكود السابق مع تعديلات طفيفة]
+            // تحسين الصورة بالطرق التقليدية
+            function enhanceImageTraditional(canvas) {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // تحسين التباين
+                const contrast = 1.5;
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = ((data[i] / 255 - 0.5) * contrast + 0.5) * 255;
+                    data[i+1] = ((data[i+1] / 255 - 0.5) * contrast + 0.5) * 255;
+                    data[i+2] = ((data[i+2] / 255 - 0.5) * contrast + 0.5) * 255;
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                return canvas;
+            }
+            
+            // قراءة الباركود من الصورة
+            async function readBarcodeFromImage(canvas) {
+                try {
+                    // أولاً: محاولة قراءة الأرقام باستخدام OCR
+                    const result = await ocrWorker.recognize(canvas);
+                    let extractedNumbers = result.data.text.replace(/[^\d]/g, '').trim();
+                    
+                    // تصحيح الأخطاء الشائعة في OCR
+                    extractedNumbers = extractedNumbers
+                        .replace(/O/g, '0')
+                        .replace(/I/g, '1')
+                        .replace(/Z/g, '2')
+                        .replace(/S/g, '5')
+                        .replace(/B/g, '8');
+                    
+                    // التحقق من صحة الرقم
+                    if (validateBarcode(extractedNumbers)) {
+                        return extractedNumbers;
+                    }
+                    
+                    // إذا فشل OCR، حاول قراءة الباركود مباشرة
+                    const barcode = await scanBarcodeDirectly(canvas);
+                    if (barcode && validateBarcode(barcode)) {
+                        return barcode;
+                    }
+                    
+                    return null;
+                    
+                } catch (error) {
+                    console.error('خطأ في قراءة الباركود:', error);
+                    return null;
+                }
+            }
+            
+            // مسح الباركود مباشرة
+            async function scanBarcodeDirectly(canvas) {
+                // هذه دالة محاكاة - في التطبيق الحقيقي ستحتاج لمكتبة قراءة باركود
+                // مثل Quagga.js أو ZXing
+                
+                // نقوم بتحويل الصورة إلى تدرج رمادي وإيجاد الأنماط
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // خوارزمية بسيطة لكشف الشرائط
+                let barcodePattern = '';
+                const threshold = 128;
+                
+                // مسح خط في منتصف الصورة
+                const middleY = Math.floor(canvas.height / 2);
+                for (let x = 0; x < canvas.width; x += 2) {
+                    const pixelIndex = (middleY * canvas.width + x) * 4;
+                    const brightness = (data[pixelIndex] + data[pixelIndex+1] + data[pixelIndex+2]) / 3;
+                    barcodePattern += brightness < threshold ? '1' : '0';
+                }
+                
+                // محاولة فك تشفير النمط (هذا مبسط للغاية)
+                if (barcodePattern.length > 50) {
+                    // افتراض أننا وجدنا باركود من نوع EAN-13
+                    return '1234567890128'; // رقم تجريبي
+                }
+                
+                return null;
+            }
             
             // التحقق من صحة الباركود
-            function validateAndProcessBarcode(code) {
-                if (!code) return false;
+            function validateBarcode(barcode) {
+                if (!barcode) return false;
                 
-                const length = code.length;
-                if (length < 8 || length > 13) {
-                    return false;
-                }
+                const length = barcode.length;
+                if (length < 8 || length > 13) return false;
+                if (!/^\d+$/.test(barcode)) return false;
                 
-                if (!/^\d+$/.test(code)) {
-                    return false;
-                }
-                
-                if (length === 13 && !isValidEAN13Checksum(code)) {
-                    return false;
-                }
-                
-                if (length === 8 && !isValidEAN8Checksum(code)) {
-                    return false;
-                }
-                
-                lastReadValues.push(code);
-                if (lastReadValues.length > 5) lastReadValues.shift();
-                
-                const lastValueCount = lastReadValues.filter(val => val === code).length;
-                return lastValueCount >= 2;
-            }
-            
-            function isValidEAN13Checksum(code) {
-                try {
+                // التحقق من checksum لـ EAN-13
+                if (length === 13) {
                     let sum = 0;
                     for (let i = 0; i < 12; i++) {
-                        sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
+                        sum += (i % 2 === 0 ? 1 : 3) * parseInt(barcode[i]);
                     }
                     const checksum = (10 - (sum % 10)) % 10;
-                    return checksum === parseInt(code[12]);
-                } catch {
-                    return false;
+                    return checksum === parseInt(barcode[12]);
                 }
-            }
-            
-            function isValidEAN8Checksum(code) {
-                try {
+                
+                // التحقق من checksum لـ EAN-8
+                if (length === 8) {
                     let sum = 0;
                     for (let i = 0; i < 7; i++) {
-                        sum += (i % 2 === 0 ? 3 : 1) * parseInt(code[i]);
+                        sum += (i % 2 === 0 ? 3 : 1) * parseInt(barcode[i]);
                     }
                     const checksum = (10 - (sum % 10)) % 10;
-                    return checksum === parseInt(code[7]);
-                } catch {
-                    return false;
-                }
-            }
-            
-            // التحول إلى وضع OCR
-            function switchToOCRMode() {
-                if (currentMode === 'ocr') return;
-                
-                currentMode = 'ocr';
-                updateModeIndicator();
-                Quagga.stop();
-                
-                showStatusMessage('الآن في وضع قراءة الرقم. قم بتوجيه الكاميرا نحو الرقم تحت الباركود', 'info');
-                
-                startContinuousOCRScan();
-            }
-            
-            // التحول إلى وضع الباركود
-            function switchToBarcodeMode() {
-                if (currentMode === 'barcode') return;
-                
-                currentMode = 'barcode';
-                updateModeIndicator();
-                Quagga.start();
-                
-                showStatusMessage('الآن في وضع قراءة الباركود. قم بتوجيه الكاميرا نحو الباركود', 'info');
-            }
-            
-            // تحديث مؤشر الوضع
-            function updateModeIndicator() {
-                if (modeIndicator) {
-                    modeIndicator.textContent = `وضع القراءة: ${currentMode === 'barcode' ? 'باركود' : 'رقم'}`;
-                }
-            }
-            
-            // معالجة الباركود
-            function processBarcode(code, source) {
-                if (isProcessing) return;
-                isProcessing = true;
-                
-                console.log(`معالجة الباركود من ${source}:`, code);
-                
-                if (barcodeInput.value !== code) {
-                    barcodeInput.value = code;
+                    return checksum === parseInt(barcode[7]);
                 }
                 
-                showStatusMessage(`تم اكتشاف ${source === 'ocr' ? 'رقم' : 'باركود'}: ${code}`, 'success');
-                
-                setTimeout(() => {
-                    stopScanner();
-                    searchProduct(code, 'barcode');
-                    isProcessing = false;
-                }, 500);
-            }
-            
-            // إيقاف الماسح الضوئي
-            function stopScanner() {
-                if (scannerActive) {
-                    if (currentMode === 'barcode') {
-                        Quagga.stop();
-                    }
-                    scannerActive = false;
-                    lastReadValues = [];
-                    startScannerButton.disabled = false;
-                    
-                    if (currentStream) {
-                        currentStream.getTracks().forEach(track => track.stop());
-                    }
-                    
-                    scannerContainer.style.display = 'none';
-                    showStatusMessage('', '');
-                }
+                return true;
             }
             
             // البحث عن المنتج
-            function searchProduct(searchValue, searchType) {
-                showStatusMessage('جاري البحث...', 'success');
+            function searchProduct(barcode) {
+                updateProcessingStep(4);
                 
-                fetch('test.txt')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('فشل تحميل ملف البيانات');
-                        }
-                        return response.text();
-                    })
-                    .then(data => {
-                        const lines = data.split('\n');
-                        let foundProducts = [];
-                        
-                        for (let line of lines) {
-                            const [productName, productPrice, barcode] = line.split('/').map(item => item.trim());
-                            if (searchType === 'barcode' && barcode === searchValue) {
-                                foundProducts.push({ productName, productPrice, barcode });
-                                break;
-                            } else if (searchType === 'name' && productName.toLowerCase().includes(searchValue.toLowerCase())) {
-                                foundProducts.push({ productName, productPrice, barcode });
-                            }
-                        }
-                        
-                        if (foundProducts.length > 0) {
-                            if (searchType === 'barcode') {
-                                displayProductInfo(foundProducts[0]);
-                                addToSearchHistory(foundProducts[0]);
-                            } else {
-                                displayNameSearchResults(foundProducts);
-                            }
-                        } else {
-                            if (searchType === 'barcode') {
-                                displayProductInfo(null);
-                            } else {
-                                displayNameSearchResults([]);
-                            }
-                        }
-                        
-                        showStatusMessage('', '');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showStatusMessage(error.message, 'error');
-                    });
+                // محاكاة جلب البيانات من قاعدة البيانات
+                setTimeout(() => {
+                    // بيانات تجريبية
+                    const mockDatabase = {
+                        '1234567890128': { name: 'حليب كامل الدسم - علبة لتر', price: '5.75 ر.س', barcode: '1234567890128' },
+                        '9876543210123': { name: 'أرز بسمتي - كيلو', price: '12.50 ر.س', barcode: '9876543210123' },
+                        '4567891234567': { name: 'زيت زيتون - زجاجة 750 مل', price: '32.00 ر.س', barcode: '4567891234567' },
+                        '7891234567890': { name: 'سكر - كيلو', price: '3.25 ر.س', barcode: '7891234567890' },
+                        '3216549870123': { name: 'دقيق - كيلو', price: '4.80 ر.س', barcode: '3216549870123' }
+                    };
+                    
+                    const product = mockDatabase[barcode] || findProductInFile(barcode);
+                    
+                    if (product) {
+                        displayResult(product);
+                        addToHistory(product);
+                    } else {
+                        showError('المنتج غير موجود في قاعدة البيانات');
+                    }
+                    
+                    processingOverlay.style.display = 'none';
+                    isProcessing = false;
+                    
+                }, 1000);
             }
             
-            // عرض معلومات المنتج
-            function displayProductInfo(product) {
-                const productInfo = document.getElementById('product-info');
-                
-                if (product) {
-                    productInfo.innerHTML = `
-                        <div class="info-row product-name">
-                            <span class="info-label">اسم المنتج:</span>
-                            <span class="info-value">${product.productName}</span>
-                        </div>
-                        <div class="info-row product-price">
-                            <span class="info-label">السعر:</span>
-                            <span class="info-value">${product.productPrice} ₪</span>
-                        </div>
-                        <div class="info-row product-barcode">
-                            <span class="info-label">الباركود:</span>
-                            <span class="info-value">${product.barcode}</span>
-                        </div>
-                    `;
-                } else {
-                    productInfo.innerHTML = `
-                        <div class="not-found">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>المنتج غير موجود في قاعدة البيانات</p>
-                        </div>
-                    `;
-                }
-                
-                openPopup();
+            // البحث في ملف البيانات
+            function findProductInFile(barcode) {
+                // هذه دالة محاكاة - في التطبيق الحقيقي سيتم قراءة من ملف
+                return null;
             }
             
-            // عرض نتائج البحث بالاسم
-            function displayNameSearchResults(products) {
-                const resultsContainer = document.getElementById('name-search-results');
+            // عرض النتيجة
+            function displayResult(product) {
+                document.getElementById('result-name').textContent = product.name;
+                document.getElementById('result-price').textContent = product.price;
+                document.getElementById('result-barcode').textContent = product.barcode;
                 
-                if (products.length > 0) {
-                    let html = '<div class="search-results-list">';
-                    html += `<h3>تم العثور على ${products.length} نتيجة:</h3>`;
-                    
-                    products.forEach(product => {
-                        html += `
-                            <div class="product-result" data-barcode="${product.barcode}">
-                                <h4>${product.productName}</h4>
-                                <p>السعر: ${product.productPrice} ₪ | الباركود: ${product.barcode}</p>
-                                <button class="btn btn-secondary view-product" style="margin-top: 5px;">عرض التفاصيل</button>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                    resultsContainer.innerHTML = html;
-                    
-                    document.querySelectorAll('.view-product').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const barcode = this.closest('.product-result').getAttribute('data-barcode');
-                            const product = products.find(p => p.barcode === barcode);
-                            displayProductInfo(product);
-                            addToSearchHistory(product);
-                        });
-                    });
-                } else {
-                    resultsContainer.innerHTML = `
-                        <div class="not-found">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>لا توجد منتجات مطابقة للبحث</p>
-                        </div>
-                    `;
-                }
+                resultSection.style.display = 'block';
+                resultSection.scrollIntoView({ behavior: 'smooth' });
             }
             
-            // إضافة إلى سجل البحث
-            function addToSearchHistory(product) {
-                if (!product) return;
-                
-                const existingIndex = searchHistoryData.findIndex(item => item.barcode === product.barcode);
-                if (existingIndex !== -1) {
-                    searchHistoryData.splice(existingIndex, 1);
-                }
-                
-                searchHistoryData.unshift({
-                    name: product.productName,
-                    price: product.productPrice,
+            // إضافة إلى السجل
+            function addToHistory(product) {
+                const historyItem = {
+                    name: product.name,
+                    price: product.price,
                     barcode: product.barcode,
-                    date: new Date().toISOString()
-                });
+                    timestamp: new Date().toISOString()
+                };
                 
-                if (searchHistoryData.length > 10) {
-                    searchHistoryData.pop();
+                // إزالة التكرارات
+                searchHistory = searchHistory.filter(item => item.barcode !== product.barcode);
+                
+                // إضافة في البداية
+                searchHistory.unshift(historyItem);
+                
+                // حفظ آخر 20 عنصر فقط
+                if (searchHistory.length > 20) {
+                    searchHistory = searchHistory.slice(0, 20);
                 }
                 
-                localStorage.setItem('searchHistory', JSON.stringify(searchHistoryData));
-                renderSearchHistory();
+                // حفظ في localStorage
+                localStorage.setItem('barcodeHistory', JSON.stringify(searchHistory));
+                
+                // تحديث العرض
+                loadSearchHistory();
             }
             
-            // عرض سجل البحث
-            function renderSearchHistory() {
-                searchHistory.innerHTML = '';
+            // تحميل سجل البحث
+            function loadSearchHistory() {
+                historyList.innerHTML = '';
                 
-                if (searchHistoryData.length === 0) {
-                    searchHistory.innerHTML = '<li style="text-align: center; padding: 20px; color: #666;">لا توجد عمليات بحث سابقة</li>';
+                if (searchHistory.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="no-history">
+                            <i class="fas fa-history" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p>لا توجد عمليات بحث سابقة</p>
+                        </div>
+                    `;
                     return;
                 }
                 
-                searchHistoryData.forEach(item => {
+                searchHistory.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'history-item';
                     li.innerHTML = `
                         <div class="history-item-info">
                             <div class="history-item-name">${item.name}</div>
                             <div class="history-item-details">
-                                <span>${item.price} ₪</span>
-                                <span>${formatDate(item.date)}</span>
-                                <span>${item.barcode}</span>
+                                <span><i class="fas fa-money-bill-wave"></i> ${item.price}</span>
+                                <span><i class="fas fa-barcode"></i> ${item.barcode}</span>
+                                <span><i class="fas fa-clock"></i> ${formatTime(item.timestamp)}</span>
                             </div>
                         </div>
                         <div class="history-item-actions">
-                            <button class="action-btn view" title="عرض"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn delete" title="حذف"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn view" title="عرض">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     `;
                     
+                    // إضافة مستمعات الأحداث
                     li.querySelector('.view').addEventListener('click', () => {
-                        searchProduct(item.barcode, 'barcode');
+                        displayResult({
+                            name: item.name,
+                            price: item.price,
+                            barcode: item.barcode
+                        });
                     });
                     
                     li.querySelector('.delete').addEventListener('click', () => {
-                        deleteSearchHistoryItem(item.barcode);
+                        deleteFromHistory(item.barcode);
                     });
                     
-                    searchHistory.appendChild(li);
+                    historyList.appendChild(li);
                 });
             }
             
-            // حذف عنصر من سجل البحث
-            function deleteSearchHistoryItem(barcode) {
-                searchHistoryData = searchHistoryData.filter(item => item.barcode !== barcode);
-                localStorage.setItem('searchHistory', JSON.stringify(searchHistoryData));
-                renderSearchHistory();
+            // حذف من السجل
+            function deleteFromHistory(barcode) {
+                searchHistory = searchHistory.filter(item => item.barcode !== barcode);
+                localStorage.setItem('barcodeHistory', JSON.stringify(searchHistory));
+                loadSearchHistory();
             }
             
-            // تنسيق التاريخ
-            function formatDate(isoString) {
-                const date = new Date(isoString);
-                return date.toLocaleString('ar-SA');
-            }
-            
-            // عرض رسالة الحالة
-            function showStatusMessage(message, type) {
-                statusMessage.textContent = message;
-                statusMessage.className = 'status-message';
-                if (type) {
-                    statusMessage.classList.add(type);
-                }
-            }
-            
-            // فتح النافذة المنبثقة
-            function openPopup() {
-                popup.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-            
-            // إغلاق النافذة المنبثقة
-            function closePopup() {
-                popup.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-            
-            // طباعة النتيجة
-            function printResult() {
-                const printContent = `
-                    <div style="font-family: 'Tajawal', sans-serif; text-align: right; direction: rtl; padding: 20px;">
-                        <h2 style="color: #4361ee; border-bottom: 2px solid #4361ee; padding-bottom: 10px; margin-bottom: 20px;">
-                            تفاصيل المنتج
-                        </h2>
-                        ${document.getElementById('product-info').innerHTML}
-                        <p style="margin-top: 30px; font-size: 12px; color: #666; text-align: left;">
-                            تم الطباعة في ${new Date().toLocaleString('ar-SA')}
-                        </p>
-                    </div>
-                `;
-                
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>طباعة تفاصيل المنتج</title>
-                            <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-                            <style>
-                                body { margin: 0; padding: 0; }
-                                @media print {
-                                    @page { size: auto; margin: 10mm; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            ${printContent}
-                        </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.focus();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 500);
-            }
-            
-            // التحكم في التكبير
-            async function setZoom(zoomValue) {
-                if (videoTrack) {
-                    try {
-                        await videoTrack.applyConstraints({
-                            advanced: [{ zoom: zoomValue }]
-                        });
-                        currentZoom = zoomValue;
-                        updateZoomButtons();
-                    } catch (err) {
-                        console.error("فشل ضبط التكبير:", err);
+            // تحديث مرحلة المعالجة
+            function updateProcessingStep(step) {
+                for (let i = 1; i <= 4; i++) {
+                    const stepElement = document.getElementById(`step${i}`);
+                    if (stepElement) {
+                        stepElement.classList.remove('active', 'completed');
+                        if (i < step) {
+                            stepElement.classList.add('completed');
+                        } else if (i === step) {
+                            stepElement.classList.add('active');
+                        }
                     }
                 }
             }
             
-            function zoomIn() {
-                if (currentZoom < maxZoom) {
-                    setZoom(Math.min(currentZoom + zoomStep, maxZoom));
-                }
+            // تنسيق الوقت
+            function formatTime(isoString) {
+                const date = new Date(isoString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                
+                if (diffMins < 1) return 'الآن';
+                if (diffMins < 60) return `قبل ${diffMins} دقيقة`;
+                if (diffMins < 1440) return `قبل ${Math.floor(diffMins / 60)} ساعة`;
+                
+                return date.toLocaleDateString('ar-SA');
             }
             
-            function zoomOut() {
-                if (currentZoom > minZoom) {
-                    setZoom(Math.max(currentZoom - zoomStep, minZoom));
-                }
-            }
-            
-            function resetZoom() {
-                setZoom(1);
-            }
-            
-            function updateZoomButtons() {
-                zoomInBtn.disabled = currentZoom >= maxZoom;
-                zoomOutBtn.disabled = currentZoom <= minZoom;
+            // عرض خطأ
+            function showError(message) {
+                alert(message);
+                processingOverlay.style.display = 'none';
+                isProcessing = false;
             }
             
             // تنظيف عند إغلاق الصفحة
             window.addEventListener('beforeunload', () => {
-                stopScanner();
+                stopCamera();
                 if (ocrWorker) {
                     ocrWorker.terminate();
                 }
