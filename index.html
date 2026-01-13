@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الأصناف - البحث بالباركود</title>
+    <title>نظام إدارة الأصناف - البحث بالكاميرا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -132,7 +132,10 @@
         }
 
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             padding: 12px 25px;
             background-color: var(--primary-color);
             color: white;
@@ -158,6 +161,14 @@
             background-color: #5a6268;
         }
 
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
         .btn-danger {
             background-color: var(--warning-color);
         }
@@ -172,28 +183,25 @@
             margin-top: 15px;
         }
 
-        .scanner-container {
+        .camera-container {
             display: none;
             position: relative;
             margin: 20px 0;
             border-radius: var(--border-radius);
             overflow: hidden;
             box-shadow: var(--box-shadow);
+            width: 100%;
+            height: 400px;
         }
 
-        #interactive {
-            position: relative;
+        #camera-view {
             width: 100%;
-            height: 300px;
-        }
-
-        #interactive video {
-            width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
             display: block;
         }
 
-        .scanner-overlay {
+        .camera-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -204,45 +212,32 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.3);
         }
 
-        .scanner-frame {
+        .camera-frame {
             width: 80%;
-            max-width: 400px;
-            height: 150px;
-            border: 3px solid var(--accent-color);
+            max-width: 500px;
+            height: 200px;
+            border: 3px dashed var(--accent-color);
             border-radius: 8px;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .scanner-frame::before, .scanner-frame::after {
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-color: var(--accent-color);
-            border-style: solid;
-            border-width: 0;
+        .camera-instruction {
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 20px;
+            font-weight: 500;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
 
-        .scanner-frame::before {
-            top: 0;
-            left: 0;
-            border-top-width: 3px;
-            border-left-width: 3px;
-            border-top-left-radius: 5px;
-        }
-
-        .scanner-frame::after {
-            top: 0;
-            right: 0;
-            border-top-width: 3px;
-            border-right-width: 3px;
-            border-top-right-radius: 5px;
-        }
-
-        .scanner-zoom-controls {
+        .camera-zoom-controls {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -264,6 +259,7 @@
             font-size: 1.2rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             transition: all 0.2s;
+            border: none;
         }
 
         .zoom-btn:hover {
@@ -271,8 +267,81 @@
             transform: scale(1.1);
         }
 
+        .camera-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .capture-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: white;
+            border: 4px solid var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .capture-btn:active {
+            transform: scale(0.95);
+        }
+
+        .captured-image-container {
+            display: none;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        #captured-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .ocr-processing {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(76, 201, 240, 0.1);
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+        }
+
+        .processing-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .status-message {
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
             border-radius: var(--border-radius);
             text-align: center;
@@ -282,11 +351,19 @@
         .success {
             background-color: rgba(76, 201, 240, 0.2);
             color: #0d6efd;
+            border-left: 4px solid var(--success-color);
         }
 
         .error {
             background-color: rgba(247, 37, 133, 0.2);
             color: var(--warning-color);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .info {
+            background-color: rgba(67, 97, 238, 0.2);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
         }
 
         .result-popup {
@@ -305,11 +382,13 @@
         .popup-content {
             background-color: white;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
+            max-height: 80vh;
             padding: 25px;
             border-radius: var(--border-radius);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             animation: popupFadeIn 0.3s ease;
+            overflow-y: auto;
         }
 
         @keyframes popupFadeIn {
@@ -384,6 +463,27 @@
             font-weight: 500;
         }
 
+        .ocr-extracted-text {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            border-right: 4px solid var(--accent-color);
+        }
+
+        .ocr-extracted-text h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .ocr-extracted-text p {
+            font-family: monospace;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
         .history-section {
             background-color: white;
             padding: 25px;
@@ -454,6 +554,28 @@
             color: var(--warning-color);
         }
 
+        .search-results-list {
+            margin-top: 20px;
+        }
+
+        .product-result {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .product-result h4 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .product-result p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -480,9 +602,13 @@
                 width: 100%;
             }
             
-            .scanner-frame {
+            .camera-container {
+                height: 300px;
+            }
+            
+            .camera-frame {
                 width: 90%;
-                height: 120px;
+                height: 150px;
             }
             
             .popup-content {
@@ -494,28 +620,10 @@
                 flex-direction: column;
                 gap: 5px;
             }
-        }
-
-        /* Animation for barcode scan */
-        @keyframes scanAnimation {
-            0% {
-                top: 0;
+            
+            .camera-controls, .camera-zoom-controls {
+                bottom: 10px;
             }
-            100% {
-                top: calc(100% - 4px);
-            }
-        }
-
-        .scan-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: rgba(72, 149, 239, 0.8);
-            box-shadow: 0 0 10px rgba(72, 149, 239, 0.8);
-            animation: scanAnimation 2s infinite linear;
-            z-index: 15;
         }
 
         /* Dark mode */
@@ -525,7 +633,7 @@
                 color: #e0e0e0;
             }
             
-            .search-section, .history-section, .popup-content {
+            .search-section, .history-section, .popup-content, .product-result {
                 background-color: #1e1e1e;
                 color: #e0e0e0;
             }
@@ -544,7 +652,7 @@
                 color: #e0e0e0;
             }
             
-            .history-item:hover {
+            .history-item:hover, .product-result {
                 background-color: #2a2a2a;
             }
             
@@ -555,51 +663,75 @@
             .info-row, .history-item {
                 border-bottom-color: #444;
             }
+            
+            .ocr-extracted-text {
+                background-color: #2a2a2a;
+            }
+            
+            .ocr-extracted-text p {
+                background-color: #1e1e1e;
+                border-color: #444;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-barcode"></i> نظام إدارة الأصناف</h1>
-            <p>ابحث عن الأصناف باستخدام الباركود أو اسم المنتج</p>
+            <h1><i class="fas fa-camera"></i> نظام إدارة الأصناف</h1>
+            <p>ابحث عن الأصناف باستخدام الكاميرا أو اسم المنتج</p>
         </header>
 
         <section class="search-section">
             <div class="search-tabs">
-                <button class="tab-btn active" data-tab="barcode-tab"><i class="fas fa-barcode"></i> البحث بالباركود</button>
+                <button class="tab-btn active" data-tab="camera-tab"><i class="fas fa-camera"></i> البحث بالكاميرا</button>
                 <button class="tab-btn" data-tab="name-tab"><i class="fas fa-search"></i> البحث بالاسم</button>
             </div>
 
-            <div id="barcode-tab" class="tab-content active">
-                <form id="barcode-form">
-                    <div class="form-group">
-                        <label for="barcode-input"><i class="fas fa-qrcode"></i> أدخل الباركود:</label>
-                        <input type="text" id="barcode-input" placeholder="مسح الباركود أو إدخاله يدويًا" autocomplete="off">
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button type="button" id="start-scanner" class="btn"><i class="fas fa-camera"></i> بدء الماسح الضوئي</button>
-                        <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> بحث</button>
-                    </div>
-                </form>
+            <div id="camera-tab" class="tab-content active">
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> التعليمات:</label>
+                    <p style="color: #666; margin-bottom: 15px;">لتحديد اسم المنتج، افتح الكاميرا ووجّهها نحو اسم المنتج المطبوع على العبوة، ثم التقط صورة. سيقوم النظام بتحليل الصورة واستخراج النص للبحث عنه.</p>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" id="start-camera" class="btn"><i class="fas fa-camera"></i> فتح الكاميرا</button>
+                    <button type="button" id="upload-image" class="btn btn-secondary"><i class="fas fa-upload"></i> رفع صورة</button>
+                </div>
 
-                <div id="scanner-container" class="scanner-container">
-                    <div id="interactive" class="viewport">
-                        <video playsinline></video>
-                        <div class="scan-line"></div>
-                        <div class="scanner-overlay">
-                            <div class="scanner-frame"></div>
+                <div id="camera-container" class="camera-container">
+                    <video id="camera-view" autoplay playsinline></video>
+                    <div class="camera-overlay">
+                        <div class="camera-frame">
+                            <div class="camera-instruction">
+                                <i class="fas fa-camera fa-2x" style="margin-bottom: 10px;"></i><br>
+                                قم بتوجيه الكاميرا نحو اسم المنتج
+                            </div>
                         </div>
                     </div>
-                    <div class="scanner-zoom-controls">
-                        <button id="zoom-out-barcode" class="zoom-btn" title="تصغير"><i class="fas fa-search-minus"></i></button>
-                        <button id="zoom-reset-barcode" class="zoom-btn" title="إعادة الضبط"><i class="fas fa-expand-arrows-alt"></i></button>
-                        <button id="zoom-in-barcode" class="zoom-btn" title="تكبير"><i class="fas fa-search-plus"></i></button>
+                    <div class="camera-controls">
+                        <button id="capture-btn" class="capture-btn" title="التقاط صورة">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <div class="camera-zoom-controls">
+                        <button id="zoom-out" class="zoom-btn" title="تصغير"><i class="fas fa-search-minus"></i></button>
+                        <button id="zoom-reset" class="zoom-btn" title="إعادة الضبط"><i class="fas fa-expand-arrows-alt"></i></button>
+                        <button id="zoom-in" class="zoom-btn" title="تكبير"><i class="fas fa-search-plus"></i></button>
                     </div>
                 </div>
 
-                <div id="status-message" class="status-message"></div>
+                <div id="captured-image-container" class="captured-image-container">
+                    <img id="captured-image" src="" alt="الصورة الملتقطة">
+                </div>
+
+                <div id="ocr-processing" class="ocr-processing">
+                    <div class="processing-spinner"></div>
+                    <p>جاري تحليل الصورة واستخراج النص...</p>
+                    <p id="ocr-progress" style="font-size: 0.9rem; color: #666; margin-top: 10px;"></p>
+                </div>
+
+                <div id="camera-status-message" class="status-message"></div>
             </div>
 
             <div id="name-tab" class="tab-content">
@@ -643,45 +775,132 @@
         </div>
     </div>
 
-  <script src="test.txt"></script>
     <!-- مكتبات JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // عناصر واجهة المستخدم
             const tabButtons = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
-            const barcodeInput = document.getElementById('barcode-input');
             const nameInput = document.getElementById('name-input');
             const popup = document.getElementById('result-popup');
-            const startScannerButton = document.getElementById('start-scanner');
-            const statusMessage = document.getElementById('status-message');
-            const scannerContainer = document.getElementById('scanner-container');
-            const barcodeForm = document.getElementById('barcode-form');
+            const startCameraButton = document.getElementById('start-camera');
+            const uploadImageButton = document.getElementById('upload-image');
+            const cameraStatusMessage = document.getElementById('camera-status-message');
+            const cameraContainer = document.getElementById('camera-container');
+            const cameraView = document.getElementById('camera-view');
+            const captureButton = document.getElementById('capture-btn');
+            const capturedImageContainer = document.getElementById('captured-image-container');
+            const capturedImage = document.getElementById('captured-image');
+            const ocrProcessing = document.getElementById('ocr-processing');
+            const ocrProgress = document.getElementById('ocr-progress');
             const nameSearchForm = document.getElementById('name-search-form');
             const searchHistory = document.getElementById('search-history');
             const productInfo = document.getElementById('product-info');
             const closePopupBtn = document.getElementById('close-popup');
             const closeResultBtn = document.getElementById('close-result');
             const printResultBtn = document.getElementById('print-result');
-            const zoomInBtn = document.getElementById('zoom-in-barcode');
-            const zoomOutBtn = document.getElementById('zoom-out-barcode');
-            const zoomResetBtn = document.getElementById('zoom-reset-barcode');
+            const zoomInBtn = document.getElementById('zoom-in');
+            const zoomOutBtn = document.getElementById('zoom-out');
+            const zoomResetBtn = document.getElementById('zoom-reset');
             
             // متغيرات النظام
-            let lastReadValues = [];
-            let isProcessing = false;
-            let scannerActive = false;
+            let cameraStream = null;
             let videoTrack = null;
+            let isCameraActive = false;
             let currentZoom = 1;
             let minZoom = 1;
             let maxZoom = 5;
             let zoomStep = 0.5;
             let searchHistoryData = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            let tesseractWorker = null;
             
-            // تهيئة سجل البحث
-            renderSearchHistory();
+            // قاعدة بيانات المنتجات (باستخدام ملف test.txt)
+            let productsDatabase = [];
+            
+            // تهيئة النظام
+            initializeSystem();
+            
+            // تهيئة النظام
+            async function initializeSystem() {
+                // تحميل قاعدة البيانات
+                await loadProductsDatabase();
+                
+                // تهيئة سجل البحث
+                renderSearchHistory();
+                
+                // تهيئة Tesseract.js
+                initializeOCR();
+            }
+            
+            // تحميل قاعدة البيانات
+            async function loadProductsDatabase() {
+                try {
+                    const response = await fetch('test.txt');
+                    if (!response.ok) {
+                        throw new Error('فشل تحميل قاعدة البيانات');
+                    }
+                    
+                    const data = await response.text();
+                    const lines = data.split('\n').filter(line => line.trim() !== '');
+                    
+                    productsDatabase = lines.map(line => {
+                        const parts = line.split('/').map(item => item.trim());
+                        return {
+                            name: parts[0] || '',
+                            price: parts[1] || '0',
+                            barcode: parts[2] || '',
+                            category: parts[3] || 'عام'
+                        };
+                    });
+                    
+                    console.log(`تم تحميل ${productsDatabase.length} منتج من قاعدة البيانات`);
+                } catch (error) {
+                    console.error('خطأ في تحميل قاعدة البيانات:', error);
+                    showCameraStatusMessage('فشل تحميل قاعدة البيانات. سيتم استخدام البيانات الافتراضية.', 'error');
+                    
+                    // استخدام بيانات افتراضية في حالة الفشل
+                    productsDatabase = [
+                        { name: "ماء صحى", price: "1.5", barcode: "123456789012", category: "مشروبات" },
+                        { name: "بيبسي", price: "2.0", barcode: "234567890123", category: "مشروبات" },
+                        { name: "ساندوتش تونة", price: "5.0", barcode: "345678901234", category: "مأكولات" },
+                        { name: "شوكولاتة داكنة", price: "3.5", barcode: "456789012345", category: "حلويات" },
+                        { name: "أرز بسمتي", price: "15.0", barcode: "567890123456", category: "مواد غذائية" },
+                        { name: "زيت زيتون", price: "25.0", barcode: "678901234567", category: "زيوت" },
+                        { name: "قهوة تركية", price: "12.0", barcode: "789012345678", category: "مشروبات" },
+                        { name: "شاي أحمد", price: "8.0", barcode: "890123456789", category: "مشروبات" },
+                        { name: "حليب طازج", price: "4.0", barcode: "901234567890", category: "ألبان" },
+                        { name: "خبز توست", price: "3.0", barcode: "012345678901", category: "مخبوزات" }
+                    ];
+                }
+            }
+            
+            // تهيئة OCR
+            async function initializeOCR() {
+                try {
+                    // تهيئة Tesseract
+                    tesseractWorker = await Tesseract.createWorker('ara', 1, {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                ocrProgress.textContent = `جاري التعرف على النص: ${m.progress * 100}%`;
+                            }
+                        },
+                        errorHandler: err => console.error('خطأ في Tesseract:', err)
+                    });
+                    
+                    // تحسين إعدادات التعرف على النص العربي
+                    await tesseractWorker.setParameters({
+                        tessedit_char_whitelist: 'اأإآبتثجحخدذرزسشصضطظعغفقكلمنهويىءةؤئ 0123456789-',
+                        preserve_interword_spaces: '1',
+                        tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT,
+                    });
+                    
+                    console.log('تم تهيئة نظام OCR بنجاح');
+                } catch (error) {
+                    console.error('خطأ في تهيئة نظام OCR:', error);
+                    showCameraStatusMessage('تعذر تهيئة نظام قراءة النص. تأكد من اتصال الإنترنت.', 'error');
+                }
+            }
             
             // تبديل التبويبات
             tabButtons.forEach(button => {
@@ -695,15 +914,32 @@
                     const tabId = button.getAttribute('data-tab');
                     document.getElementById(tabId).classList.add('active');
                     
-                    // إيقاف الماسح إذا كان نشطًا
-                    if (scannerActive) {
-                        stopScanner();
+                    // إيقاف الكاميرا إذا كانت نشطة
+                    if (isCameraActive) {
+                        stopCamera();
                     }
                 });
             });
             
-            // بدء الماسح الضوئي
-            startScannerButton.addEventListener('click', startScanner);
+            // بدء الكاميرا
+            startCameraButton.addEventListener('click', startCamera);
+            
+            // رفع صورة
+            uploadImageButton.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.capture = 'environment';
+                
+                input.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        processImageFile(file);
+                    }
+                });
+                
+                input.click();
+            });
             
             // التحكم في التكبير
             zoomInBtn.addEventListener('click', zoomIn);
@@ -715,301 +951,327 @@
             closeResultBtn.addEventListener('click', closePopup);
             printResultBtn.addEventListener('click', printResult);
             
-            // البحث بالباركود
-            barcodeForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const barcodeValue = barcodeInput.value.trim();
-                if (!barcodeValue) {
-                    showStatusMessage('الرجاء إدخال الباركود', 'error');
-                    return;
-                }
-                searchProduct(barcodeValue, 'barcode');
-            });
+            // التقاط صورة
+            captureButton.addEventListener('click', captureImage);
             
             // البحث بالاسم
             nameSearchForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const nameValue = nameInput.value.trim();
                 if (!nameValue) {
-                    showStatusMessage('الرجاء إدخال اسم المنتج', 'error');
+                    showCameraStatusMessage('الرجاء إدخال اسم المنتج', 'error');
                     return;
                 }
-                searchProduct(nameValue, 'name');
+                searchProductByName(nameValue, false);
             });
             
-            // بدء الماسح الضوئي
-            function startScanner() {
-                startScannerButton.disabled = true;
-                showStatusMessage('جاري تهيئة الماسح الضوئي...', 'success');
-                scannerContainer.style.display = 'block';
-                
-                // قيود الكاميرا مع تحسينات للقراءة
-                const constraints = {
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        aspectRatio: { ideal: 16/9 },
-                        focusMode: "continuous",
-                        zoom: currentZoom
+            // بدء الكاميرا
+            async function startCamera() {
+                try {
+                    showCameraStatusMessage('جاري تشغيل الكاميرا...', 'info');
+                    startCameraButton.disabled = true;
+                    cameraContainer.style.display = 'block';
+                    
+                    // قيود الكاميرا مع تحسينات للقراءة
+                    const constraints = {
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            aspectRatio: { ideal: 16/9 },
+                            focusMode: "continuous",
+                            zoom: currentZoom
+                        }
+                    };
+                    
+                    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    cameraView.srcObject = cameraStream;
+                    
+                    videoTrack = cameraStream.getVideoTracks()[0];
+                    
+                    // التحقق من إمكانيات الكاميرا
+                    const capabilities = videoTrack.getCapabilities();
+                    if (capabilities.zoom) {
+                        minZoom = capabilities.zoom.min || 1;
+                        maxZoom = capabilities.zoom.max || 5;
+                        zoomStep = capabilities.zoom.step || 0.5;
                     }
+                    
+                    updateZoomButtons();
+                    
+                    // إضافة مستمعات للتركيز
+                    cameraView.addEventListener("touchstart", adjustFocus);
+                    cameraView.addEventListener("click", adjustFocus);
+                    
+                    isCameraActive = true;
+                    showCameraStatusMessage('الكاميرا جاهزة. وجهها نحو اسم المنتج ثم اضغط على زر التصوير', 'success');
+                    
+                } catch (error) {
+                    console.error('خطأ في تشغيل الكاميرا:', error);
+                    showCameraStatusMessage('خطأ في تشغيل الكاميرا. يرجى التحقق من الصلاحيات', 'error');
+                    startCameraButton.disabled = false;
+                    cameraContainer.style.display = 'none';
+                }
+            }
+            
+            // إيقاف الكاميرا
+            function stopCamera() {
+                if (isCameraActive && cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraView.srcObject = null;
+                    cameraStream = null;
+                    videoTrack = null;
+                    isCameraActive = false;
+                    
+                    cameraContainer.style.display = 'none';
+                    startCameraButton.disabled = false;
+                    capturedImageContainer.style.display = 'none';
+                    showCameraStatusMessage('', '');
+                }
+            }
+            
+            // التقاط صورة
+            function captureImage() {
+                if (!isCameraActive) {
+                    showCameraStatusMessage('يجب تشغيل الكاميرا أولاً', 'error');
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = cameraView.videoWidth;
+                canvas.height = cameraView.videoHeight;
+                
+                const context = canvas.getContext('2d');
+                context.drawImage(cameraView, 0, 0, canvas.width, canvas.height);
+                
+                // عرض الصورة الملتقطة
+                const imageData = canvas.toDataURL('image/jpeg');
+                capturedImage.src = imageData;
+                capturedImageContainer.style.display = 'block';
+                
+                // إيقاف الكاميرا مؤقتاً
+                cameraContainer.style.display = 'none';
+                
+                // معالجة الصورة باستخدام OCR
+                processImageWithOCR(canvas);
+            }
+            
+            // معالجة صورة مرفوعة
+            async function processImageFile(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        
+                        const context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0);
+                        
+                        // عرض الصورة الملتقطة
+                        capturedImage.src = e.target.result;
+                        capturedImageContainer.style.display = 'block';
+                        
+                        // معالجة الصورة باستخدام OCR
+                        processImageWithOCR(canvas);
+                    };
+                    img.src = e.target.result;
                 };
                 
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then(function(stream) {
-                        const videoElement = document.querySelector('#interactive video');
-                        if (videoElement) {
-                            videoElement.srcObject = stream;
-                            videoTrack = stream.getVideoTracks()[0];
-                            
-                            // التحقق من إمكانيات الكاميرا
-                            const capabilities = videoTrack.getCapabilities();
-                            if (capabilities.zoom) {
-                                minZoom = capabilities.zoom.min || 1;
-                                maxZoom = capabilities.zoom.max || 5;
-                                zoomStep = capabilities.zoom.step || 0.5;
-                            }
-                            
-                            updateZoomButtons();
-                            
-                            // إضافة مستمعات للتركيز
-                            videoElement.addEventListener("touchstart", adjustFocus);
-                            videoElement.addEventListener("click", adjustFocus);
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('خطأ في تشغيل الكاميرا:', error);
-                        showStatusMessage('خطأ في تشغيل الكاميرا. يرجى التحقق من الصلاحيات', 'error');
-                        startScannerButton.disabled = false;
-                        scannerContainer.style.display = 'none';
-                    });
-                
-                // تهيئة Quagga.js
-                Quagga.init({
-                    inputStream: {
-                        name: 'Live',
-                        type: 'LiveStream',
-                        target: document.querySelector('#interactive'),
-                        constraints: constraints.video,
-                    },
-                    locator: {
-                        patchSize: 'medium',
-                        halfSample: true
-                    },
-                    decoder: {
-                        readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'code_39_vin_reader', 'codabar_reader'],
-                        multiple: false
-                    },
-                    locate: true,
-                    numOfWorkers: navigator.hardwareConcurrency || 4,
-                    frequency: 10
-                }, function(err) {
-                    if (err) {
-                        console.error('Error initializing Quagga:', err);
-                        showStatusMessage('خطأ في تشغيل الماسح الضوئي', 'error');
-                        startScannerButton.disabled = false;
-                        scannerContainer.style.display = 'none';
-                        return;
-                    }
-                    Quagga.start();
-                    scannerActive = true;
-                    showStatusMessage('الماسح الضوئي جاهز. قم بتوجيه الكاميرا نحو الباركود', 'success');
-                });
-                
-                Quagga.onDetected(function(data) {
-                    const code = data.codeResult.code;
-                    if (isValidBarcode(code)) {
-                        processBarcode(code);
+                reader.readAsDataURL(file);
+            }
+            
+            // معالجة الصورة باستخدام OCR
+            async function processImageWithOCR(canvas) {
+                try {
+                    ocrProcessing.style.display = 'block';
+                    showCameraStatusMessage('جاري تحليل الصورة واستخراج النص...', 'info');
+                    
+                    // معالجة مسبقة للصورة لتحسين دقة OCR
+                    const processedCanvas = preprocessImageForOCR(canvas);
+                    
+                    // استخدام Tesseract.js للتعرف على النص
+                    const { data: { text } } = await tesseractWorker.recognize(processedCanvas);
+                    
+                    // تنظيف النص المستخرج
+                    const cleanedText = cleanExtractedText(text);
+                    
+                    // عرض النص المستخرج
+                    displayExtractedText(cleanedText);
+                    
+                    // البحث عن المنتج باستخدام النص المستخرج
+                    if (cleanedText) {
+                        searchProductByName(cleanedText, true);
                     } else {
-                        console.warn('باركود غير صالح، جاري محاولة قراءة النص...');
-                        readBarcodeWithOCR();
-                    }
-                });
-            }
-            
-            // إيقاف الماسح الضوئي
-            function stopScanner() {
-                if (scannerActive) {
-                    Quagga.stop();
-                    scannerActive = false;
-                    lastReadValues = [];
-                    startScannerButton.disabled = false;
-                    
-                    // إيقاف تدفق الفيديو
-                    const videoElement = document.querySelector('#interactive video');
-                    if (videoElement && videoElement.srcObject) {
-                        videoElement.srcObject.getTracks().forEach(track => track.stop());
+                        showCameraStatusMessage('لم يتم العثور على نص في الصورة. حاول التقاط صورة أوضح.', 'error');
                     }
                     
-                    scannerContainer.style.display = 'none';
-                    showStatusMessage('', '');
+                } catch (error) {
+                    console.error('خطأ في معالجة الصورة:', error);
+                    showCameraStatusMessage('حدث خطأ أثناء تحليل الصورة', 'error');
+                } finally {
+                    ocrProcessing.style.display = 'none';
                 }
             }
             
-            // التحقق من صحة الباركود
-            function isValidBarcode(code) {
-                if (!code) return false;
+            // معالجة مسبقة للصورة لتحسين دقة OCR
+            function preprocessImageForOCR(canvas) {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
                 
-                // تحقق من أن الباركود كامل وغير مغطى
-                if (!isCompleteBarcode(code)) {
-                    console.warn('الباركود غير مكتمل أو مغطى');
-                    return false;
-                }
-                
-                // استخدام خوارزمية checksum إذا كان الباركود يحتوي على معيار يدعم ذلك
-                if (code.length === 13 && !isValidEAN13Checksum(code)) return false;
-                
-                lastReadValues.push(code);
-                if (lastReadValues.length > 3) lastReadValues.shift();
-                
-                return lastReadValues.every((val) => val === code);
-            }
-            
-            // التحقق من اكتمال الباركود
-            function isCompleteBarcode(code) {
-                const minLength = 8;
-                const maxLength = 13;
-                
-                if (code.length < minLength || code.length > maxLength) {
-                    return false;
-                }
-                
-                return true;
-            }
-            
-            // التحقق من checksum لـ EAN-13
-            function isValidEAN13Checksum(code) {
-                let sum = 0;
-                for (let i = 0; i < 12; i++) {
-                    sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
-                }
-                const checksum = (10 - (sum % 10)) % 10;
-                return checksum === parseInt(code[12]);
-            }
-            
-            // معالجة الباركود
-            function processBarcode(code) {
-                if (isProcessing) return;
-                isProcessing = true;
-                
-                if (barcodeInput.value !== code) {
-                    barcodeInput.value = code;
-                }
-                
-                showStatusMessage(`تم اكتشاف باركود: ${code}`, 'success');
-                
-                setTimeout(() => {
-                    stopScanner();
-                    searchProduct(code, 'barcode');
-                    isProcessing = false;
-                }, 300);
-            }
-            
-            // قراءة النص باستخدام OCR
-            function readBarcodeWithOCR() {
-                const videoElement = document.querySelector('#interactive video');
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                const width = videoElement.videoWidth;
-                const height = videoElement.videoHeight;
-                
-                canvas.width = width;
-                canvas.height = height;
-                context.drawImage(videoElement, 0, 0, width, height);
-                
-                showStatusMessage('جاري قراءة النص...', 'success');
-                
-                Tesseract.recognize(
-                    canvas.toDataURL(),
-                    'eng',
-                    {
-                        logger: m => console.log(m),
+                // تحسين التباين والسطوع
+                for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    
+                    // زيادة التباين
+                    const contrast = 1.5;
+                    data[i] = ((data[i] - 128) * contrast) + 128;
+                    data[i + 1] = ((data[i + 1] - 128) * contrast) + 128;
+                    data[i + 2] = ((data[i + 2] - 128) * contrast) + 128;
+                    
+                    // تصفية الألوان للتركيز على النص الأسود
+                    if (avg > 150) {
+                        data[i] = 255;     // R
+                        data[i + 1] = 255; // G
+                        data[i + 2] = 255; // B
+                    } else if (avg < 100) {
+                        data[i] = 0;       // R
+                        data[i + 1] = 0;   // G
+                        data[i + 2] = 0;   // B
                     }
-                ).then(({ data: { text } }) => {
-                    const extractedText = text.replace(/\s+/g, '').trim();
-                    if (extractedText) {
-                        console.log('النص المستخرج:', extractedText);
-                        if (isValidBarcode(extractedText)) {
-                            processBarcode(extractedText);
-                        } else {
-                            showStatusMessage('تعذر قراءة الباركود. يرجى المحاولة مرة أخرى', 'error');
-                        }
-                    }
-                }).catch(err => {
-                    console.error('خطأ في OCR:', err);
-                    showStatusMessage('خطأ في قراءة النص', 'error');
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                return canvas;
+            }
+            
+            // تنظيف النص المستخرج
+            function cleanExtractedText(text) {
+                // إزالة المسافات الزائدة والأحرف غير المرغوبة
+                let cleaned = text
+                    .replace(/\s+/g, ' ')                    // استبدال المسافات المتعددة بمسافة واحدة
+                    .replace(/[^\u0600-\u06FF0-9\s\-\.]/g, '') // إزالة الأحرف غير العربية والأرقام
+                    .trim();
+                
+                // تحسين النص العربي
+                cleaned = cleaned
+                    .replace(/أ|إ|آ/g, 'ا')                 // توحيد أشكال الألف
+                    .replace(/ة/g, 'ه')                    // تحويل التاء المربوطة إلى هاء
+                    .replace(/ى/g, 'ي')                    // تحويل الألف المقصورة إلى ياء
+                    .replace(/\s+/g, ' ')                  // إزالة المسافات الزائدة مرة أخرى
+                    .trim();
+                
+                // إزالة الأسطر الفارغة والاحتفاظ بأطول سطر (على افتراض أنه اسم المنتج)
+                const lines = cleaned.split('\n').filter(line => line.trim().length > 0);
+                if (lines.length === 0) return '';
+                
+                // البحث عن السطر الذي يحتمل أن يكون اسم منتج
+                // الأسماء العربية عادة تتكون من كلمتين أو أكثر
+                const potentialProductNames = lines.filter(line => {
+                    const words = line.split(' ').filter(word => word.length > 0);
+                    return words.length >= 2 && words.length <= 5;
                 });
+                
+                // إذا وجدنا أسماء محتملة، نعود بأطولها (أكثرها تفصيلاً)
+                if (potentialProductNames.length > 0) {
+                    return potentialProductNames.reduce((longest, current) => 
+                        current.length > longest.length ? current : longest
+                    );
+                }
+                
+                // وإلا نعود بأطول سطر
+                return lines.reduce((longest, current) => 
+                    current.length > longest.length ? current : longest
+                );
             }
             
-            // البحث عن المنتج
-            function searchProduct(searchValue, searchType) {
-                showStatusMessage('جاري البحث...', 'success');
+            // عرض النص المستخرج
+            function displayExtractedText(text) {
+                const resultsContainer = document.getElementById('name-search-results');
+                const extractedTextDiv = document.createElement('div');
+                extractedTextDiv.className = 'ocr-extracted-text';
+                extractedTextDiv.innerHTML = `
+                    <h4><i class="fas fa-font"></i> النص المستخرج من الصورة:</h4>
+                    <p>"${text}"</p>
+                `;
                 
-                fetch('test.txt')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('فشل تحميل ملف البيانات');
-                        }
-                        return response.text();
-                    })
-                    .then(data => {
-                        const lines = data.split('\n');
-                        let foundProducts = [];
-                        
-                        for (let line of lines) {
-                            const [productName, productPrice, barcode] = line.split('/').map(item => item.trim());
-                            if (searchType === 'barcode' && barcode === searchValue) {
-                                foundProducts.push({ productName, productPrice, barcode });
-                                break;
-                            } else if (searchType === 'name' && productName.toLowerCase().includes(searchValue.toLowerCase())) {
-                                foundProducts.push({ productName, productPrice, barcode });
-                            }
-                        }
-                        
-                        if (foundProducts.length > 0) {
-                            if (searchType === 'barcode') {
-                                displayProductInfo(foundProducts[0]);
-                                addToSearchHistory(foundProducts[0]);
-                            } else {
-                                displayNameSearchResults(foundProducts);
-                            }
-                        } else {
-                            if (searchType === 'barcode') {
-                                displayProductInfo(null);
-                            } else {
-                                displayNameSearchResults([]);
-                            }
-                        }
-                        
-                        showStatusMessage('', '');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showStatusMessage(error.message, 'error');
-                    });
+                // إدراج النص المستخرج قبل نتائج البحث
+                if (resultsContainer.firstChild) {
+                    resultsContainer.insertBefore(extractedTextDiv, resultsContainer.firstChild);
+                } else {
+                    resultsContainer.appendChild(extractedTextDiv);
+                }
+            }
+            
+            // البحث عن المنتج بالاسم
+            function searchProductByName(searchTerm, isFromOCR) {
+                showCameraStatusMessage('جاري البحث...', 'info');
+                
+                // تنظيف مصطلح البحث
+                const cleanedSearchTerm = searchTerm.trim().toLowerCase();
+                
+                // البحث في قاعدة البيانات
+                const results = productsDatabase.filter(product => {
+                    const productName = product.name.toLowerCase();
+                    
+                    // البحث الجزئي
+                    if (productName.includes(cleanedSearchTerm)) {
+                        return true;
+                    }
+                    
+                    // البحث عن كلمات متعددة
+                    const searchWords = cleanedSearchTerm.split(' ').filter(word => word.length > 1);
+                    if (searchWords.length > 1) {
+                        return searchWords.some(word => productName.includes(word));
+                    }
+                    
+                    return false;
+                });
+                
+                // عرض النتائج
+                if (results.length > 0) {
+                    displayNameSearchResults(results);
+                    
+                    // إذا كان البحث من OCR، أضف أول نتيجة إلى سجل البحث
+                    if (isFromOCR && results.length > 0) {
+                        addToSearchHistory(results[0]);
+                    }
+                    
+                    showCameraStatusMessage(`تم العثور على ${results.length} منتج مطابق`, 'success');
+                } else {
+                    displayNameSearchResults([]);
+                    showCameraStatusMessage('لم يتم العثور على منتجات مطابقة', 'error');
+                }
             }
             
             // عرض معلومات المنتج
             function displayProductInfo(product) {
-                const productInfo = document.getElementById('product-info');
+                const productInfoElement = document.getElementById('product-info');
                 
                 if (product) {
-                    productInfo.innerHTML = `
+                    productInfoElement.innerHTML = `
                         <div class="info-row product-name">
                             <span class="info-label">اسم المنتج:</span>
-                            <span class="info-value">${product.productName}</span>
+                            <span class="info-value">${product.name}</span>
                         </div>
                         <div class="info-row product-price">
                             <span class="info-label">السعر:</span>
-                            <span class="info-value">${product.productPrice} ₪</span>
+                            <span class="info-value">${product.price} ₪</span>
                         </div>
                         <div class="info-row product-barcode">
                             <span class="info-label">الباركود:</span>
                             <span class="info-value">${product.barcode}</span>
                         </div>
+                        <div class="info-row product-category">
+                            <span class="info-label">الفئة:</span>
+                            <span class="info-value">${product.category}</span>
+                        </div>
                     `;
                 } else {
-                    productInfo.innerHTML = `
+                    productInfoElement.innerHTML = `
                         <div class="not-found">
                             <i class="fas fa-exclamation-triangle"></i>
                             <p>المنتج غير موجود في قاعدة البيانات</p>
@@ -1024,39 +1286,64 @@
             function displayNameSearchResults(products) {
                 const resultsContainer = document.getElementById('name-search-results');
                 
+                // إزالة النص المستخرج السابق إذا وجد
+                const existingExtractedText = resultsContainer.querySelector('.ocr-extracted-text');
+                if (existingExtractedText) {
+                    // نحتفظ بالنص المستخرج فقط
+                    resultsContainer.innerHTML = '';
+                    resultsContainer.appendChild(existingExtractedText);
+                } else {
+                    resultsContainer.innerHTML = '';
+                }
+                
                 if (products.length > 0) {
                     let html = '<div class="search-results-list">';
-                    html += `<h3>تم العثور على ${products.length} نتيجة:</h3>`;
+                    
+                    // إضافة عنوان النتائج
+                    if (!existingExtractedText) {
+                        html += `<h3>نتائج البحث:</h3>`;
+                    }
                     
                     products.forEach(product => {
                         html += `
                             <div class="product-result" data-barcode="${product.barcode}">
-                                <h4>${product.productName}</h4>
-                                <p>السعر: ${product.productPrice} ₪ | الباركود: ${product.barcode}</p>
-                                <button class="btn btn-secondary view-product" style="margin-top: 5px;">عرض التفاصيل</button>
+                                <h4>${product.name}</h4>
+                                <p><i class="fas fa-money-bill-wave"></i> السعر: ${product.price} ₪ | <i class="fas fa-barcode"></i> الباركود: ${product.barcode}</p>
+                                <p><i class="fas fa-tags"></i> الفئة: ${product.category}</p>
+                                <div class="btn-group" style="margin-top: 10px;">
+                                    <button class="btn btn-secondary view-product" style="padding: 8px 15px;"><i class="fas fa-eye"></i> عرض التفاصيل</button>
+                                </div>
                             </div>
                         `;
                     });
                     
                     html += '</div>';
-                    resultsContainer.innerHTML = html;
+                    
+                    // إضافة النتائج إلى الحاوية
+                    const resultsDiv = document.createElement('div');
+                    resultsDiv.innerHTML = html;
+                    resultsContainer.appendChild(resultsDiv);
                     
                     // إضافة مستمعات الأحداث للأزرار
-                    document.querySelectorAll('.view-product').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const barcode = this.closest('.product-result').getAttribute('data-barcode');
-                            const product = products.find(p => p.barcode === barcode);
-                            displayProductInfo(product);
-                            addToSearchHistory(product);
+                    setTimeout(() => {
+                        document.querySelectorAll('.view-product').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const barcode = this.closest('.product-result').getAttribute('data-barcode');
+                                const product = products.find(p => p.barcode === barcode);
+                                displayProductInfo(product);
+                                addToSearchHistory(product);
+                            });
                         });
-                    });
+                    }, 100);
                 } else {
-                    resultsContainer.innerHTML = `
-                        <div class="not-found">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>لا توجد منتجات مطابقة للبحث</p>
-                        </div>
-                    `;
+                    if (!existingExtractedText) {
+                        resultsContainer.innerHTML = `
+                            <div class="not-found">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>لا توجد منتجات مطابقة للبحث</p>
+                            </div>
+                        `;
+                    }
                 }
             }
             
@@ -1072,9 +1359,10 @@
                 
                 // إضافة إلى بداية المصفوفة
                 searchHistoryData.unshift({
-                    name: product.productName,
-                    price: product.productPrice,
+                    name: product.name,
+                    price: product.price,
                     barcode: product.barcode,
+                    category: product.category,
                     date: new Date().toISOString()
                 });
                 
@@ -1106,9 +1394,9 @@
                         <div class="history-item-info">
                             <div class="history-item-name">${item.name}</div>
                             <div class="history-item-details">
-                                <span>${item.price} ₪</span>
-                                <span>${formatDate(item.date)}</span>
-                                <span>${item.barcode}</span>
+                                <span><i class="fas fa-money-bill-wave"></i> ${item.price} ₪</span>
+                                <span><i class="fas fa-calendar"></i> ${formatDate(item.date)}</span>
+                                <span><i class="fas fa-tags"></i> ${item.category}</span>
                             </div>
                         </div>
                         <div class="history-item-actions">
@@ -1119,7 +1407,13 @@
                     
                     // إضافة مستمعات الأحداث
                     li.querySelector('.view').addEventListener('click', () => {
-                        searchProduct(item.barcode, 'barcode');
+                        const product = {
+                            name: item.name,
+                            price: item.price,
+                            barcode: item.barcode,
+                            category: item.category
+                        };
+                        displayProductInfo(product);
                     });
                     
                     li.querySelector('.delete').addEventListener('click', () => {
@@ -1140,15 +1434,15 @@
             // تنسيق التاريخ
             function formatDate(isoString) {
                 const date = new Date(isoString);
-                return date.toLocaleString('ar-SA');
+                return date.toLocaleDateString('ar-SA');
             }
             
             // عرض رسالة الحالة
-            function showStatusMessage(message, type) {
-                statusMessage.textContent = message;
-                statusMessage.className = 'status-message';
+            function showCameraStatusMessage(message, type) {
+                cameraStatusMessage.textContent = message;
+                cameraStatusMessage.className = 'status-message';
                 if (type) {
-                    statusMessage.classList.add(type);
+                    cameraStatusMessage.classList.add(type);
                 }
             }
             
@@ -1169,11 +1463,11 @@
                 const printContent = `
                     <div style="font-family: 'Tajawal', sans-serif; text-align: right; direction: rtl; padding: 20px;">
                         <h2 style="color: #4361ee; border-bottom: 2px solid #4361ee; padding-bottom: 10px; margin-bottom: 20px;">
-                            تفاصيل المنتج
+                            <i class="fas fa-info-circle"></i> تفاصيل المنتج
                         </h2>
                         ${document.getElementById('product-info').innerHTML}
                         <p style="margin-top: 30px; font-size: 12px; color: #666; text-align: left;">
-                            تم الطباعة في ${new Date().toLocaleString('ar-SA')}
+                            <i class="fas fa-calendar"></i> تم الطباعة في ${new Date().toLocaleString('ar-SA')}
                         </p>
                     </div>
                 `;
@@ -1186,6 +1480,8 @@
                             <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
                             <style>
                                 body { margin: 0; padding: 0; }
+                                .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+                                .info-label { font-weight: bold; }
                                 @media print {
                                     @page { size: auto; margin: 10mm; }
                                 }
@@ -1200,7 +1496,9 @@
                                         window.close();
                                     }, 200);
                                 };
-
+                            <\/script>
+                        </body>
+                    </html>
                 `);
                 printWindow.document.close();
             }
@@ -1262,6 +1560,26 @@
                 }
             }
             
+            // إضافة تحسينات للعرض على الهواتف
+            function setupMobileOptimizations() {
+                // منع تكبير الصفحة عند النقر المزدوج
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', function(event) {
+                    const now = (new Date()).getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        event.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+                
+                // منع التمرير عند لمس العناصر التفاعلية
+                document.addEventListener('touchstart', function(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                        e.preventDefault();
+                    }
+                });
+            }
+            
             // تسجيل Service Worker للتطبيق التقدمي (PWA)
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -1274,6 +1592,9 @@
                         });
                 });
             }
+            
+            // تهيئة تحسينات الجوال
+            setupMobileOptimizations();
         });
     </script>
 </body>
